@@ -1,0 +1,1 @@
+python manage.py collectstatic;chmod 644 -R /var/www/elasticsearch/_site/static/scripts/*.js

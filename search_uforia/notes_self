@@ -1,0 +1,25 @@
+Django werkt met models.
+> Kan data uit de database uitgelezen worden en in Django models worden omgezet?
+> Moeten er zelf models worden aangemaakt?
+
+Django-haystack:
+> Beter dan de methode van opvragen die bij Enron wordt gebruikt?
+> https://django-haystack.readthedocs.org
+
+Elastic frontend:
+> Onduidelijk waarom er geen informatie wordt getoond op index pagina
+  > Geen errors in logs en /search/ werkt gewoon
+
+Volgend week:
+> Morgen (Donderdag) tot Zaterdag weg, bedrijfsuitje. Krijg waarschijnlijk niet zo veel af
+> Afspraak niet volgende week maar de week daarna?
+
+Github:
+> Geen veranderingen aan Uforia doorgevoerd
+> Wat moet ik, naast python code nog committen?
+
+ --- DJANGO APP committen
+ --- ELASTICSEARCH json committen
+
+
+DJANGO-HAYSTACK bekijken
