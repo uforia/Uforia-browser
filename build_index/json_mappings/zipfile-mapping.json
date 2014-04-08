@@ -1,0 +1,41 @@
+curl -XPUT 'http://localhost:9200/uforia/zip/_mapping' -d '{
+    "zip" : {
+        "dynamic" : false,
+        "properties" : {
+            "file_names" : {
+                "type" : "string",
+                "store" : "no",
+                "index" : "not_analyzed"
+            },
+             "total_files" : {
+                "type" : "integer",
+                "store" : "no",
+                "index" : "not_analyzed"
+            },
+             "zip_stored" : {
+                "type" : "integer",
+                "store" : "no",
+                "index" : "not_analyzed"
+            },
+              "zip_deflated" : {
+                "type" : "integer",
+                "store" : "no",
+                "index" : "not_analyzed"
+            },
+             "debug" : {
+                "type" : "string",
+                "store" : "no",
+                "index" : "not_analyzed"
+            },
+             "comment" : {
+                "type" : "string",
+                "store" : "no",
+                "index" : "not_analyzed"
+            },
+             "contentInfo" : {
+                "type" : "string",
+                "store" : "no",
+                "index" : "not_analyzed"
+            },
+      }
+}

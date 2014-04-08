@@ -1,0 +1,57 @@
+﻿curl -XPUT 'http://localhost:9200/uforia/xlsx/_mapping' -d '{
+    "xlsx" : {
+        "dynamic" : false,
+        "properties" : {
+            "author" : {
+                "type" : "string",
+                "store" : "no",
+                "index" : "not_analyzed"
+            },
+            "changedBy" : {
+                "type" : "string",
+                "store" : "no",
+                "index" : "not_analyzed"
+            },
+            "createdOn" : {
+                "type" : "string",
+                "store" : "no",
+                "index" : "not_analyzed"
+            },
+            "changedOn" : {
+                "type" : "string",
+                "store" : "no",
+                "index" : "not_analyzed"
+            },
+            "appType" : {
+                "type" : "string",
+                "store" : "no",
+                "index" : "not_analyzed"
+            },
+            "security" : {
+                "type" : "integer",
+                "store" : "no",
+                "index" : "not_analyzed"
+            },
+            "company" : {
+                "type" : "string",
+                "store" : "no",
+                "index" : "not_analyzed"
+            },
+            "shared" : {
+                "type" : "string",
+                "store" : "no",
+                "index" : "not_analyzed"
+            },
+            "appVersion" : {
+                "type" : "float",
+                "store" : "no",
+                "index" : "not_analyzed"
+            },
+            "totalSheets" : {
+                "type" : "integer",
+                "store" : "no",
+                "index" : "not_analyzed"
+            }
+        }
+    }
+}'
