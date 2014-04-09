@@ -2,7 +2,16 @@
 
 # Copyright (C) 2014 Hogeschool van Amsterdam
 
-import os,sys,imp
+import os, sys, imp, inspect
+
+# add pyes from the libraries subfolder
+# this will also force python to use the included module instead of the ones installed on the system
+pyes_libfolder =  os.path.realpath(os.path.abspath(os.path.join(os.path.split(inspect.getfile( inspect.currentframe() ))[0],"./libraries/pyes/src")))
+if pyes_libfolder not in sys.path:
+    print pyes_libfolder
+    sys.path.insert(0, pyes_libfolder)
+    print sys.path
+
 from pyes import *
 # PyES - Python Elastic Search
 # https://pyes.readthedocs.org/en/latest/
