@@ -107,7 +107,13 @@ class Database(object):
 
         if(_all):
             query = """
-            SELECT * FROM files;
+            SELECT 
+            `hashid`, `fullpath`, `name`, `size`, 
+            `owner`, `group`, `perm`, 
+            `mtime`, `atime`, `ctime`, 
+            `md5`, `sha1`, `sha256`, 
+            `ftype`, `mtype`, `btype`
+            FROM files;
             """
         else:
             query = """
