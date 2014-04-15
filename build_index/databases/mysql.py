@@ -133,7 +133,7 @@ class Database(object):
 
         """
 
-        if(_table is empty):
+        if(not _table):
             raise Exception("No table specified for read_table!")
 
         if(columnsonly):
@@ -148,5 +148,5 @@ class Database(object):
             SELECT * FROM """ + _table + """;
             """
 
-        result = self.execute.query(query)
+        result = self.execute_query(query)
         return self.cursor.fetchall()
