@@ -71,8 +71,10 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # this is the custom app for searching the uforia db
-    'searchDB',
+    # this is the mockup for searching the uforia db
+    # 'searchDB',
+    'uforia_demo',
+
 )
 
 MIDDLEWARE_CLASSES = (

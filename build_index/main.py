@@ -56,9 +56,33 @@ def populate_files_index(_index, jsondata):
         _filestable = db.read_filestable(_all=True)
         # hashid, fullpath, name, size, owner, group, perm, mtime, 
         # atime, ctime, md5, sha1, sha256, ftype, mtype, btype
-        for row in _filestable:
-            print row[1] 
 
+        # Only ones interesting at this time are:
+        # name, size, owner, mtype, mtime, atime and ctime.
+
+        for row in _filestable:
+            hashid      = row[0]
+            fullpath    = row[1]
+            name        = row[2]
+            size        = row[3]
+            owner       = row[4]
+            group       = row[5]
+            perm        = row[6]
+            mtime       = row[7]
+            atime       = row[8]
+            ctime       = row[9]
+            md5         = row[10]
+            sha1        = row[11]
+            sha256      = row[12]
+            ftype       = row[13]
+            mtype       = row[14]
+            btype       = row[15]
+
+            #print ("name: ", name)
+            #print ("size: ", size)
+            #print ("owner: ", owner)
+            #print ("mtype: ", mtype)
+            #print ("mtime: ", mtime)
 
 if __name__ == "__main__":
     #read_data()
