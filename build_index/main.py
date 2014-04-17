@@ -3,14 +3,14 @@
 # Copyright (C) 2014 Hogeschool van Amsterdam
 
 import os, sys, imp, inspect
+import json
+from ast import literal_eval
 
 # add pyes from the libraries subfolder
 # this will also force python to use the included module instead of the ones installed on the system
 pyes_libfolder =  os.path.realpath(os.path.abspath(os.path.join(os.path.split(inspect.getfile( inspect.currentframe() ))[0],"./libraries/pyes/src")))
 if pyes_libfolder not in sys.path:
-    print pyes_libfolder
     sys.path.insert(0, pyes_libfolder)
-    print sys.path
 
 from pyes import *
 # PyES - Python Elastic Search
@@ -25,6 +25,9 @@ except:
 
 database = imp.load_source(config.DBTYPE, config.DATABASEDIR + config.DBTYPE + ".py")
 
+db = database.Database(config)
+
+
 def read_data():
     """
     Runs the functions from the database and prints the data to stdout.
@@ -32,7 +35,7 @@ def read_data():
 
     """
     
-    db = database.Database(config)
+   # db = database.Database(config)
     
     print("\nReading the mimetypes table:\n")
     print(db.read_mimetypes()) # print the modules column first
@@ -41,13 +44,11 @@ def read_data():
     print("\nReading the files table:\n")
     print(db.read_filestable()) # just print the column names, files is table rather large
 
-def populate_files_index(_index, jsondata):
+def populate_files_mapping(_index, jsondata):
     """
     Creates (or fills if it exists) the elasticsearch index
 
     """
-    db = database.Database(config)
-
     if(not _index):
         raise Exception("The _index in populate_index is empty!")
     if(not jsondata):
@@ -84,6 +85,106 @@ def populate_files_index(_index, jsondata):
             #print ("mtype: ", mtype)
             #print ("mtime: ", mtime)
 
+def generate_table_list():
+    """
+    Will grab the modules column from the supported_mimetypes table
+    and use the referenced tables there to generate a list of tables to call
+    per mapping.
+
+    """
+    alldata = db.read_table(_table="supported_mimetypes", columnsonly=False)
+
+    for line in alldata:
+        mimetype = line[0] # mime_type
+        tables_dict = literal_eval(line[1])
+        #print tables_dict.keys()
+
+        for k in sorted(tables_dict.keys()):
+            #print _mime 
+            #print tables_dict[k]
+            create_mapping( mime = mimetype, tablename = tables_dict[k] )
+
+def coreType(value=None):
+    """
+    elasticsearch has the following coretypes:
+    string, integer/long, float/double, boolean, and null
+
+    python floats are almost always c doubles, so there is no check for double.
+    """
+
+    if isinstance(value, int):
+        return str("integer")
+    elif isinstance(value, long):
+        return str("long")
+    elif isinstance(value, str):
+        return str("string")
+    elif isinstance(value, float):
+        return str("float")
+    elif isinstance(value, bool):
+        return str("boolean")
+    elif not value:
+        return str("null")
+    else:
+        return str("string")
+
+
+def create_mapping(mime=None, tablename=None):
+    if not mime:
+        raise Exception("fill_mapping called without a mimetype")
+    elif not tablename:
+        raise Exception("fill_mapping called without a table")
+    else:
+        #conn = ES('127.0.0.1:9200') # Use HTTP
+        tableData = db.read_table(_table=tablename, columnsonly=False)
+        columnNames = db.read_table(_table=tablename)
+
+        mapping = str("")
+
+        for _name in tableData:
+            i = 0
+            while i < len(columnNames):
+                jsonName = json.dumps(columnNames[i])
+                mapping += """
+                    """ + jsonName[1:-1] + """: {
+                    "type" : \"""" + coreType(_name[i]) + """\",
+                    "store" : "no",
+                    "index" : "not_analzyed",
+                },"""
+
+                i += 1
+
+        mapping += """
+            }"""
+        fullmap = "\"" + mime + "\" : {"
+        fullmap += """ "properties" : {
+            """
+        fullmap += mapping
+        fullmap += """
+        }"""
+
+        print fullmap
+
+
+def fill_mapping(mime=None, tablename=None):
+    if not mime:
+        raise Exception("fill_mapping called without a mimetype")
+    elif not tablename:
+        raise Exception("fill_mapping called without a table")
+    else:
+        #conn = ES('127.0.0.1:9200') # Use HTTP
+        tableData = db.read_table(_table=tablename, columnsonly=False)
+        columnNames = db.read_table(_table=tablename)
+       #columnNames = json.dumps(c)
+
+        for row in tableData:
+            i = 0
+            while i < len(columnNames):
+                jsonstring = json.dumps(columnNames[i])
+                print jsonstring[1:-1], row[i], coreType(row[i])
+                i += 1
+        
+
 if __name__ == "__main__":
     #read_data()
-    populate_files_index("a", "a")
+    #populate_files_mapping("a", "a")
+    generate_table_list()

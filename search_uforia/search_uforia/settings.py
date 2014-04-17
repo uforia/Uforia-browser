@@ -72,8 +72,8 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
 
     # this is the mockup for searching the uforia db
-     'searchDB',
-    #'uforia_demo',
+    # 'searchDB',
+    'uforia_demo',
 
 )
 
