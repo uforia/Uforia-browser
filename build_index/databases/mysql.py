@@ -126,7 +126,7 @@ class Database(object):
         result = self.execute_query(query)
         return self.cursor.fetchall()
 
-    def read_table(self, _table, columnsonly=True):
+    def read_table(self, _table, columnsonly=True, onerow=False):
         """
         Generic func to read either only the columns or the entire table.
         If there is no table, will raise an exception.
@@ -148,5 +148,9 @@ class Database(object):
             SELECT * FROM """ + _table + """;
             """
 
-        result = self.execute_query(query)
-        return self.cursor.fetchall()
+        self.execute_query(query)
+        if(onerow):
+            result = self.cursor.fetchone()
+        else:
+            result = self.cursor.fetchall()
+        return result
