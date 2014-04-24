@@ -5,6 +5,7 @@
 import os, sys, imp, inspect
 import json
 from ast import literal_eval
+import itertools
 
 # add pyes from the libraries subfolder
 # this will also force python to use the included module instead of the ones installed on the system
@@ -122,48 +123,45 @@ def coreType(value=None):
         return str("float")
     elif isinstance(value, bool):
         return str("boolean")
-    elif not value:
-        return str("null")
     else:
         return str("string")
 
 
 def create_mapping(mime=None, tablename=None):
+    """
+    create_mapping will do as the name suggests for the uforia index.
+    A mapping is in the URL after the index, for example:
+
+    http://localhost:9200/uforia/image/jpeg
+
+    where image/jpeg is the mapping.
+    """
     if not mime:
         raise Exception("fill_mapping called without a mimetype")
     elif not tablename:
         raise Exception("fill_mapping called without a table")
     else:
-        #conn = ES('127.0.0.1:9200') # Use HTTP
-        tableData = db.read_table(_table=tablename, columnsonly=False)
+        conn = ES('127.0.0.1:9200') # Use HTTP
+        tableData = db.read_table(_table=tablename, columnsonly=False, onerow=True)
         columnNames = db.read_table(_table=tablename)
 
-        mapping = str("")
+        mapping = {}
 
-        for _name in tableData:
-            i = 0
-            while i < len(columnNames):
-                jsonName = json.dumps(columnNames[i])
-                mapping += """
-                    """ + jsonName[1:-1] + """: {
-                    "type" : \"""" + coreType(_name[i]) + """\",
-                    "store" : "no",
-                    "index" : "not_analzyed",
-                },"""
+        if not tableData:
+            print("No data returned for table ", tablename)
+            return
 
-                i += 1
+        for _data, _name in itertools.izip(tableData, columnNames):
+            jsonName = json.dumps(_name)
+            submap = { "type" :  coreType(_data),
+                "store" : "no",
+                "index" : "not_analyzed",
+            }
+            mapping[jsonName[1:-1]] = submap
 
-        mapping += """
-            }"""
-        fullmap = "\"" + mime + "\" : {"
-        fullmap += """ "properties" : {
-            """
-        fullmap += mapping
-        fullmap += """
-        }"""
-
-        print fullmap
-
+        #print mapping
+        print mime
+        conn.indices.put_mapping(str(mime), {'properties':mapping}, ["uforia"])
 
 def fill_mapping(mime=None, tablename=None):
     if not mime:
