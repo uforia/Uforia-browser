@@ -1,236 +1,38 @@
 <!DOCTYPE html>
-<meta charset="utf-8">
-<style>
-
-.node {
-  cursor: pointer;
-}
-
-.node:hover {
-  stroke: #000;
-  stroke-width: 1.5px;
-}
-
-.node--leaf {
-  fill: white;
-}
-
-.label {
-  font: 11px "Helvetica Neue", Helvetica, Arial, sans-serif;
-  text-anchor: middle;
-}
-
-.label,
-.node--root{
-  pointer-events: none;
-}
-
-div.tooltip {
-  position: absolute;
-  text-align: left;
-  width: auto;
-  max-width: 250px;
-  height: auto;
-  max-height: 250px;
-  padding: 5px;
-  font: 12px sans-serif;
-  background: lightsteelblue;
-  border: 0px;
-  border-radius: 8px;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-</style>
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<title>Search Uforia database</title>
+<link href="css/main.css" rel="stylesheet" type="text/css">
+<link href="css/files.css" rel="stylesheet" type="text/css" id="d3_style">
+<script src="scripts/jquery-2.1.0.min.js" type="text/javascript"></script>
+<script src="scripts/d3.v3.min.js" type="text/javascript"></script>
+<script src="scripts/index2.js" type="text/javascript"></script>
+<script src="scripts/files.js" type="text/javascript" id="d3_script"></script>
+</head>
 <body>
-<script src="scripts/d3.v3.min.js"></script>
-<script>
+<div id="header">
+    <div class="container">
+        <h1>Uforia Search</h1>
+        <div class="logo">&nbsp;</div>
+    </div>
+</div>
+<div id="search">
+    <div class="container">
+        <input type="text" id="search_query" />
+        <select multiple id="field_collapse">
+        </select>
+        <select id="search_type" onchange="changeType(this);">
+            <option value="files">Files search</option>
+            <option value="zip">Zip Search</option>
+        </select>
+        <input type="button" id="search_button" value="Search" onclick="search();" />
+        <div id="total_results">&nbsp;</div>
+    </div>
+</div>
 
-var diameter = 800;
-
-var color = d3.scale.linear()
-    .domain([-1, 5])
-    .range(["hsl(152,80%,80%)", "hsl(228,30%,40%)"])
-    .interpolate(d3.interpolateHcl);
-
-var pack = d3.layout.pack()
-    .padding(2)
-    .size([diameter - 20, diameter - 20])
-    .value(function(d) { return d.size; })
-
-var svg = d3.select("body").append("svg")
-    .attr("width", diameter)
-    .attr("height", diameter)
-  .append("g")
-    .attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
-
-var div = d3.select("body").append("div")
-          .attr("class", "tooltip")
-          .style("opacity", 0);
-
-d3.json("api/get_files", function(error, root) {
-  if (error) return console.error(error);
-
-  // root = groupByUser(root.hits.hits);
-
-  var focus = root,
-      nodes = pack.nodes(root),
-      view;
-
-  var circle = svg.selectAll("circle")
-      .data(nodes)
-    .enter().append("circle")
-      .attr("class", function(d) { return d.parent ? d.children ? "node" : "node node--leaf" : "node node--root"; })
-      .style("fill", function(d) { return d.children ? color(d.depth) : null; })
-      .on("click", function(d) { if (focus !== d) zoom(d), d3.event.stopPropagation(); });
-
-  // Add the tooltip to node leaves
-  var fileCircles = d3.selectAll(".node--leaf")
-        .on("mouseover", function(d) {
-              div.transition()
-                  .duration(200)
-                  .style("opacity", .9);
-              div.html("Name: " + d.name + "<br />" + 
-                       "Size: " + bytesToSize(d.size, false) + "<br />" +
-                       "Owner: " + d.owner + "<br />" +
-                       "Mtime: " + timeConverter(d.mtime) + "<br />" +
-                       "Atime: " + timeConverter(d.atime) + "<br />" +
-                       "Ctime: " + timeConverter(d.ctime) + "<br />" +
-                       "Mimetype: " + d.mtype)
-                  .style("left", (d3.event.pageX) + "px")
-                  .style("top", (d3.event.pageY) + "px");
-          })
-          .on("mouseout", function(d){
-              div.transition()
-                  .duration(500)
-                  .style("opacity", 0);
-          });
-
-  var text = svg.selectAll("text")
-      .data(nodes)
-    .enter().append("text")
-      .attr("class", "label")
-      .style("fill-opacity", function(d) { return d.parent === root ? 1 : 0; })
-      .style("display", function(d) { return d.parent === root ? null : "none"; })
-      .text(function(d) { return d.name; });
-
-  var node = svg.selectAll("circle,text");
-
-  d3.select("body")
-      .on("click", function() { zoom(root); });
-
-  zoomTo([root.x, root.y, root.r]);
-
-  function zoom(d) {
-    var focus0 = focus; focus = d;
-
-    var transition = d3.transition()
-        .duration(d3.event.altKey ? 7500 : 750)
-        .tween("zoom", function(d) {
-          var i = d3.interpolateZoom(view, [focus.x, focus.y, focus.r]);
-          return function(t) { zoomTo(i(t)); };
-        });
-
-    transition.selectAll("text")
-      .filter(function(d) { return d.parent === focus || this.style.display === "inline"; })
-        .style("fill-opacity", function(d) { return d.parent === focus ? 1 : 0; })
-        .each("start", function(d) { if (d.parent === focus) this.style.display = "inline"; })
-        .each("end", function(d) { if (d.parent !== focus) this.style.display = "none"; });
-  }
-
-  function zoomTo(v) {
-    var k = root.r / v[2]; view = v;
-    node.attr("transform", function(d) { return "translate(" + (d.x - v[0]) * k + "," + (d.y - v[1]) * k + ")"; });
-    circle.attr("r", function(d) { return d.r * k; });
-  }
-});
-
-
-//Group data by filetype
-function groupByType(root) {
-  var data = {name : "files", children : []};
-
-  root.forEach(function(child){
-
-      var index = arrayObjectIndexOf(data.children, child._source.mtype, "name"); 
-      if(index > -1){ // Add the child to owner's file list
-        data.children[index].children.push({name : child._source.name, size : child._source.size});
-      } else { // Not added yet, push a new item to the list
-        data.children.push({name : child._source.mtype, children : [{name : child._source.name, size : child._source.size}]});
-      }
-  });
-
-  return data;
-}
-
-
-//For owner's file list in pack layout
-function groupByUser(root) {
-  var classes = {name : "files", children : []};
-
-  root.forEach(function(child){
-
-      var index = arrayObjectIndexOf(classes.children, child._source.owner, "name"); 
-      if(index > -1){ // Add the child to owner's file list
-        var typeIndex = arrayObjectIndexOf(classes.children[index].children, child._source.mtype, "name");
-        if(typeIndex > -1) { // add the child to the correct mimetype group
-          classes.children[index].children[typeIndex].children.push({name : child._source.name, size : child._source.size, owner : child._source.owner, mtime : child._source.mtime, atime: child._source.mtime, ctime : child._source.ctime, mtype : child._source.mtype});
-        } else {
-          classes.children[index].children.push({name : child._source.mtype, children : [{name : child._source.name, size : child._source.size, owner : child._source.owner, mtime : child._source.mtime, atime: child._source.mtime, ctime : child._source.ctime, mtype : child._source.mtype}]});
-        }
-      } else { // Not added yet, push a new item to the list
-        classes.children.push({name : child._source.owner, children : [{name : child._source.mtype, children : [{name : child._source.name, size : child._source.size, owner : child._source.owner, mtime : child._source.mtime, atime: child._source.mtime, ctime : child._source.ctime, mtype : child._source.mtype}]}]});
-      }
-  });
-
-  return classes;
-}
-
-
-
-//For flat (non hierachical) pack layout
-function classes2(root) {
-  var classes = [];
-
-  root.forEach(function(child){
-      classes.push({name: child._source.name, size: child._source.size});
-  });
-  return {name : "files" , children : classes};
-}
-
-function arrayObjectIndexOf(myArray, searchTerm, property) {
-    for(var i = 0, len = myArray.length; i < len; i++) {
-        if (myArray[i][property] === searchTerm) return i;
-    }
-    return -1;
-}
-
-function bytesToSize(bytes, onlySizeFormat) {
-    var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-    if (bytes == 0) return 'n/a';
-    var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
-    if (i == 0) return bytes + ' ' + sizes[i]; 
-  if (onlySizeFormat){
-    return sizes[i];
-  }else {
-    return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + sizes[i];
-  }
-}
-
-function timeConverter(UNIX_timestamp){
- var a = new Date(UNIX_timestamp*1000);
- var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-     var year = a.getFullYear();
-     var month = months[a.getMonth()];
-     var date = a.getDate();
-     var hour = a.getHours();
-     var min = a.getMinutes();
-     var sec = a.getSeconds();
-     var time = date+ " "+month+" "+year+" "+hour+":"+min+":"+sec ;
-     return time;
- }
-
-
-d3.select(self.frameElement).style("height", diameter + "px");
-
-</script>
+<div id="content">
+	<div class="container" id="d3_visualization">
+</div>
+</body>
+</html>
