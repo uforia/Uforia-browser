@@ -1,6 +1,8 @@
 function render(api_call){
-  var width = 960,
-    height = 600;
+var state = 0; // 0 is normal, 1 is radius size sent, 2 is radius size received;
+
+var width = 960,
+  height = 600;
 
 var color = d3.scale.category20();
 
@@ -14,10 +16,18 @@ var svg = d3.select("#d3_visualization").append("svg")
     .attr("width", width)
     .attr("height", height);
 
+var cirle;
+
+var div = d3.select("#d3_visualization").append("div");
+
+div.append("<input type='button' value='Normal radius' onclick='normalRadius();' />");
+div.append("<input type='button' value='Radius by Sent' onclick='sentRadius();' />");
+div.append("<input type='button' value='Radius by Received' onclick='receivedRadius();' />");
+
 d3.json(api_call, function(error, graph) {
   if (error) return console.error(error);
 
-  console.log(JSON.stringify(graph));
+  // console.log(JSON.stringify(graph));
 
   //Stop the loading spinner
   stopSpinner();
@@ -67,9 +77,11 @@ d3.json(api_call, function(error, graph) {
 
 
   function mouseover(d, i) {
-    d3.select(this).select("circle").transition()
-        .duration(750)
-        .attr("r", 16);
+    if(state == 0){
+      d3.select(this).select("circle").transition()
+          .duration(750)
+          .attr("r", 16);
+    }
 
     d3.select("#tooltip")
       .style("visibility", "visible")
@@ -84,38 +96,48 @@ d3.json(api_call, function(error, graph) {
   function mouseout(d, i) {
     d3.select("#tooltip").style("visibility", "hidden");
 
-    d3.select(this).select("circle").transition()
-        .duration(750)
-        .attr("r", 8);
+    if(state == 0){
+      d3.select(this).select("circle").transition()
+          .duration(750)
+          .attr("r", 8);
+    }
   }
+});
 
-  function normalRadius(d){
-    circle.transition()
-      .duration(750)
-      .attr("r", 8);
-  }
+function normalRadius(d){
+  circle.transition()
+    .duration(750)
+    .attr("r", 8);
 
-  function receivedRadius(){
-    circle.transition()
-      .duration(750)
-      .attr("r", function(d){
-        if(d.received > 0) {
-          return Math.sqrt(d.received * 100);
-        } else {
-          return Math.sqrt(1 * 100);
-        }
-      });
-  }
+    state = 0;
+}
 
-  function sentRadius(d){
-    circle.transition()
-      .duration(750)
-      .attr("r", function(d){
-        if(d.sent > 0) {
-          return Math.sqrt(d.sent * 100);
-        } else {
-          return Math.sqrt(1 * 100);
-        }
-      });
-  }
-});}
+function receivedRadius(){
+  circle.transition()
+    .duration(750)
+    .attr("r", function(d){
+      if(d.received > 0) {
+        return Math.sqrt(d.received * 100);
+      } else {
+        return Math.sqrt(1 * 100);
+      }
+    });
+
+    state = 2;
+}
+
+function sentRadius(d){
+  circle.transition()
+    .duration(750)
+    .attr("r", function(d){
+      if(d.sent > 0) {
+        return Math.sqrt(d.sent * 100);
+      } else {
+        return Math.sqrt(1 * 100);
+      }
+    });
+
+    state = 1;
+}
+
+}
