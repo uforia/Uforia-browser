@@ -1,0 +1,38 @@
+.node {
+  cursor: pointer;
+}
+
+.node:hover {
+  stroke: #000;
+  stroke-width: 1.5px;
+}
+
+.node--leaf {
+  fill: white;
+}
+
+.label {
+  font: 11px "Helvetica Neue", Helvetica, Arial, sans-serif;
+  text-anchor: middle;
+}
+
+.label,
+.node--root{
+  pointer-events: none;
+}
+
+div.tooltip {
+  position: absolute;
+  text-align: left;
+  width: auto;
+  max-width: 250px;
+  height: auto;
+  max-height: 250px;
+  padding: 5px;
+  font: 12px sans-serif;
+  background: lightsteelblue;
+  border: 0px;
+  border-radius: 8px;
+  pointer-events: none;
+  overflow: hidden;
+}

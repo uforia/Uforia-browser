@@ -12,18 +12,18 @@ function render(api_call){
       .value(function(d) { return d.size; })
 
   var svg = d3.select("#d3_visualization").append("svg")
+	.attr("id", "d3_svg")
       .attr("width", diameter)
       .attr("height", diameter)
     .append("g")
       .attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
 
-  var div = d3.select("body").append("div")
-            .attr("class", "tooltip")
-            .style("opacity", 0);
-
   //Call the api and handle the results
   d3.json(api_call, function(error, root) {
     if (error) return console.error(error);
+
+	//Stop the loading spinner
+	stopSpinner();
 
     // root = groupByUser(root.hits.hits);
 
@@ -40,25 +40,8 @@ function render(api_call){
 
     // Add the tooltip to node leaves
     var fileCircles = d3.selectAll(".node--leaf")
-          .on("mouseover", function(d) {
-                div.transition()
-                    .duration(200)
-                    .style("opacity", .9);
-                div.html("Name: " + d.name + "<br />" + 
-                         "Size: " + bytesToSize(d.size, false) + "<br />" +
-                         "Owner: " + d.owner + "<br />" +
-                         "Mtime: " + timeConverter(d.mtime) + "<br />" +
-                         "Atime: " + timeConverter(d.atime) + "<br />" +
-                         "Ctime: " + timeConverter(d.ctime) + "<br />" +
-                         "Mimetype: " + d.mtype)
-                    .style("left", (d3.event.pageX) + "px")
-                    .style("top", (d3.event.pageY) + "px");
-            })
-            .on("mouseout", function(d){
-                div.transition()
-                    .duration(500)
-                    .style("opacity", 0);
-            });
+          .on("mouseover", mouseover)
+          .on("mouseout", mouseout);
 
     var text = svg.selectAll("text")
         .data(nodes)
@@ -96,6 +79,24 @@ function render(api_call){
       var k = root.r / v[2]; view = v;
       node.attr("transform", function(d) { return "translate(" + (d.x - v[0]) * k + "," + (d.y - v[1]) * k + ")"; });
       circle.attr("r", function(d) { return d.r * k; });
+    }
+
+    function mouseover(d, i){
+      d3.select("#tooltip")
+          .style("visibility", "visible")
+          .html("Name: " + d.name + "<br />" + 
+                         "Size: " + bytesToSize(d.size, false) + "<br />" +
+                         "Owner: " + d.owner + "<br />" +
+                         "Mtime: " + d.mtime + "<br />" +
+                         "Atime: " + d.atime + "<br />" +
+                         "Ctime: " + d.ctime + "<br />" +
+                         "Mimetype: " + d.mtype)
+          .style("left", (d3.event.pageX - 100) + "px")
+          .style("top", (d3.event.pageY - 150) + "px");
+    }
+
+    function mouseout(d, i){
+      d3.select("#tooltip").style("visibility", "hidden");
     }
   });
 

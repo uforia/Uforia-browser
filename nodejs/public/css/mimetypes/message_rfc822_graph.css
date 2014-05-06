@@ -1,0 +1,28 @@
+#tooltip {
+  color: white;
+  opacity: .9;
+  background: #333;
+  padding: 5px;
+  border: 1px solid lightgrey;
+  border-radius: 5px;
+  position: absolute;
+  z-index: 10;
+  visibility: hidden;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.node circle{
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
+
+text {
+  pointer-events: none;
+  font: 10px sans-serif;
+}
+
+.link {
+  stroke: #999;
+  stroke-opacity: .6;
+}
