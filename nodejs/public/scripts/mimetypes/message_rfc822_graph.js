@@ -16,13 +16,8 @@ var svg = d3.select("#d3_visualization").append("svg")
     .attr("width", width)
     .attr("height", height);
 
-var cirle;
+var cirle = 1;
 
-var div = d3.select("#d3_visualization").append("div");
-
-div.append("<input type='button' value='Normal radius' onclick='normalRadius();' />");
-div.append("<input type='button' value='Radius by Sent' onclick='sentRadius();' />");
-div.append("<input type='button' value='Radius by Received' onclick='receivedRadius();' />");
 
 d3.json(api_call, function(error, graph) {
   if (error) return console.error(error);
