@@ -79,10 +79,21 @@ function stopSpinner(){
     spinner.stop();
 }
 
+function showMessage(message){
+    $("#message").text(message);
+    $("#message").attr("style", "visibility: visible")
+}
+
+function hideMessage(){
+    $("#message").empty();
+    $("#message").attr("style", "visibility: hidden")
+}
+
 //Init the elasticsearch query
 function search(){
     //Clear the old SVG
     removeSVG();
+    hideMessage();
     startSpinner();
 
     //Get the values from the input fields

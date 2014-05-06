@@ -1,5 +1,5 @@
 function render(api_call){
-  var diameter = 800;
+  var diameter = 960;
 
   var color = d3.scale.linear()
       .domain([-1, 5])
@@ -12,7 +12,7 @@ function render(api_call){
       .value(function(d) { return d.size; })
 
   var svg = d3.select("#d3_visualization").append("svg")
-	.attr("id", "d3_svg")
+  .attr("id", "d3_svg")
       .attr("width", diameter)
       .attr("height", diameter)
     .append("g")
@@ -20,10 +20,21 @@ function render(api_call){
 
   //Call the api and handle the results
   d3.json(api_call, function(error, root) {
-    if (error) return console.error(error);
+    if (error) {
+      showMessage("An error occurred, please try another query");
+      stopSpinner();
+      return console.error(error);
+    } 
 
-	//Stop the loading spinner
-	stopSpinner();
+    if(root.children.length == 0){
+      showMessage("No results for this query")
+      stopSpinner();
+      return;
+    }
+
+
+  //Stop the loading spinner
+  stopSpinner();
 
     // root = groupByUser(root.hits.hits);
 
@@ -49,7 +60,7 @@ function render(api_call){
         .attr("class", "label")
         .style("fill-opacity", function(d) { return d.parent === root ? 1 : 0; })
         .style("display", function(d) { return d.parent === root ? null : "none"; })
-        .text(function(d) { return d.name; });
+        .text(function(d) { return d.parent ? d.children ? d.name.substring(0, d.r / 3) : d.name.substring(0, d.r * 5) : d.name; });
 
     var node = svg.selectAll("circle,text");
 
