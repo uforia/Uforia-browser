@@ -26,3 +26,14 @@ text {
   stroke: #999;
   stroke-opacity: .6;
 }
+
+div#d3_button_bar  input[type="button"] {
+    width: 170px;
+    float: center;
+    padding: 8px;
+    font-size: 16px;
+    color: #FFFFFF;
+    background-color: #747474;
+    cursor: pointer;
+    border: 1px solid #000;
+}
