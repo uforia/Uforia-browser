@@ -31,6 +31,7 @@ db = database.Database(config)
 
 def read_data():
     """
+    
     Runs the functions from the database and prints the data to stdout.
     Used as a means to confirm things are working as they should be (for now).
 
@@ -47,6 +48,7 @@ def read_data():
 
 def populate_files_mapping(_index, jsondata):
     """
+    
     Creates (or fills if it exists) the elasticsearch index
 
     """
@@ -88,6 +90,7 @@ def populate_files_mapping(_index, jsondata):
 
 def generate_table_list():
     """
+
     Will grab the modules column from the supported_mimetypes table
     and use the referenced tables there to generate a list of tables to call
     per mapping.
@@ -107,10 +110,12 @@ def generate_table_list():
 
 def coreType(value=None):
     """
+    
     elasticsearch has the following coretypes:
     string, integer/long, float/double, boolean, and null
 
     python floats are almost always c doubles, so there is no check for double.
+    
     """
 
     if isinstance(value, int):
@@ -129,12 +134,14 @@ def coreType(value=None):
 
 def create_mapping(mime=None, tablename=None):
     """
+    
     create_mapping will do as the name suggests for the uforia index.
     A mapping is in the URL after the index, for example:
 
-    http://localhost:9200/uforia/image/jpeg
+    http://localhost:9200/uforia/image_jpeg
 
-    where image/jpeg is the mapping.
+    where image_jpeg is the mapping.
+    
     """
     if not mime:
         raise Exception("fill_mapping called without a mimetype")
@@ -160,8 +167,10 @@ def create_mapping(mime=None, tablename=None):
             mapping[jsonName[1:-1]] = submap
 
         #print mapping
-        print mime
-        conn.indices.put_mapping(str(mime), {'properties':mapping}, ["uforia"])
+        #print mime
+        newmime = mime.replace("/","_")
+        print newmime
+        conn.indices.put_mapping(str(newmime), {'properties':mapping}, ["uforia"])
 
 def fill_mapping(mime=None, tablename=None):
     if not mime:

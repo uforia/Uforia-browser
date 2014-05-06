@@ -5,14 +5,19 @@ var app = express();
 //Set up elasticsearch
 var elasticsearch = require('elasticsearch');
 var client = new elasticsearch.Client({
-  host: 'localhost:9200',
-  log: 'trace'
+  host: 'localhost:9200'
+  // log: 'trace'
 });
 
 //'Constants'
 var INDEX = 'uforia';
 var DEFAULT_TYPE = 'files';
+var DEFAULT_VIEW = 'bubble';
 var DEFAULT_SIZE = 10;
+var VIEWS = {
+    files : {bubble : 'Bubble'},
+    message_rfc822 : {chord : 'Chord diagram', graph :'Graph'}
+};
 
 
 //Set the view directory and HTML render engine
@@ -45,7 +50,7 @@ app.get('/api/get_files', function(req, res){
 * q
 * type
 * size
-* collapse (array of values)
+* view
 * 
 */
 app.get("/api/search", function(req, res) {
@@ -53,6 +58,8 @@ app.get("/api/search", function(req, res) {
   search_request['index'] = INDEX;
   search_request['type'] = defaultFor(req.param('type'), DEFAULT_TYPE);
   search_request['size'] = defaultFor(req.param('size'), DEFAULT_SIZE);
+  search_request['q'] = defaultFor(req.param('q'), "*:*");
+  var view = defaultFor(req.param('view'), DEFAULT_VIEW);
 
   if(search_request['size'] === 'all'){
     client.count({
@@ -61,14 +68,14 @@ app.get("/api/search", function(req, res) {
     }).then(function(resp){
       //Search
       search_request.size = resp.count;
-      search(search_request, res);
+      search(search_request, res, view);
     }, function(err){
       console.trace(err.message);
       search_request.size = DEFAULT_SIZE;
-      search(search_request, res);
+      search(search_request, res, view);
     });
   }  else {
-    search(search_request, res);
+    search(search_request, res, view);
   }
 });
 
@@ -84,10 +91,24 @@ app.get("/api/mapping_info", function(req, res){
     index : INDEX,
     type : type
   }).then(function(resp){
-    res.send(Object.keys(resp[INDEX].mappings[type].properties));
+    try{
+      res.send(Object.keys(resp[INDEX].mappings[type].properties)); 
+    } catch(err){
+      res.send(["Could not load fields for this mapping"])
+    }
   }, function(err){
     console.log(err.message);
   });
+});
+
+/* Return the available view for a type
+* takes params:
+* type
+*
+*/
+app.get("/api/view_info", function(req, res){
+    type = defaultFor(req.param('type'), DEFAULT_TYPE);
+    res.send(VIEWS[type]);
 });
 
 //Util functions
@@ -136,10 +157,216 @@ function groupByUser(root) {
     return classes;
 }
 
+function createEmailChordDiagram(root){
+    var data = {total : 0, names : [], count : [], matrix : []};
+
+    function getFromEmail(input){
+        if(input == null) {
+          return "Unknown";
+        }
+
+        input = input.toLowerCase();
+        try {
+          var matches = input.match(/\<([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)\>/gi);
+          if(matches.length > 0){
+            return matches[0].substring(1, matches[0].length -1);
+         } else {
+            return "Unknown";
+          }
+        } catch(err){
+          return "Unknown";
+        }
+    }
+
+    function getToEmail(input){
+        if(input == null){
+          return ["Unknown"];
+        }
+
+        input = input.toLowerCase();
+        try {
+          var matches = input.match(/\<([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)\>/gi);
+          if(matches.length > 0){
+            result = [];
+            matches.forEach(function(match){
+                result.push(match.substring(1, match.length -1));
+            });
+            return result;
+          } else {
+            return ["Unknown"];
+          }
+        } catch (err){
+         return ["Unknown"]; 
+        } 
+    }
+
+    root.forEach(function(child){
+        data.total += 1;
+        var from = getFromEmail(child._source.From);
+        var to = getToEmail(child._source.To);
+
+        //Add the emailaddress to the list of names
+        if(data.names.indexOf(from) < 0){
+            data.names.push(from);
+            data.count.push(1);
+        } else { //Add another email to the total emails sent by an address
+            data.count[data.names.indexOf(from)] += 1;
+        }
+
+        to.forEach(function(receipient){
+            if(data.names.indexOf(receipient) < 0){
+                data.names.push(receipient);
+                data.count.push(0);
+            }
+        });       
+    });
+
+    //Fill the matrix with empty values
+    for(var i = 0; i < data.names.length; i++){
+        data.matrix.push([]);
+        //Set initial matrix values to zero
+        for(var j = 0; j < data.names.length; j++){
+            data.matrix[i].push(0);
+        }
+    }
+
+    //Fill the matrix with useful data
+    root.forEach(function(child){
+        var from = getFromEmail(child._source.From);
+        var to = getToEmail(child._source.To);
+
+        fromIndex = data.names.indexOf(from);
+        to.forEach(function(receipient){
+            if(data.names.indexOf(receipient) > -1){
+                data.matrix[fromIndex][data.names.indexOf(receipient)] += 1;
+            }
+        });
+    });
+
+    return data;
+}
+
+//Modify the result for an email graph
+function createEmailGraph(root){
+    var data = { total : 0, nodes : [], links : []};
+
+    function getFromEmail(input){
+        if(input == null) {
+          return "Unknown";
+        }
+
+        input = input.toLowerCase();
+        try {
+          var matches = input.match(/\<([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)\>/gi);
+          if(matches.length > 0){
+            return matches[0].substring(1, matches[0].length -1);
+         } else {
+            return "Unknown";
+          }
+        } catch(err){
+          return "Unknown";
+        }
+    }
+
+    function getToEmail(input){
+        if(input == null){
+          return ["Unknown"];
+        }
+
+        input = input.toLowerCase();
+        try {
+          var matches = input.match(/\<([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)\>/gi);
+          if(matches.length > 0){
+            result = [];
+            matches.forEach(function(match){
+                result.push(match.substring(1, match.length -1));
+            });
+            return result;
+          } else {
+            return ["Unknown"];
+          }
+        } catch (err){
+         return ["Unknown"]; 
+        } 
+    }
+
+    //check if a link already exists in the link array
+    function containsLink(links, target){
+        var found = false;
+        for(var i = 0; i < links.length; i++){
+            var link = links[i];
+            if(link.source == target.source && link.target == target.target){
+                found = true;
+                break;
+            }
+        }
+        return found;
+    }
+
+    //Fill the nodes array
+    root.forEach(function(child){
+        data.total += 1;
+        var from = getFromEmail(child._source.From);
+        var to = getToEmail(child._source.To);
+
+        var fromIndex = arrayObjectIndexOf(data.nodes, from, "name"); 
+        if(fromIndex > -1){
+            data.nodes[fromIndex].sent += 1;
+        } else {
+            data.nodes.push({name : from, sent: 1, received : 0});
+        }
+
+        to.forEach(function(receipient){
+            var toIndex = arrayObjectIndexOf(data.nodes, receipient, "name");
+            if(toIndex > -1){
+                data.nodes[toIndex].received += 1;
+            } else {
+                data.nodes.push({name : receipient, sent : 0, received : 1});
+            } 
+        });
+    });
+
+    //Fill the links array
+    root.forEach(function(child){
+        var from = getFromEmail(child._source.From);
+        var to = getToEmail(child._source.To);
+
+        var index = arrayObjectIndexOf(data.nodes, from, "name");
+
+        // console.log("index out loop: " + index);
+        to.forEach(function(receipient){
+            var toIndex = arrayObjectIndexOf(data.nodes, receipient, "name");
+            var link = {source : index, target : toIndex, value : 1};
+            // console.log("index in loop: " + index);
+            if(containsLink(data.links, link)){
+                data.links[index].value += 1;
+            } else {
+                data.links.push(link);
+            }
+        });
+    });
+
+  return data;
+}
+
 //Search and return the result
-var search = function(search_request, res){
+var search = function(search_request, res, view){
     client.search(search_request, res).then(function(resp){
-    res.send(groupByUser(resp.hits.hits));
+    switch(search_request.type){
+        case 'files':
+            res.send(groupByUser(resp.hits.hits));
+            break;
+        case 'message_rfc822':
+            if(view == 'chord'){
+                res.send(createEmailChordDiagram(resp.hits.hits));
+            } else if (view == 'graph') { 
+                res.send(createEmailGraph(resp.hits.hits));
+            }
+            break;
+        default: // default is files
+            res.send(groupByUser(resp.hits.hits));
+            break;
+    }
   }, function(err){
     console.trace(err.message);
   });
@@ -172,10 +399,13 @@ function arrayObjectIndexOf(myArray, searchTerm, property) {
     return -1;
 }
 
-
 //Start the server
-app.on('listening', function(){
-    console.trace('Express server started on port %s at %s', app.address().port, app.address().address);
-})
-app.listen(8888, 'localhost');
+var server = app.listen(8888, function(){
+  console.log('Listening on port %d', server.address().port);
+});
 
+//Gracefully shutdown the server
+process.on('SIGTERM', function () {
+  console.log("Closing");
+  server.close();
+});
