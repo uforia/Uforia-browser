@@ -354,13 +354,25 @@ var search = function(search_request, res, view){
     client.search(search_request, res).then(function(resp){
     switch(search_request.type){
         case 'files':
-            res.send(groupByUser(resp.hits.hits));
+                try {
+                    res.send(groupByUser(resp.hits.hits));
+                }catch(err){
+                    res.send();
+                }
             break;
         case 'message_rfc822':
             if(view == 'chord'){
-                res.send(createEmailChordDiagram(resp.hits.hits));
+                try {
+                    res.send(createEmailChordDiagram(resp.hits.hits));
+                }catch(err){
+                    res.send();
+                }
             } else if (view == 'graph') { 
-                res.send(createEmailGraph(resp.hits.hits));
+                try {
+                    res.send(createEmailGraph(resp.hits.hits));
+                }catch(err){
+                    res.send();
+                }
             }
             break;
         default: // default is files
@@ -368,6 +380,7 @@ var search = function(search_request, res, view){
             break;
     }
   }, function(err){
+    res.send();
     console.trace(err.message);
   });
 };
