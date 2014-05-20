@@ -177,7 +177,7 @@ def create_mapping(mime=None, tablename=None):
         #print mapping
         #print mime
         newmime = mime.replace("/","_")
-        print newmime
+        print("")newmime
         conn.indices.put_mapping(str(newmime), {'properties':mapping}, ["uforia"])
 
 def fill_mapping(mime=None, tablename=None):
@@ -190,13 +190,6 @@ def fill_mapping(mime=None, tablename=None):
         tableData = db.read_table(_table=tablename, columnsonly=False)
         columnNames = db.read_table(_table=tablename)
        #columnNames = json.dumps(c)
-
-        for row in tableData:
-            i = 0
-            while i < len(columnNames):
-                jsonstring = json.dumps(columnNames[i])
-                print jsonstring[1:-1], row[i], coreType(row[i])
-                i += 1
 
 
 if __name__ == "__main__":
