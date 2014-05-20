@@ -25,11 +25,17 @@ function render(api_call){
     .attr("r", innerRadius);
 
   d3.json(api_call, function(error, imports) {
-    if (error) return console.error(error);
+    if (error) {
+      showMessage("An error occurred, please try another query");
+      stopSpinner();
+      return console.error(error);
+    } 
 
-    // console.log(JSON.stringify(imports));
-
-    //Stop the loading spinner
+    if(imports.total == 0){
+      showMessage("No results for this query")
+      stopSpinner();
+      return;
+    }
     stopSpinner();
 
     var total = imports.total;
