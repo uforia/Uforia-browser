@@ -4,12 +4,12 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 <title>Search Uforia database</title>
 <link href="css/main.css" rel="stylesheet" type="text/css">
-<link href="css/mimetypes/files_bubble.css" rel="stylesheet" type="text/css" id="d3_style">
+<link href="css/mimetypes/message_rfc822_chord.css" rel="stylesheet" type="text/css" id="d3_style">
 <script src="scripts/jquery-2.1.0.min.js" type="text/javascript"></script>
 <script src="scripts/d3.v3.min.js" type="text/javascript"></script>
 <script src="scripts/spin.min.js" type="text/javascript"></script>
 <script src="scripts/index.js" type="text/javascript"></script>
-<script src="scripts/mimetypes/files_bubble.js" type="text/javascript" id="d3_script"></script>
+<script src="scripts/mimetypes/message_rfc822_chord.js" type="text/javascript" id="d3_script"></script>
 </head>
 <script>
 
@@ -35,53 +35,54 @@ var opts = {
   left: '50%' // Left position relative to parent
 };
 
-
-
 //init the page
 $( document ).ready(function() {
-	init();
-	target = document.getElementById('d3_visualization');
-	spinner = new Spinner(opts);
-	search();
+  init();
+  target = document.getElementById('d3_visualization');
+  spinner = new Spinner(opts);
 
-	//Search when enter is pressed in the searchbar
+  //Search when enter is pressed in the searchbar
        $("#search_query").keypress(function(e) {
-       	var code = (e.keyCode ? e.keyCode : e.which);
-       	if (code == 13) {
-       		search();
-       		return false;
-       	}
+        var code = (e.keyCode ? e.keyCode : e.which);
+        if (code == 13) {
+          search();
+          return false;
+        }
        });
 });
 
 
 </script>
 <body>
-<div id="header">
-    <div class="container">
-        <h1>Uforia Search</h1>
-        <div class="logo">&nbsp;</div>
-    </div>
+<div class="header">
+  <h1>Uforia Search</h1>
 </div>
-<div id="search">
-    <div class="container">
-        <input type="text" id="search_query" />
-        <!-- <select multiple id="field_collapse"></select> -->
-        <select id="view_type" onchange="changeView(this);">
-        </select> 
-	<select id="search_type" onchange="changeType(this);">
-            <option value="files">Files search</option>
-		<option value="message_rfc822">Email (message/rfc822)</option>
-        </select>
-        <input type="button" id="search_button" value="Search" onclick="search();" />
-        <div id="total_results">&nbsp;</div>
+<div class="content">
+  <div class="sidebarLeft">
+    <h2>Visualization type</h2>
+    <select id="search_type" size="2" class="listbox" onchange="changeType(this);">
+      <option value="message_rfc822">Email (message/rfc822)</option>
+      <option value="files">Files</option>
+    </select>
+  </div>
+  <div class="container">
+    <div id="parameters">
     </div>
-</div>
-
-<div id="content">
-	<div class="message" id="message"></div>
-	<div class="tooltip" id="tooltip"></div>
-	<div class="container" id="d3_visualization">
+    <div id="content">
+      <div class="message" id="message"></div>
+      <div class="tooltip" id="tooltip"></div>
+      <div id="d3_visualization"></div>
+    </div>
+  </div>
+  <div class="sidebarRight">
+    <div class="matchesBox">
+      <h1 id="query_matches_count">0</h1>
+      <h2>Documents match query</h2>
+    </div>
+    <h2>Visualize as</h2>
+    <select id="view_type" size="2" onchange="changeView(this);"></select>
+    <input type="button" id="search_button" value="Visualize" onclick="search();" />
+  </div>
 </div>
 </body>
 </html>

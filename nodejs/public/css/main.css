@@ -1,7 +1,4 @@
-
-:focus {
-    outline: none;
-}
+/* general css */
 
 html {
     height: 100%;
@@ -22,94 +19,6 @@ h1 {
     font-weight: normal;
 }
 
-#message {
-	text-align: center ;
-	font-size: 40px;
-}
-
-div#header {
-    margin: 20px 0px 20px 0px;
-    float: left;
-    width: 100%;
-}
-
-div#header h1 {
-    width:600px;
-    float:left;
-}
-
-div#header div.logo{
-    background-image: url("http://www.create-it.hva.nl/_internal/cimg!0/lkld92p5dmulxebyolsskhvuew6y1v8");
-    width:200px;
-    height: 117px;
-    float:right;
-}
-
-div#search {
-    float: left;
-    width: 100%;
-    margin: 0px 0px 20px 0px;
-}
-
-div#search input[type="text"] {
-    width: 290px;
-    float: left;
-    padding: 8px;
-    font-size: 16px;
-    border: 1px solid #000;
-}
-
-div#search input[type="button"] {
-    width: 170px;
-    float: right;
-    padding: 8px;
-    font-size: 16px;
-    color: #FFFFFF;
-    background-color: #747474;
-    cursor: pointer;
-    border: 1px solid #000;
-}
-
-div#search select {
-    width: 180px;
-    float:right;
-    padding: 8px;
-    cursor:pointer;
-    border: 1px solid #000;
-    margin:0px 10px 10px 10px;
-}
-
-div#content {
-    float: left;
-    width: 100%;
-    padding: 0px 0px 20px 0px;
-}
-
-div#facets {
-    float: left;
-    width: 250px;
-    overflow-x: hidden;
-}
-
-div#results {
-    float: left;
-    width: 630px;
-    margin-left: 10px;
-}
-
-div#total_results {
-    float:left;
-    width: 100%;
-    text-align: right;
-    margin: 10px 0px 10px 0px;
-}
-
-div.container {
-    width: 890px;
-    margin: 0px auto 0px auto;
-}
-/* New Layout */
-
 .show {
     display:block;  
 }
@@ -118,171 +27,89 @@ div.container {
     display:none;
 }
 
-div.message_box {
-    width:100%;
-    float:left;
-}
-/* Abstract */
-div.message_box div.abstract {
-    float:left;
-    width:100%;
-    padding:3px 0px 3px 0px;
+#message {
+    text-align: center;
+    font-size: 40px;
 }
 
-div.message_box div.abstract:hover {
-    background-color: #ccc;
+#d3_visualization {
+    border: 1px solid black;
+}
+
+div.header {
+	width: 1400px;
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+div.content{
+	width: 1400px;
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+div.container {
+    width: 900px;
+    display: inline-block;
+}
+
+div.container h2 {
+	margin:0px 10px 10px 10px;
+}
+
+div.sidebarLeft {
+	float: left;
+	width: 200px;
+    text-align: center;
+    margin: auto;
+}
+
+div.sidebarRight {
+	float: right;
+	width: 200px;
+    text-align: center;
+    margin: auto;
+}
+
+input[type="button"] {
+    padding: 8px;
+    font-size: 16px;
+    color: #FFFFFF;
+    background-color: #747474;
+    cursor: pointer;
+    border: 1px solid #000;
+    margin:0px 10px 10px 10px;
+}
+
+input[type="text"]{
+    width: 290px;
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #000;	
+}
+
+select {
+    width: 180px;
+    padding: 8px;
     cursor:pointer;
-}
-
-div.message_box div.abstract span.sender {
-    width: 195px;
-    float:left;
-    overflow: hidden;
-    margin-right:5px;
-}
-
-div.message_box div.abstract span.subject {
-    width: 319px;
-    float:left;
-    overflow: hidden;
-    margin-right:5px;       
-    font-weight: bold;
-}
-
-div.message_box div.abstract span.date {
-    width: 100px;
-    float:right;
-    overflow: hidden;
-    text-align: right;
-}
-
-/* Full Message */
-div.message_box div.details {
-    float:left;
-    width: 100%;
-    margin: 0px 0px 10px 0px;
-    background:#ccc;
-    position: relative;
-}
-
-div.message_box div.details a.new_window {
-    width: 300px;
-    float:right;
-    text-align: right;
-    margin:10px 10px 10px 0px;
-}
-
-div.message_box em {
-    background-color:#ff0;
-    font-style: normal;
-    padding: 0px 3px 0px 3px;
-}
-
-div.message_box div.details div.meta {
-    width:600px;
-    margin: 10px 10px 10px 10px;
-    padding: 5px;
     border: 1px solid #000;
-    float:left;
-    background: #fff;
+    margin:0px 10px 10px 10px;
 }
 
-div.message_box div.details div.meta span {
-    position:relative;
-    padding: 3px 0px 3px 150px;
-    width:445px;
-    float:left;
-    border-bottom: 1px dotted #ccc;
+select.listbox {
+	height: 400px;
 }
 
-div.message_box div.details div.meta span label {
-    width:150px;
-    float:left;
-    font-weight: bold;
-    position: absolute;
-    top: 3px;
-    left: 0px;
+div.matchesBox {
+    width: 50%;
+    min-width: 150px;
+    height: 150px;
+    border: 1px solid black;
+    margin: 0 auto;
 }
 
-div.message_box div.details div.meta span.subject {
-    font-weight: bold;
-}
-
-div.message_box div.details span.body {
-    width: 600px;
-    float:left;
-    padding:5px;
-    margin: 0px 10px 10px 10px;
-}
-
-
-/* New Layout End */
-
-div.facet {
-    width: 100%;
-    float: left;
-}
-
-.reset_facet {
-    color: #f00;
-    font-size: 11px;
-    margin-left: 3px;
-    cursor: pointer;
-}
-
-div.facet a.label {
-    float: left;
-    font-size: 15px;
-    color: #000080;
-    cursor: pointer;
-}
-
-div.facetbox div.facetentry a {
-    cursor: pointer;
-}
-
-div.facetbox div.facetsearchbox {
-    width: 100%;
-    float:left;
-    margin: 5px 0px 20px 0px;
-}
-
-div.facetbox div.facetsearchbox input {
-    float:left;
-}
-
-div.facetbox div.facetsearchbox input[type="text"] {
-    width: 60%;
-    padding:3px;
-    margin-right: 5px;
-}
-
-div.facetbox div.facetsearchbox input[type="button"] {
-    width: 30%;
-    padding:3px;
-    margin-top:2px;
-}
-
-
-a#next_page {
-    border: 1px solid #000;
-    padding: 3px 5px 3px 5px;
-    float:right;
-    width:618px;
-    text-align:center;
-    color:#fff;
-    background-color:#000;
-    font-weigth:bold;
-    font-size:14px;
-    cursor: pointer;
-}
-
-span#loader {
-    width: 630px;
-    height: 52px;
-    background-image: url("http://www.bcscollege.com/assets/images/waiting_animation.gif");
-    background-repeat:no-repeat;
-    background-position: 289px 0px;
-    margin-top:50px;
-    float:right;
+div.matchesBox h2 h1{
+    text-align: center;
 }

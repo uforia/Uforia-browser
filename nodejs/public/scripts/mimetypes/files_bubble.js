@@ -1,5 +1,5 @@
 function render(api_call){
-  var diameter = 960;
+  var diameter = 900;
 
   var color = d3.scale.linear()
       .domain([-1, 5])
