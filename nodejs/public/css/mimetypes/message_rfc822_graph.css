@@ -13,8 +13,6 @@
 }
 
 .node circle{
-  stroke: #fff;
-  stroke-width: 1.5px;
 }
 
 text {
@@ -25,6 +23,8 @@ text {
 .link {
   stroke: #999;
   stroke-opacity: .6;
+  stroke-width: 1.5px;
+  fill: none;
 }
 
 div#d3_button_bar  input[type="button"] {
