@@ -4,12 +4,12 @@
 
 import os, sys, imp, inspect
 import json
-from ast import literal_eval
 import itertools
+import ConfigParser
 
 # add pyes from the libraries subfolder
 # this will also force python to use the included module instead of the ones installed on the system
-pyes_libfolder =  os.path.realpath(os.path.abspath(os.path.join(os.path.split(inspect.getfile( inspect.currentframe() ))[0],"./libraries/pyes/src")))
+pyes_libfolder =  os.path.realpath(os.path.abspath(os.path.join(os.path.split(inspect.getfile( inspect.currentframe() ))[0],"./libraries/pyes")))
 if pyes_libfolder not in sys.path:
     sys.path.insert(0, pyes_libfolder)
 
@@ -23,13 +23,6 @@ try:
     config = imp.load_source('config', 'include/config.py')
 except:
     print("< WARNING! > Config file not found in include / or not configured correctly, loading default config.")
-
-mapconfig = ConfigParser.SafeConfigParser()
-mapconfig.read('include/default_mapping_config.cfg')
-try:
-    mapconfig.read('include/mapping_config.cfg')
-except:
-    print("< WARNING! > MAPPING Config file not found in include / or not configured correctly, loading default config.")
 
 database = imp.load_source(config.DBTYPE, config.DATABASEDIR + config.DBTYPE + ".py")
 db = database.Database(config)
@@ -143,7 +136,7 @@ def coreType(value=None):
 def create_mapping(mime=None, tablename=None):
     """
     
-    create_mapping will do as the name suggests for the uforia index.
+    create_mapping will create a mapping for the desired index index.
     A mapping is in the URL after the index, for example:
 
     http://localhost:9200/uforia/image_jpeg
@@ -156,10 +149,9 @@ def create_mapping(mime=None, tablename=None):
     elif not tablename:
         raise Exception("create_mapping called without a table")
     else:
-        conn = ES('127.0.0.1:9200') # Use HTTP
+        conn = ES(config.ESSERVER)
         tableData = db.read_table(_table=tablename, columnsonly=False, onerow=True)
         columnNames = db.read_table(_table=tablename)
-
         mapping = {}
 
         if not tableData:
@@ -177,8 +169,9 @@ def create_mapping(mime=None, tablename=None):
         #print mapping
         #print mime
         newmime = mime.replace("/","_")
-        print("")newmime
+        print("Creating mapping: %s" % newmime)
         conn.indices.put_mapping(str(newmime), {'properties':mapping}, ["uforia"])
+
 
 def fill_mapping(mime=None, tablename=None):
     if not mime:
@@ -189,8 +182,42 @@ def fill_mapping(mime=None, tablename=None):
         #conn = ES('127.0.0.1:9200') # Use HTTP
         tableData = db.read_table(_table=tablename, columnsonly=False)
         columnNames = db.read_table(_table=tablename)
-       #columnNames = json.dumps(c)
+        #columnNames = json.dumps(c)
 
+def del_index():
+    """
+    Erases the entire index set in the configuration file.
+    """
+    conn = ES(config.ESSERVER)
+    try:
+        conn.indices.delete_index(config.ESINDEX)
+        print("Successfully deleted the ElasticSearch index: %s" % config.ESINDEX)
+    except:
+        print("Could not delete the index: %s" % config.ESINDEX)
+        raise
+
+def parse_mapping_config(mapfile=None):
+    """
+    parse_mapping_config will treat the mapfile var as a file when supplied.
+    If nothing is supplied it wil default to attempt to the file default_mapping_config.cfg
+
+    mapconfig is declared at the top and uses ConfigParser.SafeConfigParser()
+    """
+    mapconfig = ConfigParser.SafeConfigParser()
+
+    mapconfig.read('include/default_mapping_config.cfg')
+    try:
+        mapconfig.read(mapfile)
+    except:
+        print("< WARNING! > MAPPING Config file not supplied or not configured correctly, loading default config.")
+
+    # section titles are also the mimetype names
+    mimetypes = mapconfig.sections()
+
+    for mime in mimetypes:
+        if (mapconfig.has_option(mime, 'map'))
+            mapping_fields = mapconfig.get_option(mime, 'map')
+            
 
 if __name__ == "__main__":
     #read_data()

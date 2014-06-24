@@ -140,13 +140,13 @@ class Database(object):
             query = """
             SELECT column_name
             FROM information_schema.columns
-            WHERE table_schema = '""" + self.database + """'
-            AND table_name = '""" + _table + """';
-            """
+            WHERE table_schema = '%s'
+            AND table_name = '%s';
+            """ % (self.database, _table)
         else:
             query = """
-            SELECT * FROM """ + _table + """;
-            """
+            SELECT * FROM '%s';
+            """ % (_table)
 
         self.execute_query(query)
         if(onerow):

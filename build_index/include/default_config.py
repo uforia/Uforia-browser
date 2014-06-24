@@ -36,3 +36,10 @@ DBCONN = 2
 
 # Maximum number of database connection attempts before giving up
 DBRETRY = 5
+
+# ELASTICSEARCH SETTINGS
+# ElasticSearch index name
+ESINDEX = 'uforia'
+
+# Elasticsearch server:port
+ESSERVER = '127.0.0.1:9200'
