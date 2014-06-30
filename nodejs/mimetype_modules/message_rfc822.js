@@ -11,21 +11,22 @@ module.exports = {
         data.total += 1;
         var from = getFromEmail(child._source.From);
         var to = getToEmail(child._source.To + " " + child._source.XTo + " " + child._source.Xcc + " " + child._source.Xbcc + " " + child._source.Cc + " " + child._source.Bcc);
-        // var to = getToEmail(child._source.To);
 
         var fromIndex = util.arrayObjectIndexOf(data.names, from, "name");
         if(fromIndex > -1){
             data.names[fromIndex].sent += 1;
+            data.names[fromIndex].hashids.push(child._source.hashid);
         } else {
-            data.names.push({name : from, sent: 1, received : 0});
+            data.names.push({name : from, sent: 1, received : 0, hashids : [child._source.hashid]});
         }
 
         to.forEach(function(receipient){
             var toIndex = util.arrayObjectIndexOf(data.names, receipient, "name");
             if(toIndex > -1){
                 data.names[toIndex].received += 1;
+                data.names[toIndex].hashids.push(child._source.hashid);
             } else {
-                data.names.push({name : receipient, sent : 0, received : 1});
+                data.names.push({name : receipient, sent : 0, received : 1, hashids : [child._source.hashid]});
             } 
         });
     });
@@ -84,16 +85,18 @@ module.exports = {
         var fromIndex = util.arrayObjectIndexOf(data.nodes, from, "name"); 
         if(fromIndex > -1){
             data.nodes[fromIndex].sent += 1;
+            data.nodes[fromIndex].hashids.push(child._source.hashid);
         } else {
-            data.nodes.push({name : from, sent: 1, received : 0});
+            data.nodes.push({name : from, sent: 1, received : 0, hashids : [child._source.hashid]});
         }
 
         to.forEach(function(receipient){
             var toIndex = util.arrayObjectIndexOf(data.nodes, receipient, "name");
             if(toIndex > -1){
                 data.nodes[toIndex].received += 1;
+                data.nodes[toIndex].hashids.push(child._source.hashid);
             } else {
-                data.nodes.push({name : receipient, sent : 0, received : 1});
+                data.nodes.push({name : receipient, sent : 0, received : 1, hashids : [child._source.hashid]});
             } 
         });
     });
@@ -107,14 +110,43 @@ module.exports = {
 
         to.forEach(function(receipient){
             var toIndex = util.arrayObjectIndexOf(data.nodes, receipient, "name");
-            var link = {source : index, target : toIndex, value : 1};
+            var link = {source : index, target : toIndex, value : 1, hashids : [child._source.hashid]};
             var linkIndex = linkIndexFor(data.links, link);
             if(linkIndex > -1){
                 data.links[linkIndex].value += 1;
+                data.links[linkIndex].hashids.push(child._source.hashid);
             } else {
                 data.links.push(link);
             }
         });
+    });
+
+    return data;
+  },
+
+  createBarChart: function(root){
+    var data = { total : 0, dates : []};
+
+    root.forEach(function(child){
+        data.total += 1;
+
+        var date = child._source.Date;
+
+        //Check if date already has an entry in the dates array
+        var dateIndex = util.arrayObjectIndexOf(data.dates, date, "date");
+        if(dateIndex > -1) { //has entry
+            data.dates[dateIndex].total += 1;
+            data.dates[dateIndex].hashids.push(child._source.hashid);
+        } else { // new date entry
+            data.dates.push({ "date" : date, total : 1, hashids : [child._source.hashid] });
+        }
+    });
+
+    //Sort by date
+    data.dates.sort(function(item1, item2){
+        var date1 = new Date(item1.date);
+        var date2 = new Date(item2.date);
+        return date1 - date2;
     });
 
     return data;

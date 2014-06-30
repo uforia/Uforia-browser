@@ -5,8 +5,8 @@ var DATABASE = 'uforia'
 
 var connection = mysql.createConnection({
     host : 'localhost',
-    user : 'uforia',
-    password : 'uforia'
+    user : '',
+    password : ''
 })
 
 //These function will be public

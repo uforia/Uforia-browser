@@ -38,7 +38,7 @@ for($message_offset = 0; $message_offset < $total_messages; $message_offset += M
         $msc = microtime ( true );
         $result = mysql_query ( $sql ) or die ( "Error in query: $query. " . mysql_error () );
         $msc = microtime ( true ) - $msc;
-        echo ($msc * 1000) . " milliseconds \n"; // in milliseconds
+        //echo ($msc * 1000) . " milliseconds \n"; // in milliseconds
 
         $msc_while = microtime ( true );
 
@@ -77,19 +77,19 @@ for($message_offset = 0; $message_offset < $total_messages; $message_offset += M
                 $curl_result = curl_exec ( $ch );
                 curl_close ( $ch );
 
-                echo $message_iterator . "\n";
-                echo $curl_result;
-                echo "\n\n";
+                //echo $message_iterator . "\n";
+                //echo $curl_result;
+                //echo "\n\n";
                 //unset ( $ch, $curl_result, $data_string, $receivers, $sender, $sqlSender, $sqlReceiver );
 
-                usleep ( 100 );
+                //usleep ( 100 );
         }
         $msc_while = microtime ( true ) - $msc_while;
         echo "While takes: " . ($msc_while * 1000) . " milliseconds \n\n";
         mysql_free_result ( $result );
         unset ( $data, $result, $sql, $msc, $msc_while );
 
-        usleep ( 5000000 );
+        //usleep ( 5000000 );
 }
 
 echo "######################################################################### \n";
