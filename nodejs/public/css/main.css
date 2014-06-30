@@ -105,6 +105,7 @@ div.parameters h2 {
 
 .paramField {
     width: 150px;
+    height: 36px;
     padding: 8px;
     cursor:pointer;
     border: 1px solid #000;
@@ -113,6 +114,7 @@ div.parameters h2 {
 
 .paramOperator {
     width: 150px;
+    height: 36px;
     padding: 8px;
     cursor:pointer;
     border: 1px solid #000;
