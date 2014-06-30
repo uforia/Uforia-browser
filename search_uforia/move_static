@@ -1,1 +1,0 @@
-python manage.py collectstatic;sudo find /var/www/elasticsearch/_site/ -type d -print0 | xargs -0 chmod 755;sudo find /var/www/elasticsearch/_site/ -type f -print0 | xargs -0 chmod 644

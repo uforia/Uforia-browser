@@ -22,12 +22,17 @@ config = imp.load_source('config', 'include/default_config.py')
 try:
     config = imp.load_source('config', 'include/config.py')
 except:
-    print("< WARNING! > Config file not found in include/ or not configured correctly, loading default config.")
+    print("< WARNING! > Config file not found in include / or not configured correctly, loading default config.")
+
+mapconfig = ConfigParser.SafeConfigParser()
+mapconfig.read('include/default_mapping_config.cfg')
+try:
+    mapconfig.read('include/mapping_config.cfg')
+except:
+    print("< WARNING! > MAPPING Config file not found in include / or not configured correctly, loading default config.")
 
 database = imp.load_source(config.DBTYPE, config.DATABASEDIR + config.DBTYPE + ".py")
-
 db = database.Database(config)
-
 
 def read_data():
     """
@@ -95,11 +100,13 @@ def generate_table_list():
     and use the referenced tables there to generate a list of tables to call
     per mapping.
 
+    For each mapping it will then call create_mapping() which will create an *EMPTY* mapping entry.
+
     """
     alldata = db.read_table(_table="supported_mimetypes", columnsonly=False)
 
     for line in alldata:
-        mimetype = line[0] # mime_type
+        mimetype = line[0]
         tables_dict = literal_eval(line[1])
         #print tables_dict.keys()
 
@@ -115,6 +122,7 @@ def coreType(value=None):
     string, integer/long, float/double, boolean, and null
 
     python floats are almost always c doubles, so there is no check for double.
+    we default to string for convenience sake.
     
     """
 
@@ -144,9 +152,9 @@ def create_mapping(mime=None, tablename=None):
     
     """
     if not mime:
-        raise Exception("fill_mapping called without a mimetype")
+        raise Exception("create_mapping called without a mimetype")
     elif not tablename:
-        raise Exception("fill_mapping called without a table")
+        raise Exception("create_mapping called without a table")
     else:
         conn = ES('127.0.0.1:9200') # Use HTTP
         tableData = db.read_table(_table=tablename, columnsonly=False, onerow=True)
@@ -169,7 +177,7 @@ def create_mapping(mime=None, tablename=None):
         #print mapping
         #print mime
         newmime = mime.replace("/","_")
-        print newmime
+        print("")newmime
         conn.indices.put_mapping(str(newmime), {'properties':mapping}, ["uforia"])
 
 def fill_mapping(mime=None, tablename=None):
@@ -183,13 +191,6 @@ def fill_mapping(mime=None, tablename=None):
         columnNames = db.read_table(_table=tablename)
        #columnNames = json.dumps(c)
 
-        for row in tableData:
-            i = 0
-            while i < len(columnNames):
-                jsonstring = json.dumps(columnNames[i])
-                print jsonstring[1:-1], row[i], coreType(row[i])
-                i += 1
-        
 
 if __name__ == "__main__":
     #read_data()
