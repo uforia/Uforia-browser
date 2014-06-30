@@ -12,6 +12,7 @@ function init(){
         if($("#parameters").children().length > 1){
             $(this).parent().slideUp('fast', function(){
                 $(this).remove();
+                loadResultCount();
             });
         } else {
             alert("Can't remove this search parameter");
@@ -37,7 +38,6 @@ function changeType(select){
 
     removeSVG();
     removeParameters();
-    //loadFieldCollapseFields(type);
     loadViewTypes(type);
     changeScripts();
     search();
@@ -63,25 +63,81 @@ function removeSVG(){
 }
 
 function addParameter(){
-    var param = $('<div class="param"><select class="paramField" onchange="loadResultCount()"><input class="paramQuery" type="text" onchange="loadResultCount()" onkeydown="loadResultCount()" onpaste="loadResultCount()" oninput="loadResultCount()" /><select class="paramOperator" onchange="loadResultCount()"><option value="must">Must match</option><option value="must_not">Must not match</option></select><input type="button" class="addParam" value="+" onclick="addParameter()" /><input type="button" class="removeParam" value="x"/></div>');
+    var param = $('<div class="param"></div>');
+    var paramField = $('<select class="paramField" onchange="loadResultCount();changeParamType($(this).parent());"></select>');
+   
+    //If you change this also change it in changeParamType()
+    var paramQuery = $('<input class="paramQuery" type="text" placeholder="Query" onchange="loadResultCount()" onkeydown="loadResultCount()" onpaste="loadResultCount()" oninput="loadResultCount()" />');
+    
+    var paramOperator = $('<select class="paramOperator" onchange="loadResultCount()"><option value="must">Must match</option><option value="must_not">Must not match</option></select>');
+    var paramAdd = $('<input type="button" class="addParam" value="+" onclick="addParameter()" />');
+    var paramRemove = $('<input type="button" class="removeParam" value="x"/>');
+
+    param.append(paramField);
+    param.append(paramOperator);
+    param.append(paramQuery);
+    param.append(paramAdd);
+    param.append(paramRemove);
+
     param.appendTo("#parameters").hide().slideDown('fast');
     loadMimetypeAttributes(type, param.find("select.paramField"));
+    changeParamType(param);
 }
 
+//This function decides wether a parameter should be a normal query or a date input and changes it if necessary
+function changeParamType(element){
+    var type = element.find('.paramField').find(":selected").data('type');
+
+    if(type == 'date'){
+        //Remove the query field and add the date fields
+        if(element.find('.paramQuery').length != 0){
+            var queryField = element.find('.paramQuery');
+            queryField.hide().fadeOut("slow", function(){
+                $(this).remove();
+            });
+            var paramStartDate = $('<input class="paramStartDate paramDateField" type="text" placeholder="Start date" onchange="loadResultCount()" onkeydown="loadResultCount()" onpaste="loadResultCount()" oninput="loadResultCount()" />').datepicker({ dateFormat: 'dd-M-yy', changeYear : true , changeMonth : true, yearRange : "-50:+1"});
+            var paramEndDate = $('<input class="paramEndDate paramDateField" type="text" placeholder="End date" onchange="loadResultCount()" onkeydown="loadResultCount()" onpaste="loadResultCount()" oninput="loadResultCount()" />').datepicker({ dateFormat: 'dd-M-yy', changeYear : true , changeMonth : true, yearRange : "-50:+1"});
+            paramStartDate.insertAfter(element.find('.paramOperator'));
+            paramStartDate.hide().fadeIn("slow");
+            paramEndDate.insertAfter(element.find('.paramStartDate'));
+            paramEndDate.hide().fadeIn("slow");
+        }
+    } else {
+        if(element.find('.paramStartDate').length != 0 && element.find('.paramEndDate').length != 0){
+            var startDateField = element.find('.paramStartDate');
+            var endDateField = element.find('.paramEndDate');
+            startDateField.hide().fadeOut("slow", function(){
+                $(this).remove();
+            });
+            endDateField.hide().fadeOut("slow", function(){
+                $(this).remove();
+            });
+
+            var paramQuery = $('<input class="paramQuery" type="text" placeholder="Query" onchange="loadResultCount()" onkeydown="loadResultCount()" onpaste="loadResultCount()" oninput="loadResultCount()" />');
+            paramQuery.insertAfter(element.find('.paramOperator'));
+            paramQuery.hide().fadeIn("slow");
+        }
+    }
+}
+
+//Remove all search parameters
 function removeParameters(){
     $('#parameters').empty();
     addParameter(); //There must always be at least one param
+    loadResultCount();
 }
 
+//Load the fields per mapping
 function loadMimetypeAttributes(type, element){
     $.get("api/mapping_info?type=" + type, function(data){
         element.find('option').remove().end();
-        $(data).each(function(i, v){ 
-            element.append($("<option>", { value: v, html: v }));
+        Object.keys(data).forEach(function(key){
+            element.append($("<option>", { value: key, text: key, data : { 'type' : data[key].type}}));
         });
     });
 }
 
+//Load the available view types (visualizations) per mapping
 function loadViewTypes(type){
     var select = $('#view_type')
     $.get("api/view_info?type=" + type, function(data){
@@ -123,19 +179,32 @@ function search(){
     var api_params = {
         'type' : type,
         'view' : view,
-        'must' : [],
-        'must_not' : [],
-        'should' : []
+        'parameters' : {
+            'must' : [],
+            'must_not' : []
+        },
+        'filters' : {
+            'must' : [],
+            'must_not' : []
+        }
     };
-    var params = [];
 
-    var parameters = $(".param").each(function(index){
+    $(".param").each(function(index){
         var field = $(this).find("select.paramField").val();
-        var query = $(this).find('input.paramQuery').val()
         var operator = $(this).find("select.paramOperator").val();
-        api_params[operator].push({'field' : field, 'query' : query});
+
+        //Check wether it's a query or date param
+        if($(this).find('input.paramStartDate').length != 0 && $(this).find('input.paramEndDate').length != 0){
+            var startDate = new Date($(this).find('input.paramStartDate').val());
+            var endDate = new Date($(this).find('input.paramEndDate').val());
+            api_params.filters[operator].push({'field' : field, 'start_date' : startDate.getTime(), 'end_date' :  endDate.getTime()});
+        } else if($(this).find('input.paramQuery').length != 0){
+            var query = $(this).find('input.paramQuery').val();
+            api_params.parameters[operator].push({'field' : field, 'query' : query});
+        }
     });
 
+    loadResultCount();
     api_call += $.param(api_params);
     render(api_call);
 }
@@ -146,21 +215,43 @@ function loadResultCount(){
     var api_params = {
         'type' : type,
         'view' : view,
-        'must' : [],
-        'must_not' : [],
-        'should' : []
+        'parameters' : {
+            'must' : [],
+            'must_not' : []
+        },
+        'filters' : {
+            'must' : [],
+            'must_not' : []
+        }
     };
-    var params = [];
 
-    var parameters = $(".param").each(function(index){
+    $(".param").each(function(index){
         var field = $(this).find("select.paramField").val();
-        var query = $(this).find('input.paramQuery').val()
         var operator = $(this).find("select.paramOperator").val();
-        api_params[operator].push({'field' : field, 'query' : query});
+
+        //Check wether it's a query or date param
+        if($(this).find('input.paramStartDate').length != 0 && $(this).find('input.paramEndDate').length != 0){
+            var startDate = new Date($(this).find('input.paramStartDate').val());
+            var endDate = new Date($(this).find('input.paramEndDate').val());
+            api_params.filters[operator].push({'field' : field, 'start_date' : startDate.getTime(), 'end_date' :  endDate.getTime()});
+        } else if($(this).find('input.paramQuery').length != 0){
+            var query = $(this).find('input.paramQuery').val();
+            api_params.parameters[operator].push({'field' : field, 'query' : query});
+        }
     });
 
     api_call += $.param(api_params);
     $.get(api_call, function(data){
         $("#query_matches_count").text(data.count);
+
+        if(data.count <= 100){
+            $(".matchesBox").css('box-shadow', '0px 0px 10px green');
+        } else if(data.count > 100 && data.count <= 200){
+            $(".matchesBox").css('box-shadow', '0px 0px 10px orange');
+        } else if (data.count > 200) {
+            $(".matchesBox").css('box-shadow', '0px 0px 10px red');
+        } else {
+            $(".matchesBox").css('box-shadow', '');
+        }
     });
 }

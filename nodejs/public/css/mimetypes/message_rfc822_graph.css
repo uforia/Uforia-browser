@@ -12,15 +12,15 @@
   pointer-events: none;
 }
 
-.node circle{
+#d3_visualization .node circle{
 }
 
-text {
+#d3_visualization text {
   pointer-events: none;
   font: 10px sans-serif;
 }
 
-.link {
+#d3_visualization .link {
   stroke: #999;
   stroke-opacity: .6;
   stroke-width: 1.5px;

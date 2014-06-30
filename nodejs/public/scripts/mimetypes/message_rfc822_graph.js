@@ -14,9 +14,10 @@ function render(api_call){
       .linkDistance(100)
       .size([width, height]);
 
+  var drag = force.drag().on("dragstart", function(d){ d3.select(this).classed("fixed", d.fixed = true)});
+
   //Add button to the layout
-  var div = d3.select("#d3_visualization").append("div")
-            .attr("id", "d3_button_bar");
+  var div = d3.select("#d3_visualization").append("div").attr("id", "d3_button_bar");
 
   $("#d3_button_bar").append("<input type='button' value='Normal radius' onclick='normalRadius();' />");
   $("#d3_button_bar").append("<input type='button' value='Radius by Sent' onclick='sentRadius();' />");
@@ -28,9 +29,10 @@ function render(api_call){
       .attr("height", height);
 
   d3.json(api_call, function(error, graph) {
-    
-  console.log(JSON.stringify(graph));
-  if (error) {
+
+    console.log(JSON.stringify(graph));
+
+    if (error) {
       showMessage("An error occurred, please try another query");
       stopSpinner();
       return console.error(error);
@@ -73,7 +75,11 @@ function render(api_call){
         .data(force.links())
       .enter().append("path")
         .attr("class", "link")
-        .attr("marker-end", "url(#marker)");
+        .attr("marker-end", "url(#marker)")
+        .on("click", mouseclickLink);
+
+    var clickedOnce = false;
+    var timer;
 
     var node = svg.selectAll(".node")
         .data(graph.nodes)
@@ -82,7 +88,8 @@ function render(api_call){
         .attr("r", "15")
         .on("mouseover", mouseover)
         .on("mouseout", mouseout)
-        .call(force.drag);
+        .on("click", mouseclick)
+        .call(drag);
 
     circle = node.append("circle")
         .attr("r", 8)
@@ -151,6 +158,25 @@ function render(api_call){
             .duration(750)
             .attr("r", 8);
       }
+    }
+
+    //click on a node
+    function mouseclick(d){
+      clickedOnce = false;
+      if (d3.event.defaultPrevented) return; //prevent a click event when a node is dragged
+      var url = 'file_details?type=message_rfc822&hashids=' + d.hashids.toString() + '&address1=' + d.name;
+      window.open(url, d.hashids.toString(),'height=768, width=1100, left=100, top=100, resizable=yes, scrollbars=yes, toolbar=no, menubar=no, location=no, directories=no, status=no, location=no');
+    }
+
+    //For clicks on a link
+    function mouseclickLink(d){
+      var url = 'file_details?type=message_rfc822&hashids=' + d.hashids.toString() + '&address1=' + d.name + "&address2=";
+      window.open(url, d.hashids.toString(),'height=768, width=1100, left=100, top=100, resizable=yes, scrollbars=yes, toolbar=no, menubar=no, location=no, directories=no, status=no, location=no');
+    }
+
+    function dblclick(d) {
+      clickedOnce = false;
+      d3.select(this).classed("fixed", d.fixed = false);
     }
   });
 }

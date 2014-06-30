@@ -64,7 +64,8 @@ function render(api_call){
       .enter().append("g")
         .attr("class", "group")
         .on("mouseout", mouseout)
-        .on("mouseover", mouseover);
+        .on("mouseover", mouseover)
+        .on("click", groupClick);
 
     var groupPath = g.append("path")
         .attr("id", function(d, i) { return "group" + i; })
@@ -134,13 +135,18 @@ function render(api_call){
     function mouseclick(d){
       // var params = $.param({ type :  'message_rfc822', hashids : imports.hashids[d.source.index][d.target.index]})
       var url = 'file_details?type=message_rfc822&hashids=' + imports.hashids[d.source.index][d.target.index].toString() + '&address1=' + nameByIndex.get(d.source.index) + '&address2=' + nameByIndex.get(d.target.index);
-      window.open(url, imports.hashids[d.source.index][d.target.index].toString(),'height=768, width=1000, left=100, top=100, resizable=yes, scrollbars=yes, toolbar=no, menubar=no, location=no, directories=no, status=no, location=no');
+      window.open(url, imports.hashids[d.source.index][d.target.index].toString(),'height=768, width=1100, left=100, top=100, resizable=yes, scrollbars=yes, toolbar=no, menubar=no, location=no, directories=no, status=no, location=no');
     }
 
     function groupTip(d){
       return nameByIndex.get(d.index) + "<br/>"
              + "Sent " + imports.names[d.index].sent + " out of " + total + " emails" + "<br />"
              + "Received " + imports.names[d.index].received + " emails";
+    }
+
+    function groupClick(d){
+      var url = 'file_details?type=message_rfc822&hashids=' + imports.names[d.index].hashids.toString() + '&address1=' + imports.names[d.index].name;
+      window.open(url, imports.names[d.index].hashids.toString(),'height=768, width=1100, left=100, top=100, resizable=yes, scrollbars=yes, toolbar=no, menubar=no, location=no, directories=no, status=no, location=no');
     }
 
     function chordTip(d){

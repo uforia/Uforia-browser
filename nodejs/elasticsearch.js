@@ -16,16 +16,11 @@ var message_rfc822 = require('./mimetype_modules/message_rfc822');
 
 //Connect to the Database
 var mysql = require('mysql');
-var db = mysql.createConnection({
+var pool = mysql.createPool({
     host : 'localhost',
-    user : '',
-    password : '',
+    user : 'uforia',
+    password : 'uforia',
     database : 'uforia'
-});
-db.connect(function(err){
-    if(err){
-        console.log("Error connecting to database: " + err.stack());
-    }
 });
 
 
@@ -36,7 +31,7 @@ var DEFAULT_VIEW = 'bubble';
 var DEFAULT_SIZE = 10;
 var VIEWS = {
     files : {bubble : 'Bubble'},
-    message_rfc822 : {chord : 'Chord diagram', graph :'Graph'}
+    message_rfc822 : {chord : 'Chord diagram', graph :'Graph', bar_chart : 'Bar Chart'}
 };
 
 
@@ -54,81 +49,87 @@ app.get('/', function(req, res){
   res.render('index.html');
 });
 
-//Api calls
-app.get('/api/get_files', function(req, res){
-  client.search({
-    index : 'uforia',
-    type : 'files',
-    size : 100
-  }).then(function(resp){
-    res.send(files.groupByUser(resp.hits.hits));
-  }, function(err){
-    console.trace(err.message);
-  });
-});
+/* Renders a detail page where more details of a file can be shown
+* takes params:
+* type
+* hashid
+*/
+app.get('/file_details', function(req, res){
+  var type = util.defaultFor(req.param('type'), DEFAULT_TYPE);
+  var hashids = util.defaultFor(req.param('hashids'), []);
+
+  switch(type){
+    case 'message_rfc822':
+      res.render('email_details.html');
+      break;
+    default:
+      res.render('index.html', {title : hashids});
+      break; 
+  }
+})
 
 /* Query elasticsearch
 * takes params:
 * q
 * type
-* size
+* parameters
+*   must(objects with field and a query)
+*   must_not(objects with field and a query)
+* filters 
+*   must(objects with a field, stard_date and end_date)
+*   must_not(objects with a field, stard_date and end_date) 
 * view
 * 
 */
-// app.get("/api/search", function(req, res) {
-//   var search_request = {};
-//   search_request['index'] = INDEX;
-//   search_request['type'] = util.defaultFor(req.param('type'), DEFAULT_TYPE);
-//   search_request['size'] = util.defaultFor(req.param('size'), DEFAULT_SIZE);
-//   search_request['q'] = util.defaultFor(req.param('q'), "*:*");
-//   var view = util.defaultFor(req.param('view'), DEFAULT_VIEW);
-
-//   if(search_request['size'] === 'all'){
-//     client.count({
-//       index : INDEX,
-//       type : search_request.type
-//     }).then(function(resp){
-//       //Search
-//       search_request.size = resp.count;
-//       search(search_request, res, view);
-//     }, function(err){
-//       console.trace(err.message);
-//       search_request.size = DEFAULT_SIZE;
-//       search(search_request, res, view);
-//     });
-//   }  else {
-//     search(search_request, res, view);
-//   }
-// });
-
 app.get("/api/search", function(req, res) {
   var search_request = {};
-  var query_skeleton = { query : { bool : { must : [], must_not : [], should : [] } }};
+  // var query_skeleton = { query : { bool : { must : [], must_not : [], should : [] } }};
+  var query_skeleton = { "query": { "filtered": { "query": { "bool": { "must": [], "must_not": [] } }, "filter": { "bool": { "must": [], "must_not": [] } } } } };
   var view = util.defaultFor(req.param('view'), DEFAULT_VIEW);
 
   search_request['index'] = INDEX;
   search_request['type'] = util.defaultFor(req.param('type'), DEFAULT_TYPE);
-  var must_query = util.defaultFor(req.param('must'), []);
-  var must_not_query = util.defaultFor(req.param('must_not'), []);
-  var should_query = util.defaultFor(req.param('should'), []);
+  var parameters = util.defaultFor(req.param('parameters'), {});
+  var filters = util.defaultFor(req.param('filters'), {});
 
-  must_query.forEach(function(param){
-    var query = {};
-    util.createNestedObject(query, ['fuzzy_like_this_field', param.field, 'like_text'], param.query);
-    query_skeleton.query.bool.must.push(query);
-  });
+  if(parameters.must){
+    parameters.must.forEach(function(param){
+      var query = {};
+      util.createNestedObject(query, ['wildcard', param.field], param.query);
+      query_skeleton.query.filtered.query.bool.must.push(query);
+    });
+  }
 
-  must_not_query.forEach(function(param){
-    var query = {};
-    util.createNestedObject(query, ['fuzzy_like_this_field', param.field, 'like_text'], param.query);
-    query_skeleton.query.bool.must_not.push(query);
-  });
+  if(parameters.must_not){
+    parameters.must_not.forEach(function(param){
+      var query = {};
+      util.createNestedObject(query, ['wildcard', param.field], param.query);
+      query_skeleton.query.filtered.query.bool.must_not.push(query);
+    }); 
+  }
 
-  should_query.forEach(function(param){
-    var query = {};
-    util.createNestedObject(query, ['fuzzy_like_this_field', param.field, 'like_text'], param.query);
-    query_skeleton.query.bool.should.push(query);
-  });
+  if(filters.must){
+    filters.must.forEach(function(filter){
+      var query = {};
+      var startDate = new Date(+filter.start_date);
+      var endDate = new Date(+filter.end_date);
+      util.createNestedObject(query, ['range', filter.field, 'gte'], startDate.toISOString());
+      query.range[filter.field].lte = endDate.toISOString();
+      query_skeleton.query.filtered.filter.bool.must.push(query);
+    }); 
+  }
+
+  if(filters.must_not){
+    filters.must_not.forEach(function(filter){
+      var query = {};
+      var startDate = new Date(+filter.start_date);
+      var endDate = new Date(+filter.end_date);
+      util.createNestedObject(query, ['range', filter.field, 'gte'], startDate.toISOString());
+      query.range[filter.field].lte = endDate.toISOString();
+      query_skeleton.query.filtered.filter.bool.must_not.push(query);
+    }); 
+  }
+
   search_request['body'] = query_skeleton;
 
   client.count(search_request).then(function(resp){
@@ -151,31 +152,51 @@ app.get("/api/search", function(req, res) {
 */
 app.get("/api/count", function(req, res){
   var search_request = {};
-  var query_skeleton = { query : { bool : { must : [], must_not : [], should : [] } }};
+  var query_skeleton = { "query": { "filtered": { "query": { "bool": { "must": [], "must_not": [] } }, "filter": { "bool": { "must": [], "must_not": [] } } } } };
 
   search_request['index'] = INDEX;
   search_request['type'] = util.defaultFor(req.param('type'), DEFAULT_TYPE);
-  var must_query = util.defaultFor(req.param('must'), []);
-  var must_not_query = util.defaultFor(req.param('must_not'), []);
-  var should_query = util.defaultFor(req.param('should'), []);
+  var parameters = util.defaultFor(req.param('parameters'), {});
+  var filters = util.defaultFor(req.param('filters'), {});
 
-  must_query.forEach(function(param){
-    var query = {};
-    util.createNestedObject(query, ['fuzzy_like_this_field', param.field, 'like_text'], param.query);
-    query_skeleton.query.bool.must.push(query);
-  });
+  if(parameters.must){
+    parameters.must.forEach(function(param){
+      var query = {};
+      util.createNestedObject(query, ['wildcard', param.field], param.query);
+      query_skeleton.query.filtered.query.bool.must.push(query);
+    });
+  }
 
-  must_not_query.forEach(function(param){
-    var query = {};
-    util.createNestedObject(query, ['fuzzy_like_this_field', param.field, 'like_text'], param.query);
-    query_skeleton.query.bool.must_not.push(query);
-  });
+  if(parameters.must_not){
+    parameters.must_not.forEach(function(param){
+      var query = {};
+      util.createNestedObject(query, ['wildcard', param.field], param.query);
+      query_skeleton.query.filtered.query.bool.must_not.push(query);
+    }); 
+  }
 
-  should_query.forEach(function(param){
-    var query = {};
-    util.createNestedObject(query, ['fuzzy_like_this_field', param.field, 'like_text'], param.query);
-    query_skeleton.query.bool.should.push(query);
-  });
+  if(filters.must){
+    filters.must.forEach(function(filter){
+      var query = {};
+      var startDate = new Date(+filter.start_date);
+      var endDate = new Date(+filter.end_date);
+      util.createNestedObject(query, ['range', filter.field, 'gte'], startDate.toISOString());
+      query.range[filter.field].lte = endDate.toISOString();
+      query_skeleton.query.filtered.filter.bool.must.push(query);
+    }); 
+  }
+
+  if(filters.must_not){
+    filters.must_not.forEach(function(filter){
+      var query = {};
+      var startDate = new Date(+filter.start_date);
+      var endDate = new Date(+filter.end_date);
+      util.createNestedObject(query, ['range', filter.field, 'gte'], startDate.toISOString());
+      query.range[filter.field].lte = endDate.toISOString();
+      query_skeleton.query.filtered.filter.bool.must_not.push(query);
+    }); 
+  }
+
   search_request['body'] = query_skeleton;
   
   client.count(search_request).then(function(resp){
@@ -204,9 +225,9 @@ app.get("/api/mapping_info", function(req, res){
     type : type
   }).then(function(resp){
     try{
-      res.send(Object.keys(resp[INDEX].mappings[type].properties)); 
+      res.send(resp[INDEX].mappings[type].properties); 
     } catch(err){
-      res.send(["Could not load fields for this mapping"])
+      res.send();
     }
   }, function(err){
     console.log(err.message);
@@ -228,45 +249,39 @@ app.get("/api/view_info", function(req, res){
 * type
 * hashids
 */
-
-/* Renders a detail page where more details of a file can be shown
-* takes params:
-* type
-*/
-app.get('/file_details', function(req, res){
-  var type = util.defaultFor(req.param('type'), DEFAULT_TYPE);
-  var hashids = util.defaultFor(req.param('hashids'), []);
-
-  switch(type){
-    case 'message_rfc822':
-      res.render('email_details.html');
-      break;
-    default:
-      res.render('index.html', {title : hashids});
-      break; 
-  }
-})
-
 app.get("/api/get_file_details", function(req, res){
   var type = util.defaultFor(req.param('type'), DEFAULT_TYPE);
   var hashids = util.defaultFor(req.param('hashids'), []);
   var tableName = '63c5e0bd853105c84a2184539eb245'; //temp for demonstration
 
+  //Remove duplicates from the hashids
+  hashids = hashids.filter (function (v, i, a) { return a.indexOf (v) == i });
+
   //Escape the values for safety
   hashids.forEach(function(hashid, index){
-    hashids[index] = db.escape(hashid);
+    hashids[index] = pool.escape(hashid);
   });
 
-  var query = "SELECT * FROM ?? WHERE hashid IN (" + hashids.toString() + ")";
-
-  db.query(query,[tableName], function(err, results){
-      if(err){
+  pool.getConnection(function(err, connection){
+    if(err){
+      console.log("Coulnd't establish db connection: " + err.stack());
+      res.send();
+      return;
+    } else {
+      //Create the query and execute it
+      var query = "SELECT * FROM ?? WHERE hashid IN (" + hashids.toString() + ")";
+      connection.query(query, [tableName], function(err, results){
+        if(err){
           console.log("Can't execute query: " + err.stack());
-          return;
-      }
-      res.send(results);
+          res.send();
+        } else {
+          res.send(results);
+        }
+        connection.release(); //back to the conn pool
+      });
+    }
   });
-});
+});  
 
 //Search and return the result
 var search = function(search_request, res, view){
@@ -292,6 +307,12 @@ var search = function(search_request, res, view){
                 }catch(err){
                     res.send();
                 }
+            } else if(view == 'bar_chart'){
+                try {
+                    res.send(message_rfc822.createBarChart(resp.hits.hits));
+                } catch(err){
+                    res.send();
+                }
             }
             break;
         default: // default is files
@@ -309,15 +330,9 @@ var server = app.listen(8888, function(){
   console.log('Listening on port %d', server.address().port);
 });
 
-// process.on('SIGINT', function() {
-//     console.log("Shutting down");
-//     db.destroy();
-//     server.close();
-// });
-
 //Gracefully shutdown the server
 process.on('SIGTERM', function () {
   console.log("Shutting down");
-  db.destroy();
+  pool.destroy();
   server.close();
 });

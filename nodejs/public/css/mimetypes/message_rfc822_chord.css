@@ -1,4 +1,4 @@
-body {
+#d3_visualization {
   font: 10px sans-serif;
 }
 
@@ -16,16 +16,16 @@ body {
   pointer-events: none;
 }
 
-#circle circle {
+#d3_visualization #circle circle {
   fill: none;
   pointer-events: all;
 }
 
-.chord {
+#d3_visualization .chord {
   fill-opacity: .67;
   fill: none;
 }
 
-#circle:hover .chord--fade {
+#d3_visualization #circle:hover .chord--fade {
 	display: none;
 }
