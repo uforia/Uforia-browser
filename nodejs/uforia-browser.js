@@ -2,9 +2,9 @@
 ELASTIC_SEARCH_HOST = "localhost";
 ELASTIC_SEARCH_PORT = "9200";
 DATABASE_HOST = "localhost";
-DATABASE_USER = "uforia";
-DATABASE_PASSWORD = "uforia";
-DATABASE_NAME = "uforia";
+DATABASE_USER = "";
+DATABASE_PASSWORD = "";
+DATABASE_NAME = "";
 SERVER_PORT = "8888";
 
 // Set up express
