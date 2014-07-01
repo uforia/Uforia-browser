@@ -1,3 +1,12 @@
+//Config
+ELASTIC_SEARCH_HOST = "localhost";
+ELASTIC_SEARCH_PORT = "9200";
+DATABASE_HOST = "localhost";
+DATABASE_USER = "uforia";
+DATABASE_PASSWORD = "uforia";
+DATABASE_NAME = "uforia";
+SERVER_PORT = "8888";
+
 // Set up express
 var express = require("express");
 var app = express();
@@ -5,7 +14,7 @@ var app = express();
 //Set up elasticsearch
 var elasticsearch = require('elasticsearch');
 var client = new elasticsearch.Client({
-  host: 'localhost:9200'
+  host: ELASTIC_SEARCH_HOST + ":" + ELASTIC_SEARCH_PORT
   // log: 'trace'
 });
 
@@ -17,10 +26,10 @@ var message_rfc822 = require('./mimetype_modules/message_rfc822');
 //Connect to the Database
 var mysql = require('mysql');
 var pool = mysql.createPool({
-    host : 'localhost',
-    user : 'uforia',
-    password : '',
-    database : ''
+    host : DATABASE_HOST,
+    user : DATABASE_USER,
+    password : DATABASE_PASSWORD,
+    database : DATABASE_NAME
 });
 
 
@@ -29,13 +38,14 @@ var INDEX = 'uforia';
 var DEFAULT_TYPE = 'files';
 var DEFAULT_VIEW = 'bubble';
 var DEFAULT_SIZE = 10;
+var TYPES = {
+    message_rfc822: 'Email (message_rfc822)',
+    files: 'Files'
+};
 var VIEWS = {
     files : {bubble : 'Bubble'},
     message_rfc822 : {chord : 'Chord diagram', graph :'Graph', bar_chart : 'Bar Chart'}
 };
-
-
-
 
 //Set the view directory and HTML render engine
 app.set('views', __dirname + '/public/views');
@@ -70,7 +80,6 @@ app.get('/file_details', function(req, res){
 
 /* Query elasticsearch
 * takes params:
-* q
 * type
 * parameters
 *   must(objects with field and a query)
@@ -147,8 +156,17 @@ app.get("/api/search", function(req, res) {
 });
 
 /* Returns the number or results a query will return
-*
-*
+* takes params:
+* q
+* type
+* parameters
+*   must(objects with field and a query)
+*   must_not(objects with field and a query)
+* filters 
+*   must(objects with a field, stard_date and end_date)
+*   must_not(objects with a field, stard_date and end_date) 
+* view
+* 
 */
 app.get("/api/count", function(req, res){
   var search_request = {};
@@ -212,6 +230,13 @@ app.get("/api/count", function(req, res){
   });
 });
 
+/*Returns the availabe types and their pretty names
+* takes params:
+* none
+*/
+app.get("/api/get_types", function(req, res){
+  res.send(TYPES);
+});
 
 /*Return the fields each item in a mapping has
 * takes params:
@@ -247,6 +272,7 @@ app.get("/api/view_info", function(req, res){
 /* Queries database and return the info it has about a file
 * takes params:
 * type
+* tablenames
 * hashids
 */
 app.get("/api/get_file_details", function(req, res){
@@ -326,7 +352,7 @@ var search = function(search_request, res, view){
 };
 
 //Start the server
-var server = app.listen(8888, function(){
+var server = app.listen(SERVER_PORT, function(){
   console.log('Listening on port %d', server.address().port);
 });
 

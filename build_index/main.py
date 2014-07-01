@@ -4,12 +4,16 @@
 
 import os, sys, imp, inspect
 import json
-from ast import literal_eval
 import itertools
+import ConfigParser
+from ast import literal_eval
+
+#custom files
+import es_coretypes
 
 # add pyes from the libraries subfolder
 # this will also force python to use the included module instead of the ones installed on the system
-pyes_libfolder =  os.path.realpath(os.path.abspath(os.path.join(os.path.split(inspect.getfile( inspect.currentframe() ))[0],"./libraries/pyes/src")))
+pyes_libfolder =  os.path.realpath(os.path.abspath(os.path.join(os.path.split(inspect.getfile( inspect.currentframe() ))[0],"./libraries/pyes")))
 if pyes_libfolder not in sys.path:
     sys.path.insert(0, pyes_libfolder)
 
@@ -23,13 +27,6 @@ try:
     config = imp.load_source('config', 'include/config.py')
 except:
     print("< WARNING! > Config file not found in include / or not configured correctly, loading default config.")
-
-mapconfig = ConfigParser.SafeConfigParser()
-mapconfig.read('include/default_mapping_config.cfg')
-try:
-    mapconfig.read('include/mapping_config.cfg')
-except:
-    print("< WARNING! > MAPPING Config file not found in include / or not configured correctly, loading default config.")
 
 database = imp.load_source(config.DBTYPE, config.DATABASEDIR + config.DBTYPE + ".py")
 db = database.Database(config)
@@ -108,42 +105,32 @@ def generate_table_list():
     for line in alldata:
         mimetype = line[0]
         tables_dict = literal_eval(line[1])
-        #print tables_dict.keys()
+       #print tables_dict.keys()
 
         for k in sorted(tables_dict.keys()):
             #print _mime 
             #print tables_dict[k]
             create_mapping( mime = mimetype, tablename = tables_dict[k] )
 
-def coreType(value=None):
+def find_mime_table(configmime=None, fields=None):
+    if not configmime:
+        raise Exception("fine_mime_table has no configmime to query the database for.")
+
+    mimedata = db.like_mime(_table="supported_mimetypes", _mime=configmime)
+
+    for line in mimedata:
+        mimetype = line[0]
+        tables_dict = literal_eval(line[1])
+
+        for k in sorted(tables_dict.keys()):
+            create_mapping( mime = mimetype, tablename = tables_dict[k], mappinglist = fields )
+
+def create_mapping(mime=None, tablename=None, mappinglist=None):
     """
     
-    elasticsearch has the following coretypes:
-    string, integer/long, float/double, boolean, and null
+    create_mapping will create a mapping for the desired index.
+    if mappinglist is empty it will assume all fields need to be mapped.
 
-    python floats are almost always c doubles, so there is no check for double.
-    we default to string for convenience sake.
-    
-    """
-
-    if isinstance(value, int):
-        return str("integer")
-    elif isinstance(value, long):
-        return str("long")
-    elif isinstance(value, str):
-        return str("string")
-    elif isinstance(value, float):
-        return str("float")
-    elif isinstance(value, bool):
-        return str("boolean")
-    else:
-        return str("string")
-
-
-def create_mapping(mime=None, tablename=None):
-    """
-    
-    create_mapping will do as the name suggests for the uforia index.
     A mapping is in the URL after the index, for example:
 
     http://localhost:9200/uforia/image_jpeg
@@ -156,10 +143,10 @@ def create_mapping(mime=None, tablename=None):
     elif not tablename:
         raise Exception("create_mapping called without a table")
     else:
-        conn = ES('127.0.0.1:9200') # Use HTTP
+        conn = ES(config.ESSERVER)
+        print("Retrieving table from database (this could take a little while).")
         tableData = db.read_table(_table=tablename, columnsonly=False, onerow=True)
         columnNames = db.read_table(_table=tablename)
-
         mapping = {}
 
         if not tableData:
@@ -167,6 +154,9 @@ def create_mapping(mime=None, tablename=None):
             return
 
         for _data, _name in itertools.izip(tableData, columnNames):
+            if( (mappinglist) and (_name in list(mappinglist)) ): 
+                print "skipping field %s" % (_name)
+                continue
             jsonName = json.dumps(_name)
             submap = { "type" :  coreType(_data),
                 "store" : "no",
@@ -174,11 +164,11 @@ def create_mapping(mime=None, tablename=None):
             }
             mapping[jsonName[1:-1]] = submap
 
-        #print mapping
-        #print mime
         newmime = mime.replace("/","_")
-        print("")newmime
-        conn.indices.put_mapping(str(newmime), {'properties':mapping}, ["uforia"])
+        print("Creating mapping: %s" % newmime)
+        print mapping
+        #conn.indices.put_mapping(str(newmime), {'properties':mapping}, ["uforia"])
+
 
 def fill_mapping(mime=None, tablename=None):
     if not mime:
@@ -189,10 +179,85 @@ def fill_mapping(mime=None, tablename=None):
         #conn = ES('127.0.0.1:9200') # Use HTTP
         tableData = db.read_table(_table=tablename, columnsonly=False)
         columnNames = db.read_table(_table=tablename)
-       #columnNames = json.dumps(c)
+        #columnNames = json.dumps(c)
 
+def del_index():
+    """
+    Erases the entire index set in the configuration file.
+    """
+    conn = ES(config.ESSERVER)
+    try:
+        conn.indices.delete_index(config.ESINDEX)
+        print("Successfully deleted the ElasticSearch index: %s" % config.ESINDEX)
+    except:
+        print("Could not delete the index: %s" % config.ESINDEX)
+        raise
+
+def parse_mapping_config(mapfile=None):
+    """
+    parse_mapping_config will treat the mapfile var as a file when supplied.
+    If nothing is supplied it wil default to attempt to the file default_mapping_config.cfg
+
+    mapconfig is declared at the top and uses ConfigParser.SafeConfigParser()
+    """
+    mapconfig = ConfigParser.SafeConfigParser()
+
+    mapconfig.read('include/default_mapping_config.cfg')
+    try:
+        mapconfig.read(mapfile)
+    except:
+        print("< WARNING! > MAPPING Config file not supplied or not configured correctly, loading default config.")
+
+    # section titles are also the mimetype names
+    mimetypes = mapconfig.sections()
+
+    for mime in mimetypes:
+        if (mapconfig.has_option(mime, 'map')):
+            mapping_fields = mapconfig.get(mime, 'map')
+            if(mime is 'files'): 
+                continue
+            else:
+                find_mime_table(mime, mapping_fields)
+
+def generate_conf_file():
+    """
+    Uses the supported_mimetypes table to grab the mimetypes and their respective modules
+    it'll then make a list of fields per module and throw them into a dict
+    the dict will be written to file.
+
+    this same file can be used to create mappings
+
+    """
+    mapconfig = ConfigParser.SafeConfigParser()
+
+    print("Retrieving table supported_mimetypes from database.")
+
+    supmimetable = db.read_table(_table="supported_mimetypes", columnsonly=False)
+    for line in supmimetable:
+        mimetype = line[0]
+        tables_dict = literal_eval(line[1])
+
+        for k in sorted(tables_dict.keys()):
+            #print mimetype
+
+            mimetype = mimetype.replace("/","_")
+            if(not mapconfig.has_section(mimetype)):
+                mapconfig.add_section(mimetype)
+
+            modulecolumns = db.read_table(_table = tables_dict[k], columnsonly=True)
+            fields = []
+            for row in modulecolumns:
+                fields.append(row)
+            fields = json.dumps(fields, ensure_ascii=False)
+            mapconfig.set(mimetype, tables_dict[k], str(fields))
+            with open('test.cfg', 'wb') as configfile:
+                mapconfig.write(configfile)
+
+    print "Done. Config is written to file as test.cfg."
 
 if __name__ == "__main__":
     #read_data()
     #populate_files_mapping("a", "a")
-    generate_table_list()
+    #generate_table_list()
+    #parse_mapping_config()
+    generate_conf_file()

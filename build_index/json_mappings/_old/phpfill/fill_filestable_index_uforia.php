@@ -1,7 +1,7 @@
 ﻿<?php
 define ( 'MESSAGE_BATCH_PER_RUN', 100000 );
-define ( 'DB_USERNAME', 'uforia' );
-define ( 'DB_PASSWORD', 'uforia' );
+define ( 'DB_USERNAME', '' );
+define ( 'DB_PASSWORD', '' );
 define ( 'DB_HOST', 'localhost' );
 define ( 'DB_NAME', 'uforia' );
 

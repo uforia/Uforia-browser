@@ -48,7 +48,7 @@ function render(api_call){
         matrix = imports.matrix,
         n = 0;
 
-    // Compute a unique index for each package name.
+    // create a unique index for each package name.
     imports.names.forEach(function(d) {
       d = d.name;
       if (!indexByName.has(d)) {
@@ -59,6 +59,7 @@ function render(api_call){
 
     chord.matrix(matrix);
  
+ 	//Add the groups
     var g = svg.selectAll(".group")
         .data(chord.groups)
       .enter().append("g")
@@ -74,7 +75,7 @@ function render(api_call){
         .attr("d", arc);
 
 
-    //The commented code below will put the label in the arc instead of behind it
+    //The commented code below will put the labels in the arc instead of behind it
     // var groupText = g.append("text")
     //     .attr("x", 6)
     //     .attr("dy", 15);
@@ -87,6 +88,7 @@ function render(api_call){
     // groupText.filter(function(d, i) { return groupPath[0][i].getTotalLength() / 2 - 16 < this.getComputedTextLength(); })
     //     .remove();
 
+    //Add the labels on the side of the diagram
     g.append("text")
         .each(function(d) { d.angle = (d.startAngle + d.endAngle) / 2; })
         .attr("dy", ".35em")
@@ -98,6 +100,7 @@ function render(api_call){
         .style("text-anchor", function(d) { return d.angle > Math.PI ? "end" : null; })
         .text(function(d) { return nameByIndex.get(d.index); });
 
+    //Add the chords
     var chords = svg.selectAll(".chord")
         .data(chord.chords)
       .enter().append("path")
@@ -115,6 +118,7 @@ function render(api_call){
         .on("mouseout", mouseout)
         .on("click", mouseclick);
 
+    // Show the tooltip for a chord
     function mouseover(d, i) {
       d3.select("#tooltip")
         .style("visibility", "visible")
@@ -128,27 +132,31 @@ function render(api_call){
       });
     }
 
+    //Hide the tooltip
     function mouseout(d, i){
       d3.select("#tooltip").style("visibility", "hidden")
     }
 
+    // Click on a chord
     function mouseclick(d){
-      // var params = $.param({ type :  'message_rfc822', hashids : imports.hashids[d.source.index][d.target.index]})
       var url = 'file_details?type=message_rfc822&hashids=' + imports.hashids[d.source.index][d.target.index].toString() + '&address1=' + nameByIndex.get(d.source.index) + '&address2=' + nameByIndex.get(d.target.index);
       window.open(url, imports.hashids[d.source.index][d.target.index].toString(),'height=768, width=1100, left=100, top=100, resizable=yes, scrollbars=yes, toolbar=no, menubar=no, location=no, directories=no, status=no, location=no');
     }
 
+    //Show the tooltip for a chord group
     function groupTip(d){
       return nameByIndex.get(d.index) + "<br/>"
              + "Sent " + imports.names[d.index].sent + " out of " + total + " emails" + "<br />"
              + "Received " + imports.names[d.index].received + " emails";
     }
 
+    //Open a window on the click of a chord group
     function groupClick(d){
       var url = 'file_details?type=message_rfc822&hashids=' + imports.names[d.index].hashids.toString() + '&address1=' + imports.names[d.index].name;
       window.open(url, imports.names[d.index].hashids.toString(),'height=768, width=1100, left=100, top=100, resizable=yes, scrollbars=yes, toolbar=no, menubar=no, location=no, directories=no, status=no, location=no');
     }
 
+    //Show the tooltip for a chord on mouseover
     function chordTip(d){
       //Return the count of emails sent to one receipient out of a list of addresses
       var email = '';

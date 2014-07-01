@@ -29,23 +29,22 @@ function render(api_call){
       .attr("height", height);
 
   d3.json(api_call, function(error, graph) {
+  	//Stop the loading spinner
+    stopSpinner();
+
 
     console.log(JSON.stringify(graph));
 
     if (error) {
       showMessage("An error occurred, please try another query");
-      stopSpinner();
       return console.error(error);
     } 
 
     if(graph.total == 0){
       showMessage("No results for this query")
-      stopSpinner();
       return;
     }
 
-    //Stop the loading spinner
-    stopSpinner();
 
     var total = graph.total;
 
@@ -54,6 +53,7 @@ function render(api_call){
         .links(graph.links)
         .start();
 
+    //Creat the links between nodes
     link = svg.append("defs").selectAll("marker")
         .data(force.links())
       .enter().append("marker")
@@ -78,9 +78,7 @@ function render(api_call){
         .attr("marker-end", "url(#marker)")
         .on("click", mouseclickLink);
 
-    var clickedOnce = false;
-    var timer;
-
+    //Add the nodes
     var node = svg.selectAll(".node")
         .data(graph.nodes)
       .enter().append("g")
@@ -91,10 +89,12 @@ function render(api_call){
         .on("click", mouseclick)
         .call(drag);
 
+    //Give each node a circle
     circle = node.append("circle")
         .attr("r", 8)
         .style("fill", function(d) { return color(d.name); });
      
+    //Give each node a label
     node.append("text")
         .attr("x", 12)
         .attr("dy", ".35em")
@@ -132,7 +132,7 @@ function render(api_call){
       node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
     });
 
-
+	//Show the tooltip on a node mouseover
     function mouseover(d, i) {
       if(state == 0){
         d3.select(this).select("circle").transition()
@@ -150,6 +150,7 @@ function render(api_call){
 
     }
 
+    //Hide the tooltip and make the node smaller again
     function mouseout(d, i) {
       d3.select("#tooltip").style("visibility", "hidden");
 
@@ -162,7 +163,6 @@ function render(api_call){
 
     //click on a node
     function mouseclick(d){
-      clickedOnce = false;
       if (d3.event.defaultPrevented) return; //prevent a click event when a node is dragged
       var url = 'file_details?type=message_rfc822&hashids=' + d.hashids.toString() + '&address1=' + d.name;
       window.open(url, d.hashids.toString(),'height=768, width=1100, left=100, top=100, resizable=yes, scrollbars=yes, toolbar=no, menubar=no, location=no, directories=no, status=no, location=no');
@@ -174,13 +174,10 @@ function render(api_call){
       window.open(url, d.hashids.toString(),'height=768, width=1100, left=100, top=100, resizable=yes, scrollbars=yes, toolbar=no, menubar=no, location=no, directories=no, status=no, location=no');
     }
 
-    function dblclick(d) {
-      clickedOnce = false;
-      d3.select(this).classed("fixed", d.fixed = false);
-    }
   });
 }
 
+//Transition to the normal node size
 function normalRadius(){
   force.linkDistance(100)
     .start();
@@ -197,6 +194,7 @@ function normalRadius(){
   state = 0;
 }
 
+//Transition the node radius to display the largest receivers
 function receivedRadius(){
   force.linkDistance(200)
     .start();
@@ -231,6 +229,7 @@ function receivedRadius(){
   state = 2;
 }
 
+//Transition the node radius to display the largest senders
 function sentRadius(){
   force.linkDistance(200)
     .start();

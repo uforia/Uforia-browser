@@ -4,28 +4,35 @@ var util = require('./util');
 //These function will be public
 module.exports = {
 
+	//Produces data for the Chord Diagram
   createEmailChordDiagram: function(root){
     var data = {total : 0, names : [], matrix : [], hashids : []};
 
+
+    //Add all the emailaddresses to the names array
     root.forEach(function(child){
         data.total += 1;
+
+        //Get the email addresses
         var from = getFromEmail(child._source.From);
         var to = getToEmail(child._source.To + " " + child._source.XTo + " " + child._source.Xcc + " " + child._source.Xbcc + " " + child._source.Cc + " " + child._source.Bcc);
 
+        //Check if the from email already has an entry
         var fromIndex = util.arrayObjectIndexOf(data.names, from, "name");
-        if(fromIndex > -1){
+        if(fromIndex > -1){ //Update existing entry
             data.names[fromIndex].sent += 1;
             data.names[fromIndex].hashids.push(child._source.hashid);
-        } else {
+        } else { //No entry for this email yet
             data.names.push({name : from, sent: 1, received : 0, hashids : [child._source.hashid]});
         }
 
         to.forEach(function(receipient){
+        	//Check if this receipient alreayd has an entry
             var toIndex = util.arrayObjectIndexOf(data.names, receipient, "name");
-            if(toIndex > -1){
+            if(toIndex > -1){ //Receipient has entry
                 data.names[toIndex].received += 1;
                 data.names[toIndex].hashids.push(child._source.hashid);
-            } else {
+            } else { //New receipient
                 data.names.push({name : receipient, sent : 0, received : 1, hashids : [child._source.hashid]});
             } 
         });
@@ -42,6 +49,7 @@ module.exports = {
         }
     }
 
+    //Create the links between email addresses
     root.forEach(function(child){
         var from = getFromEmail(child._source.From);
         var to = getToEmail(child._source.To + " " + child._source.XTo + " " + child._source.Xcc + " " + child._source.Xbcc + " " + child._source.Cc + " " + child._source.Bcc);
@@ -50,8 +58,10 @@ module.exports = {
         to.forEach(function(receipient){
             var toIndex = util.arrayObjectIndexOf(data.names, receipient, "name")
             if(toIndex > -1){
+            	//Create the link between the from 'address' and this 'to' address
                 data.matrix[fromIndex][toIndex] += 1;
                 data.matrix[toIndex][fromIndex] += 1;
+                //Also store the hashids of the email
                 data.hashids[fromIndex][toIndex].push(child._source.hashid);
                 data.hashids[toIndex][fromIndex].push(child._source.hashid);
             }
@@ -82,6 +92,7 @@ module.exports = {
         var from = getFromEmail(child._source.From);
         var to = getToEmail(child._source.To + " " + child._source.Xto + " " + child._source.Xcc + " " + child._source.Xbcc + " " + child._source.Cc + " " + child._source.Bcc);
 
+        //Check if the from address already has an entry. If so update it, otherwise create it
         var fromIndex = util.arrayObjectIndexOf(data.nodes, from, "name"); 
         if(fromIndex > -1){
             data.nodes[fromIndex].sent += 1;
@@ -91,6 +102,7 @@ module.exports = {
         }
 
         to.forEach(function(receipient){
+        	//Check if the to address already has an entry. If so update it, otherwise create it
             var toIndex = util.arrayObjectIndexOf(data.nodes, receipient, "name");
             if(toIndex > -1){
                 data.nodes[toIndex].received += 1;
@@ -108,6 +120,7 @@ module.exports = {
 
         var index = util.arrayObjectIndexOf(data.nodes, from, "name");
 
+        //Create a link between the from address and all the receipients of the email
         to.forEach(function(receipient){
             var toIndex = util.arrayObjectIndexOf(data.nodes, receipient, "name");
             var link = {source : index, target : toIndex, value : 1, hashids : [child._source.hashid]};
@@ -154,6 +167,7 @@ module.exports = {
 };
 
 //Functions below are private
+
 function getFromEmail(input){
     input = input.toLowerCase();
     try {

@@ -3,7 +3,7 @@ var type = 'message_rfc822';
 var view = 'chord';
 
 function init(){
-    //loadMimetypeAttributes(type, '.parameter');
+    loadTypes();
     loadViewTypes(type);
     addParameter();
     showMessage("Enter a query");
@@ -36,6 +36,7 @@ function changeType(select){
             break;
     }
 
+    //Clear the visualization and search parameters
     removeSVG();
     removeParameters();
     loadViewTypes(type);
@@ -58,10 +59,10 @@ function changeScripts(){
 
 //clear the d3 svg from the page
 function removeSVG(){
-    //$('#d3_svg').remove();
     $('#d3_visualization').empty();
 }
 
+// Add a search parameter
 function addParameter(){
     var param = $('<div class="param"></div>');
     var paramField = $('<select class="paramField" onchange="loadResultCount();changeParamType($(this).parent());"></select>');
@@ -137,6 +138,18 @@ function loadMimetypeAttributes(type, element){
     });
 }
 
+function loadTypes(){
+    var select = $('#search_type');
+    $.get("api/get_types", function(data){
+        select.find('option').remove().end();
+        $.each(data, function(key, value) {   
+                select
+                    .append($('<option>', { value : key })
+                    .text(value)); 
+        });
+    });
+}
+
 //Load the available view types (visualizations) per mapping
 function loadViewTypes(type){
     var select = $('#view_type')
@@ -189,6 +202,7 @@ function search(){
         }
     };
 
+	//Get all the search parameters and add them to the query object.
     $(".param").each(function(index){
         var field = $(this).find("select.paramField").val();
         var operator = $(this).find("select.paramOperator").val();
@@ -225,6 +239,7 @@ function loadResultCount(){
         }
     };
 
+    //Get all the search parameters and add them to the query object.
     $(".param").each(function(index){
         var field = $(this).find("select.paramField").val();
         var operator = $(this).find("select.paramOperator").val();

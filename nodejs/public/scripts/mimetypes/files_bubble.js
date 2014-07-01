@@ -20,28 +20,24 @@ function render(api_call){
 
   //Call the api and handle the results
   d3.json(api_call, function(error, root) {
+  	//Stop the loading spinner
+  	stopSpinner();
+
     if (error) {
       showMessage("An error occurred, please try another query");
-      stopSpinner();
       return console.error(error);
     } 
 
     if(root.children.length == 0){
       showMessage("No results for this query")
-      stopSpinner();
       return;
     }
-
-
-  //Stop the loading spinner
-  stopSpinner();
-
-    // root = groupByUser(root.hits.hits);
 
     var focus = root,
         nodes = pack.nodes(root),
         view;
 
+    //Create the circles for the files
     var circle = svg.selectAll("circle")
         .data(nodes)
       .enter().append("circle")
@@ -54,6 +50,7 @@ function render(api_call){
           .on("mouseover", mouseover)
           .on("mouseout", mouseout);
 
+    // Add text to the bubbles
     var text = svg.selectAll("text")
         .data(nodes)
       .enter().append("text")
@@ -72,6 +69,7 @@ function render(api_call){
     function zoom(d) {
       var focus0 = focus; focus = d;
 
+      //zoom in
       var transition = d3.transition()
           .duration(d3.event.altKey ? 7500 : 750)
           .tween("zoom", function(d) {
@@ -79,6 +77,7 @@ function render(api_call){
             return function(t) { zoomTo(i(t)); };
           });
 
+      //Update the label after zooming
       transition.selectAll("text")
         .filter(function(d) { return d.parent === focus || this.style.display === "inline"; })
           .style("fill-opacity", function(d) { return d.parent === focus ? 1 : 0; })
@@ -92,6 +91,7 @@ function render(api_call){
       circle.attr("r", function(d) { return d.r * k; });
     }
 
+    //Display tooltip on mouseover
     function mouseover(d, i){
       d3.select("#tooltip")
           .style("visibility", "visible")
@@ -106,11 +106,13 @@ function render(api_call){
           .style("top", (d3.event.pageY - 150) + "px");
     }
 
+    //Hide tooltip on mouse out
     function mouseout(d, i){
       d3.select("#tooltip").style("visibility", "hidden");
     }
   });
 
+	//Takes bytes and converts them to a human readable fomat
   function bytesToSize(bytes, onlySizeFormat) {
       var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
       if (bytes == 0) return 'n/a';
@@ -123,6 +125,7 @@ function render(api_call){
     }
   }
 
+  //Convert unix time to a human readable date
   function timeConverter(UNIX_timestamp){
    var a = new Date(UNIX_timestamp*1000);
    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];

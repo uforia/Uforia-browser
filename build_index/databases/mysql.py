@@ -76,6 +76,7 @@ class Database(object):
         """
         try:
             warnings.filterwarnings('ignore', category=self.connection.Warning)
+            #print "query is %s " % query
             self.cursor.execute(query, params)
             warnings.resetwarnings()
         except:
@@ -91,7 +92,7 @@ class Database(object):
 
         """
 
-        query = "SELECT " + column + " FROM supported_mimetypes;"
+        query = "SELECT "+column+" FROM supported_mimetypes;"
         self.execute_query(query)
 
         return self.cursor.fetchall()
@@ -119,7 +120,7 @@ class Database(object):
             query = """
             SELECT column_name
             FROM information_schema.columns
-            WHERE table_schema = '""" + self.database + """'
+            WHERE table_schema = '"""+ self.database +"""'
             AND table_name = 'files';
             """
 
@@ -141,16 +142,32 @@ class Database(object):
             SELECT column_name
             FROM information_schema.columns
             WHERE table_schema = '""" + self.database + """'
-            AND table_name = '""" + _table + """';
+            AND table_name = '"""+ _table +"""';
             """
         else:
             query = """
-            SELECT * FROM """ + _table + """;
+            SELECT * FROM """+ _table +""";
             """
-
+            
         self.execute_query(query)
+ 
         if(onerow):
             result = self.cursor.fetchone()
         else:
             result = self.cursor.fetchall()
+        return result
+
+    def like_mime(self, _mime=None,  _table="supported_mimetypes"):
+        """
+        like_mime queries the database using a LIKE query
+        this is done under the assumption that whatever the config file reads is not 100% accurate
+        but close enough to still produce a hit in the database.
+
+        """
+        if(not _mime):
+            raise Exception("No mime supplied. Cannot query database.")
+
+        query = "SELECT * from "+ _table +" WHERE mime_type LIKE '%"+_mime+"%';"
+        self.execute_query(query)
+        result = self.cursor.fetchall()
         return result

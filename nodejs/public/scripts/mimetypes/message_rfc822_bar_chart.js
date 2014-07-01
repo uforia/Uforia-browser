@@ -17,6 +17,7 @@ function render(api_call){
       .scale(y)
       .orient("left");
 
+  //Tooltip
   var tip = d3.tip()
     .attr('class', 'd3-tip')
     .offset([-10, 0])
@@ -24,7 +25,6 @@ function render(api_call){
     return "<strong>Date: </strong>" + d.date  + 
     "<br /><strong>Emails: </strong>" + d.total;
   });
-
 
   var svg = d3.select("#d3_visualization").append("svg")
       .attr("width", width + margin.left + margin.right)
@@ -49,11 +49,13 @@ function render(api_call){
       return;
     }
 
+    //Set the max values for the x and y axis
     x.domain(data.dates.map(function(d) { return d.date; }));
     var max = d3.max(data.dates, function(d) { return +d.total; })
     y.domain([0, max]);
     yAxis.ticks(max);
 
+    //add the X axis
     svg.append("g")
         .attr("class", "x axis")
         .attr("transform", "translate(0," + height + ")")
@@ -61,6 +63,7 @@ function render(api_call){
       .selectAll("text")
         .attr("transform", "translate(-20, 20) rotate(-45)");
 
+    //Add the Y axis
     svg.append("g")
         .attr("class", "y axis")
         .call(yAxis)
@@ -71,6 +74,7 @@ function render(api_call){
         .style("text-anchor", "left")
         .text("Emails sent");
 
+    //Add the bars
     svg.selectAll(".bar")
         .data(data.dates)
       .enter().append("rect")
