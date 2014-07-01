@@ -1,5 +1,5 @@
 function render(api_call){
-  var outerRadius = 960 / 2,
+  var outerRadius = 900 / 2,
       innerRadius = outerRadius - 130;
 
   var fill = d3.scale.category20c();
@@ -31,6 +31,8 @@ function render(api_call){
       return console.error(error);
     } 
 
+    console.log(JSON.stringify(imports));
+
     if(imports.total == 0){
       showMessage("No results for this query")
       stopSpinner();
@@ -46,13 +48,9 @@ function render(api_call){
         matrix = imports.matrix,
         n = 0;
 
-    function name(name) {
-      return name;
-    }
-
-
     // Compute a unique index for each package name.
     imports.names.forEach(function(d) {
+      d = d.name;
       if (!indexByName.has(d)) {
         nameByIndex.set(n, d);
         indexByName.set(d, n++);
@@ -60,13 +58,14 @@ function render(api_call){
     });
 
     chord.matrix(matrix);
-
+ 
     var g = svg.selectAll(".group")
         .data(chord.groups)
       .enter().append("g")
         .attr("class", "group")
         .on("mouseout", mouseout)
-        .on("mouseover", mouseover);
+        .on("mouseover", mouseover)
+        .on("click", groupClick);
 
     var groupPath = g.append("path")
         .attr("id", function(d, i) { return "group" + i; })
@@ -113,7 +112,8 @@ function render(api_call){
             .style("top", function () { return (d3.event.pageY - 75)+"px"})
             .style("left", function () { return (d3.event.pageX - 60)+"px";})
         })
-        .on("mouseout", mouseout);
+        .on("mouseout", mouseout)
+        .on("click", mouseclick);
 
     function mouseover(d, i) {
       d3.select("#tooltip")
@@ -132,17 +132,21 @@ function render(api_call){
       d3.select("#tooltip").style("visibility", "hidden")
     }
 
-    function groupTip(d){
-      function countSentEmails(index){
-        var count = 0;
-        matrix[index].forEach(function(numberSent){
-          count += numberSent;
-        });
-        return count;
-      }
+    function mouseclick(d){
+      // var params = $.param({ type :  'message_rfc822', hashids : imports.hashids[d.source.index][d.target.index]})
+      var url = 'file_details?type=message_rfc822&hashids=' + imports.hashids[d.source.index][d.target.index].toString() + '&address1=' + nameByIndex.get(d.source.index) + '&address2=' + nameByIndex.get(d.target.index);
+      window.open(url, imports.hashids[d.source.index][d.target.index].toString(),'height=768, width=1100, left=100, top=100, resizable=yes, scrollbars=yes, toolbar=no, menubar=no, location=no, directories=no, status=no, location=no');
+    }
 
+    function groupTip(d){
       return nameByIndex.get(d.index) + "<br/>"
-             + "Sent " + imports.count[d.index] + " out of " + total + " emails";
+             + "Sent " + imports.names[d.index].sent + " out of " + total + " emails" + "<br />"
+             + "Received " + imports.names[d.index].received + " emails";
+    }
+
+    function groupClick(d){
+      var url = 'file_details?type=message_rfc822&hashids=' + imports.names[d.index].hashids.toString() + '&address1=' + imports.names[d.index].name;
+      window.open(url, imports.names[d.index].hashids.toString(),'height=768, width=1100, left=100, top=100, resizable=yes, scrollbars=yes, toolbar=no, menubar=no, location=no, directories=no, status=no, location=no');
     }
 
     function chordTip(d){

@@ -1,22 +1,22 @@
-.node {
+#d3_visualization .node {
   cursor: pointer;
 }
 
-.node:hover {
+#d3_visualization .node:hover {
   stroke: #000;
   stroke-width: 1.5px;
 }
 
-.node--leaf {
+#d3_visualization .node--leaf {
   fill: white;
 }
 
-.label {
+#d3_visualization .label {
   font: 11px "Helvetica Neue", Helvetica, Arial, sans-serif;
   text-anchor: middle;
 }
 
-.label,
+#d3_visualization .label,
 .node--root{
   pointer-events: none;
 }

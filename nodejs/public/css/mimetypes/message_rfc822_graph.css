@@ -12,19 +12,19 @@
   pointer-events: none;
 }
 
-.node circle{
-  stroke: #fff;
-  stroke-width: 1.5px;
+#d3_visualization .node circle{
 }
 
-text {
+#d3_visualization text {
   pointer-events: none;
   font: 10px sans-serif;
 }
 
-.link {
+#d3_visualization .link {
   stroke: #999;
   stroke-opacity: .6;
+  stroke-width: 1.5px;
+  fill: none;
 }
 
 div#d3_button_bar  input[type="button"] {
