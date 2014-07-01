@@ -1,9 +1,9 @@
 ﻿<?php
 define ( 'MESSAGE_BATCH_PER_RUN', 10000000 );
-define ( 'DB_USERNAME', 'uforia' );
-define ( 'DB_PASSWORD', 'uforia' );
-define ( 'DB_HOST', 'localhost' );
-define ( 'DB_NAME', 'uforia' );
+define ( 'DB_USERNAME', '' );
+define ( 'DB_PASSWORD', '' );
+define ( 'DB_HOST', '' );
+define ( 'DB_NAME', '' );
 
 // DO NOT EDIT ANYTHING BEYOND THIS LINE
 // Create database connection.
