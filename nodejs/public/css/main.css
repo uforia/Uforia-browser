@@ -43,6 +43,15 @@ h2 {
     overflow: scroll;
 }
 
+div.content div.sidebarLeft div.visualizeBox p select#view_type {
+    width: 180px;
+    height: 100px;
+    padding: 8px;
+    cursor:pointer;
+    border: 1px solid #000;
+    margin:0px 10px 10px 10px;
+}
+
 div.header {
     width: 1400px;
     display: block;
@@ -131,7 +140,6 @@ div.parameters h2 {
 
 select {
     width: 180px;
-    height: 100px;
     padding: 8px;
     cursor:pointer;
     border: 1px solid #000;

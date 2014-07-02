@@ -6,7 +6,7 @@ html {
     padding: 0px;
     font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
     font-size: 12px;
-    font-weight: bold;
+    font-weight: normal;
     margin: 0px;
 }
 
@@ -20,6 +20,7 @@ div.main {
     width: 1000px;
     /* height: 600px; */
     min-height: 600px;
+    display: inline-block;
 }
 
 div.header {
@@ -41,13 +42,20 @@ div.sidebar {
     width: 200px;
     height: 100%;
     text-align: center;
-    display: inline-block;
     vertical-align: top;
+    display: inline-block;
 }
+
+div.sidebar select#subjects {
+    min-height: 300px;
+    display: inline-block;
+}
+
 div.items_header {
     text-align: center;
     font-size: 18px;
     font-weight: bold;
+    display: inline-block;
 }
 select {
     width: 180px;
@@ -58,30 +66,30 @@ select {
 }
 
 div.email {
-    width: 75%;
-    text-align: center;
+    width: 650px;
+    text-align: left;
     display: inline-block;
     border: 1px solid black;
-    padding: 5px;
+    padding: 0px;
 }
 div.email_header {
+    text-align: center;
     font-size: 18px;
     font-weight: bold;
-    border: 1px solid black;
+    border-bottom: 1px solid black;
 }
 div.email_contents {
-    width: 100%;
     font-weight: normal;
-    padding: 0px;
+    padding: 2px;
     word-break: break-all;
     word-wrap: break-word;
     hyphens: auto;
     overflow: auto;
     text-align: left;
-    display: block;
     unicode-bidi: embed;
     font-family: monospace;
     white-space: pre-wrap;
+    display: inline-block;
 }
 
 input[type="button"] {
