@@ -1,35 +1,29 @@
-// Config
-ELASTIC_SEARCH_HOST = "localhost";
-ELASTIC_SEARCH_PORT = "9200";
-DATABASE_HOST = "localhost";
-DATABASE_USER = "";
-DATABASE_PASSWORD = "";
-DATABASE_NAME = "";
-SERVER_PORT = "8888";
-
 // Set up express
 var express = require("express");
 var app = express();
 
-//Set up elasticsearch
-var elasticsearch = require('elasticsearch');
-var client = new elasticsearch.Client({
-  host: ELASTIC_SEARCH_HOST + ":" + ELASTIC_SEARCH_PORT
-  // log: 'trace'
-});
-
-//Mimetype classes requirements
+//Requirements
+var config = require('./uforia-config')
 var util = require('./mimetype_modules/util');
 var files = require('./mimetype_modules/files');
 var message_rfc822 = require('./mimetype_modules/message_rfc822');
 
+//Set up elasticsearch
+var elasticsearch = require('elasticsearch');
+var client = new elasticsearch.Client({
+  host: config.ELASTIC_SEARCH_HOST + ":" + config.ELASTIC_SEARCH_PORT
+  // log: 'trace'
+});
+
+
+
 //Connect to the Database
 var mysql = require('mysql');
 var pool = mysql.createPool({
-    host : DATABASE_HOST,
-    user : DATABASE_USER,
-    password : DATABASE_PASSWORD,
-    database : DATABASE_NAME
+    host : config.DATABASE_HOST,
+    user : config.DATABASE_USER,
+    password : config.DATABASE_PASSWORD,
+    database : config.DATABASE_NAME
 });
 
 
@@ -352,7 +346,7 @@ var search = function(search_request, res, view){
 };
 
 //Start the server
-var server = app.listen(SERVER_PORT, function(){
+var server = app.listen(config.SERVER_PORT, function(){
   console.log('Listening on port %d', server.address().port);
 });
 
