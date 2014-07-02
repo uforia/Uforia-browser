@@ -11,11 +11,9 @@ var message_rfc822 = require('./mimetype_modules/message_rfc822');
 //Set up elasticsearch
 var elasticsearch = require('elasticsearch');
 var client = new elasticsearch.Client({
-  host: config.ELASTIC_SEARCH_HOST + ":" + config.ELASTIC_SEARCH_PORT
-  // log: 'trace'
+  host: config.ELASTIC_SEARCH_HOST + ":" + config.ELASTIC_SEARCH_PORT,
+  log: 'trace'
 });
-
-
 
 //Connect to the Database
 var mysql = require('mysql');
@@ -25,7 +23,6 @@ var pool = mysql.createPool({
     password : config.DATABASE_PASSWORD,
     database : config.DATABASE_NAME
 });
-
 
 //'Constants'
 var INDEX = 'uforia';
