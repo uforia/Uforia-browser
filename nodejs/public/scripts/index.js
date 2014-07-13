@@ -1,5 +1,5 @@
 //Execute on page load 
-var type = 'message_rfc822';
+var type = 'email';
 var view = 'chord';
 
 function init(){
@@ -22,26 +22,30 @@ function init(){
 
 //Load the right css for the right D3 visualisation
 function changeType(select){
+    type = select.value;
+
     switch(select.value){
         case "files":
-            type = 'files';
             view = 'bubble';
             break;
-        case "message_rfc822":
-            type = 'message_rfc822';
+        case "email":
             view = 'chord';
             break; 
+        case "documents":
+            view = 'bar_chart';
+            break;
         default:
-            type = 'files';
+            type = 'email';
+            view = 'chord';
             break;
     }
 
     //Clear the visualization and search parameters
+    loadViewTypes(type);
     removeSVG();
     removeParameters();
-    loadViewTypes(type);
     changeScripts();
-    search();
+    loadResultCount();
 }
 
 //Load a different view for the same mimetype
@@ -82,7 +86,6 @@ function addParameter(){
 
     param.appendTo("#parameters").hide().slideDown('fast');
     loadMimetypeAttributes(type, param.find("select.paramField"));
-    changeParamType(param);
 }
 
 //This function decides wether a parameter should be a normal query or a date input and changes it if necessary
@@ -135,6 +138,9 @@ function loadMimetypeAttributes(type, element){
         Object.keys(data).forEach(function(key){
             element.append($("<option>", { value: key, text: key, data : { 'type' : data[key].type}}));
         });
+
+        //Check if it's a date field, if so change it to a date layout
+        changeParamType(element.parent());
     });
 }
 
@@ -142,10 +148,11 @@ function loadTypes(){
     var select = $('#search_type');
     $.get("api/get_types", function(data){
         select.find('option').remove().end();
-        $.each(data, function(key, value) {   
+
+        $.each(data, function(key, value) {
                 select
-                    .append($('<option>', { value : key })
-                    .text(value)); 
+                    .append($('<option>', { value : key})
+                    .text(value['name'])); 
         });
     });
 }

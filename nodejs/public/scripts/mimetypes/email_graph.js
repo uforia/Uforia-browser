@@ -164,13 +164,13 @@ function render(api_call){
     //click on a node
     function mouseclick(d){
       if (d3.event.defaultPrevented) return; //prevent a click event when a node is dragged
-      var url = 'file_details?type=message_rfc822&hashids=' + d.hashids.toString() + '&address1=' + d.name;
+      var url = 'file_details?type=email&hashids=' + d.hashids.toString() + '&address1=' + d.name;
       window.open(url, d.hashids.toString(),'height=768, width=1100, left=100, top=100, resizable=yes, scrollbars=yes, toolbar=no, menubar=no, location=no, directories=no, status=no, location=no');
     }
 
     //For clicks on a link
     function mouseclickLink(d){
-      var url = 'file_details?type=message_rfc822&hashids=' + d.hashids.toString() + '&address1=' + d.name + "&address2=";
+      var url = 'file_details?type=email&hashids=' + d.hashids.toString() + '&address1=' + d.name + "&address2=";
       window.open(url, d.hashids.toString(),'height=768, width=1100, left=100, top=100, resizable=yes, scrollbars=yes, toolbar=no, menubar=no, location=no, directories=no, status=no, location=no');
     }
 

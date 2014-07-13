@@ -6,13 +6,13 @@ var app = express();
 var config = require('./uforia-config')
 var util = require('./mimetype_modules/util');
 var files = require('./mimetype_modules/files');
-var message_rfc822 = require('./mimetype_modules/message_rfc822');
+var email = require('./mimetype_modules/email');
 
 //Set up elasticsearch
 var elasticsearch = require('elasticsearch');
 var client = new elasticsearch.Client({
-  host: config.ELASTIC_SEARCH_HOST + ":" + config.ELASTIC_SEARCH_PORT,
-  log: 'trace'
+  host: config.ELASTIC_SEARCH_HOST + ":" + config.ELASTIC_SEARCH_PORT
+  // log: 'trace'
 });
 
 //Connect to the Database
@@ -30,12 +30,14 @@ var DEFAULT_TYPE = 'files';
 var DEFAULT_VIEW = 'bubble';
 var DEFAULT_SIZE = 10;
 var TYPES = {
-    message_rfc822: 'Email (message_rfc822)',
-    files: 'Files'
+    email: {name : 'Email', mappings : ["message_rfc822"]},
+    documents: { name : 'Documents', mappings : ["msword", "vnd_oasis_opendocument_text", "pdf"]}, 
+    files: { name : 'Files', mappings : ["files"]}
 };
 var VIEWS = {
     files : {bubble : 'Bubble'},
-    message_rfc822 : {chord : 'Chord diagram', graph :'Graph', bar_chart : 'Bar Chart'}
+    documents : {bar_chart : 'Bar Chart'},
+    email : {chord : 'Chord diagram', graph :'Graph', bar_chart : 'Bar Chart'}
 };
 
 //Set the view directory and HTML render engine
@@ -58,13 +60,12 @@ app.get('/', function(req, res){
 app.get('/file_details', function(req, res){
   var type = util.defaultFor(req.param('type'), DEFAULT_TYPE);
   var hashids = util.defaultFor(req.param('hashids'), []);
-
   switch(type){
-    case 'message_rfc822':
+    case 'email':
       res.render('email_details.html');
       break;
     default:
-      res.render('index.html', {title : hashids});
+      res.render('index.html');
       break; 
   }
 })
@@ -83,12 +84,11 @@ app.get('/file_details', function(req, res){
 */
 app.get("/api/search", function(req, res) {
   var search_request = {};
-  // var query_skeleton = { query : { bool : { must : [], must_not : [], should : [] } }};
   var query_skeleton = { "query": { "filtered": { "query": { "bool": { "must": [], "must_not": [] } }, "filter": { "bool": { "must": [], "must_not": [] } } } } };
   var view = util.defaultFor(req.param('view'), DEFAULT_VIEW);
 
   search_request['index'] = INDEX;
-  search_request['type'] = util.defaultFor(req.param('type'), DEFAULT_TYPE);
+  search_request['type'] = TYPES[util.defaultFor(req.param('type'), DEFAULT_TYPE)].mappings.toString();
   var parameters = util.defaultFor(req.param('parameters'), {});
   var filters = util.defaultFor(req.param('filters'), {});
 
@@ -164,7 +164,7 @@ app.get("/api/count", function(req, res){
   var query_skeleton = { "query": { "filtered": { "query": { "bool": { "must": [], "must_not": [] } }, "filter": { "bool": { "must": [], "must_not": [] } } } } };
 
   search_request['index'] = INDEX;
-  search_request['type'] = util.defaultFor(req.param('type'), DEFAULT_TYPE);
+  search_request['type'] = TYPES[util.defaultFor(req.param('type'), DEFAULT_TYPE)].mappings.toString();
   var parameters = util.defaultFor(req.param('parameters'), {});
   var filters = util.defaultFor(req.param('filters'), {});
 
@@ -213,11 +213,11 @@ app.get("/api/count", function(req, res){
       res.send(resp);
     } catch(err){
       console.log(err.message);
-      res.send("Couldn't get count");
+      res.send({count : "Invalid query" });
     }
   }, function(err){
     console.trace(err.message);
-    res.send("Couldn't get count");
+    res.send({count : "Invalid query" });
   });
 });
 
@@ -235,10 +235,10 @@ app.get("/api/get_types", function(req, res){
 *
 */
 app.get("/api/mapping_info", function(req, res){
-  type = util.defaultFor(req.param('type'), DEFAULT_TYPE);
+  type = TYPES[util.defaultFor(req.param('type'), DEFAULT_TYPE)].mappings.toString();
   client.indices.getMapping({ 
     index : INDEX,
-    type : type
+    type : type,
   }).then(function(resp){
     try{
       res.send(resp[INDEX].mappings[type].properties); 
@@ -267,7 +267,7 @@ app.get("/api/view_info", function(req, res){
 * hashids
 */
 app.get("/api/get_file_details", function(req, res){
-  var type = util.defaultFor(req.param('type'), DEFAULT_TYPE);
+  var type = TYPES[util.defaultFor(req.param('type'), DEFAULT_TYPE)].mappings.toString();
   var hashids = util.defaultFor(req.param('hashids'), []);
   var tableName = '63c5e0bd853105c84a2184539eb245'; //temp for demonstration
 
@@ -314,24 +314,29 @@ var search = function(search_request, res, view){
         case 'message_rfc822':
             if(view == 'chord'){
                 try {
-                    res.send(message_rfc822.createEmailChordDiagram(resp.hits.hits));
+                    res.send(email.createEmailChordDiagram(resp.hits.hits));
                 }catch(err){
                     res.send();
                 }
             } else if (view == 'graph') { 
                 try {
-                    res.send(message_rfc822.createEmailGraph(resp.hits.hits));
+                    res.send(email.createEmailGraph(resp.hits.hits));
                 }catch(err){
                     res.send();
                 }
             } else if(view == 'bar_chart'){
                 try {
-                    res.send(message_rfc822.createBarChart(resp.hits.hits));
+                    res.send(email.createBarChart(resp.hits.hits));
                 } catch(err){
                     res.send();
                 }
             }
             break;
+        case 'msword,vnd_oasis_opendocument_text,pdf':
+          if(view == 'bar_chart'){
+            res.send(documents.createBarChart(resp.hits.hits));
+          }
+          break;
         default: // default is files
             res.send(files.groupByUser(resp.hits.hits));
             break;

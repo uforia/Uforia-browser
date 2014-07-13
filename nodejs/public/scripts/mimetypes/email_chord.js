@@ -139,7 +139,7 @@ function render(api_call){
 
     // Click on a chord
     function mouseclick(d){
-      var url = 'file_details?type=message_rfc822&hashids=' + imports.hashids[d.source.index][d.target.index].toString() + '&address1=' + nameByIndex.get(d.source.index) + '&address2=' + nameByIndex.get(d.target.index);
+      var url = 'file_details?type=email&hashids=' + imports.hashids[d.source.index][d.target.index].toString() + '&address1=' + nameByIndex.get(d.source.index) + '&address2=' + nameByIndex.get(d.target.index);
       window.open(url, imports.hashids[d.source.index][d.target.index].toString(),'height=768, width=1100, left=100, top=100, resizable=yes, scrollbars=yes, toolbar=no, menubar=no, location=no, directories=no, status=no, location=no');
     }
 
@@ -152,7 +152,7 @@ function render(api_call){
 
     //Open a window on the click of a chord group
     function groupClick(d){
-      var url = 'file_details?type=message_rfc822&hashids=' + imports.names[d.index].hashids.toString() + '&address1=' + imports.names[d.index].name;
+      var url = 'file_details?type=email&hashids=' + imports.names[d.index].hashids.toString() + '&address1=' + imports.names[d.index].name;
       window.open(url, imports.names[d.index].hashids.toString(),'height=768, width=1100, left=100, top=100, resizable=yes, scrollbars=yes, toolbar=no, menubar=no, location=no, directories=no, status=no, location=no');
     }
 

@@ -94,7 +94,7 @@ function render(api_call){
 
     //click on a bar
     function mouseclick(d){
-      var url = 'file_details?type=message_rfc822&hashids=' + d.hashids.toString() + '&address1=' + d.date;
+      var url = 'file_details?type=email&hashids=' + d.hashids.toString() + '&address1=' + d.date;
       window.open(url, d.hashids.toString(),'height=768, width=1100, left=100, top=100, resizable=yes, scrollbars=yes, toolbar=no, menubar=no, location=no, directories=no, status=no, location=no');
     }
   });
