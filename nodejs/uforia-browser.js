@@ -7,6 +7,7 @@ var config = require('./uforia-config')
 var util = require('./mimetype_modules/util');
 var files = require('./mimetype_modules/files');
 var email = require('./mimetype_modules/email');
+var documents = require('./mimetype_modules/documents');
 
 //Set up elasticsearch
 var elasticsearch = require('elasticsearch');
@@ -31,7 +32,7 @@ var DEFAULT_VIEW = 'bubble';
 var DEFAULT_SIZE = 10;
 var TYPES = {
     email: {name : 'Email', mappings : ["message_rfc822"]},
-    documents: { name : 'Documents', mappings : ["msword", "vnd_oasis_opendocument_text", "pdf"]}, 
+    documents: { name : 'Documents', mappings : ["documents"]}, 
     files: { name : 'Files', mappings : ["files"]}
 };
 var VIEWS = {
@@ -260,7 +261,7 @@ app.get("/api/view_info", function(req, res){
   res.send(VIEWS[type]);
 });
 
-/* Queries database and return the info it has about a file
+/* Queries database and return the full path of a file
 * takes params:
 * type
 * tablenames
@@ -269,6 +270,7 @@ app.get("/api/view_info", function(req, res){
 app.get("/api/get_file_details", function(req, res){
   var type = TYPES[util.defaultFor(req.param('type'), DEFAULT_TYPE)].mappings.toString();
   var hashids = util.defaultFor(req.param('hashids'), []);
+  var filesTable = 'files';
   var tableName = '63c5e0bd853105c84a2184539eb245'; //temp for demonstration
 
   //Remove duplicates from the hashids
@@ -281,15 +283,15 @@ app.get("/api/get_file_details", function(req, res){
 
   pool.getConnection(function(err, connection){
     if(err){
-      console.log("Coulnd't establish db connection: " + err.stack());
+      console.log("Couldn't establish db connection: " + err.stack());
       res.send();
       return;
     } else {
       //Create the query and execute it
-      var query = "SELECT * FROM ?? WHERE hashid IN (" + hashids.toString() + ")";
-      connection.query(query, [tableName], function(err, results){
+      var query = "SELECT ??.*, ??.fullpath FROM ?? LEFT JOIN ?? ON ??.hashid = ??.hashid WHERE ??.hashid IN (" + hashids.toString() + ")";
+      connection.query(query, [tableName, filesTable, tableName, filesTable, tableName, filesTable, tableName], function(err, results){
         if(err){
-          console.log("Can't execute query: " + err.stack());
+          console.log("Error executing query: " + err.stack());
           res.send();
         } else {
           res.send(results);
@@ -304,14 +306,14 @@ app.get("/api/get_file_details", function(req, res){
 var search = function(search_request, res, view){
     client.search(search_request).then(function(resp){
     switch(search_request.type){
-        case 'files':
+        case TYPES.files.mappings.toString():
                 try {
                     res.send(files.groupByUser(resp.hits.hits));
                 }catch(err){
                     res.send();
                 }
             break;
-        case 'message_rfc822':
+        case TYPES.email.mappings.toString():
             if(view == 'chord'){
                 try {
                     res.send(email.createEmailChordDiagram(resp.hits.hits));
@@ -332,7 +334,7 @@ var search = function(search_request, res, view){
                 }
             }
             break;
-        case 'msword,vnd_oasis_opendocument_text,pdf':
+        case TYPES.documents.mappings.toString():
           if(view == 'bar_chart'){
             res.send(documents.createBarChart(resp.hits.hits));
           }
@@ -352,7 +354,7 @@ var server = app.listen(config.SERVER_PORT, function(){
   console.log('Listening on port %d', server.address().port);
 });
 
-//Gracefully shutdown the server
+//Gracefully shutdown the server on termination signal
 process.on('SIGTERM', function () {
   console.log("Shutting down");
   pool.destroy();

@@ -86,7 +86,7 @@ function render(api_call){
         .on('mouseout', tip.hide)
         .attr("height", "0px")
         .attr("y", height)
-        .transition().delay(function (d,i){ return i * 50;}).duration(300)
+        .transition().duration(500)
         .attr("y", function(d) { return y(+d.total); })
         .attr("height", function(d) { return height - y(+d.total); });
 
