@@ -2,7 +2,7 @@
 
 import datetime
 
-def coreType(value=None):
+def getType(value=None):
     """
     
     elasticsearch has the following coretypes:

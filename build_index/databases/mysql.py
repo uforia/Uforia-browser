@@ -171,3 +171,14 @@ class Database(object):
         self.execute_query(query)
         result = self.cursor.fetchall()
         return result
+
+    def get_modules_column(self):
+        """
+        Returns only the 'modules' column from the supported_mimetypes table.
+        """
+
+        query = "SELECT modules from supported_mimetypes;"
+        self.execute_query(query)
+        result = self.cursor.fetchall()
+        return result
+
