@@ -77,8 +77,31 @@ div.email_header {
     font-size: 18px;
     font-weight: bold;
     border-bottom: 1px solid black;
+    border-top: 1px solid black;
 }
+
 div.email_contents {
+    font-weight: normal;
+    padding: 2px;
+    word-break: break-all;
+    word-wrap: break-word;
+    hyphens: auto;
+    overflow: auto;
+    text-align: left;
+    unicode-bidi: embed;
+    font-family: monospace;
+    white-space: pre-wrap;
+    display: inline-block;
+}
+
+div.fullpath_header {
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    border-bottom: 1px solid black;
+}
+
+div.fullpath_contents {
     font-weight: normal;
     padding: 2px;
     word-break: break-all;
