@@ -96,7 +96,7 @@ def generate_table_list(_files = False):
         for k in sorted(tables_dict.keys()):
             #print _mime 
             #print tables_dict[k]
-            create_mapping( mime = mimetype, tablename = tables_dict[k], make_files = _files )
+            create_mapping( mapping_name = mimetype, tablename = tables_dict[k], make_files = _files )
 
 def find_mime_table(configmime=None, fields=None):
     if not configmime:
@@ -109,13 +109,13 @@ def find_mime_table(configmime=None, fields=None):
         tables_dict = literal_eval(line[1])
 
         for k in sorted(tables_dict.keys()):
-            create_mapping( mime = mimetype, tablename = tables_dict[k], mappinglist = fields )
+            create_mapping( mapping_name = mimetype, tablename = tables_dict[k], fieldlist = fields )
 
-def create_mapping(mime=None, tablename=None, mappinglist=None, make_files=False):
+def create_mapping(mapping_name=None, tablename=None, fieldlist=None, make_files=False):
     """
     
     create_mapping will create a mapping for the desired index.
-    if mappinglist is empty it will assume all fields need to be mapped.
+    if fieldlist is empty it will assume all fields need to be mapped.
 
     A mapping is in the URL after the index, for example:
 
@@ -124,44 +124,72 @@ def create_mapping(mime=None, tablename=None, mappinglist=None, make_files=False
     where image_jpeg is the mapping.
     
     """
-    if not mime:
-        raise Exception("create_mapping called without a mimetype")
+    if not mapping_name:
+        raise Exception("create_mapping called without a mapping_name")
     elif not tablename:
         raise Exception("create_mapping called without a table")
     else:
         conn = ES(config.ESSERVER)
         print("Retrieving table from database (this could take a little while).")
-        tableData = db.read_table(_table=tablename, columnsonly=False, onerow=True)
-        columnNames = db.read_table(_table=tablename)
+        try:
+            tableData = db.read_table(_table=tablename, columnsonly=True) # onerow=True)
+        except:
+            tableData = db.read_table_list(_tablelist=tablename, columnsonly=True)
+        #tableData = db.read_table(_table=tablename, columnsonly=True) # onerow=True)
+
+        #columnNames = db.read_table(_table=tablename)
         mapping = {}
 
         if not tableData:
             print("No data returned for table ", tablename)
             return
 
-        for _data, _name in itertools.izip(tableData, columnNames):
-            if( (mappinglist) and (_name in list(mappinglist)) ): 
-                print "skipping field %s" % (_name)
+#        print tableData
+#        print tableData[0]
+#        print tableData[0][1]
+#        print es_coretypes.getType(tableData[0][1])
+#        sys.exit(0)
+
+        # if no list was supplied then every field is to be mapped
+        # so fieldlist refers to columnNames to ensure iteration can continue
+        if not fieldlist:
+            fieldlist = tableData
+            print("< DEBUG! > no fieldlist supplied.")
+        
+        # hashid should always be included
+        if "hashid" not in fieldlist:
+            fieldlist.append("hashid")
+            print("< DEBUG! > appended 'hashid' to list")
+
+        for _name in itertools.izip(tableData):
+            jsonName = _name[0][0].encode('ascii') # _name is a unicode string
+#            jsonName = jsonName.replace('"','') # or it'll give "\""_name"\"" in JSON
+            if jsonName not in fieldlist: 
+                print("%s is not in fieldlist" % str(jsonName))
                 continue
-            jsonName = json.dumps(_name) # _name is a unicode string
-            jsonName = jsonName.replace('"','') # or it'll give "\""_name"\"" in JSON
-            submap = { "type" :  es_coretypes.getType(_data),
+            if _name == "tablename": continue # forcefully added
+
+            submap = { "type" :  es_coretypes.getType(_name[0][1]),
                 "store" : "no",
                 "index" : "not_analyzed",
             }
-            mapping[jsonName[1:-1]] = submap
+            mapping[jsonName] = submap
 
-        newmime = mime.replace("/","_")
-        print("Creating mapping: %s" % newmime)
+        
+
+        newname = mapping_name.replace("/","_")
+        print("Creating mapping: %s" % newname)
         if make_files:
-            with open('jsonfiles/'+newmime+'.json', 'w') as outfile:
+            with open('jsonfiles/'+newname+'.json', 'w') as outfile:
                 json.dump(mapping, outfile)
         else:
-            conn.indices.put_mapping(str(newmime), {'properties':mapping}, [config.ESINDEX])
+            #conn.indices.put_mapping(str(newname), {'properties':mapping}, [config.ESINDEX])
+            print "NAME %s " % newname
+            print "MAPPING: %s " % mapping
  
-def fill_mapping(mime=None, tablename=None):
-    if not mime:
-        raise Exception("fill_mapping called without a mimetype")
+def fill_mapping(mapping_name=None, tablename=None):
+    if not mapping_name:
+        raise Exception("fill_mapping called without mapping_name")
     elif not tablename:
         raise Exception("fill_mapping called without a table")
     else:
@@ -195,7 +223,7 @@ def parse_mapping_config():
     try:
         mapconfig.read('include/custom_uforia_mapping.cfg')
     except:
-        print("< WARNING! > MAPPING Config file not supplied or not configured correctly, loading default config.")
+        print("< ERROR! > MAPPING Config file not supplied or not configured correctly.")
         sys.exit(1)
 
     # section titles are also the mapping names
@@ -204,12 +232,11 @@ def parse_mapping_config():
     for name in mapname:
         if (mapconfig.has_option(name, 'modules')):
             modules = mapconfig.get(name, 'modules', 1)
-            #print mapping_fields
-            #for x in literal_eval(mapping_fields):
-            #    print x
             json_acceptable_string = modules.replace("'", "\"")
+
             moduledict = json.loads(json_acceptable_string)
             fields = []
+            
             for key in moduledict:
                 columns = db.read_table(_table=moduledict[key]) # returns columns only by default
                 fields.append([x[0].encode('ascii') for x in columns]) # mysql returns it in unicode format which we don't want
@@ -224,6 +251,53 @@ def parse_mapping_config():
             mapconfig.write(configfile)
 
         print("Successfully added 'fields' option to the config file for %s" % name)
+
+def make_custom_mapping():
+    """
+    Uses the file 'include/custom_uforia_mapping.cfg' to create new mappings
+    and fill them accordingly.
+
+    """
+    mapconfig = ConfigParser.SafeConfigParser()
+
+    try:
+        mapconfig.read('include/custom_uforia_mapping.cfg')
+    except:
+        print("< ERROR! > MAPPING Config file not supplied or not configured correctly.")
+        sys.exit(1)
+
+    mappings = mapconfig.sections()
+    fields = None
+
+    for name in mappings:
+
+        # check for the database names
+        if (mapconfig.has_option(name, 'modules')):
+            modules = mapconfig.get(name, 'modules')
+            json_acceptable_string = modules.replace("'", "\"")
+            moduledict = json.loads(json_acceptable_string)
+
+        else:
+            raise Exception("< ERROR! > There is no 'modules' option in section %s !" % name)
+
+        # check for list of fieldnames
+        if(mapconfig.has_option(name, 'fields')):
+            fields = mapconfig.get(name, 'fields')
+            json_acceptable_string = fields.replace("'", "\"")
+            fields = json.loads(json_acceptable_string)
+        else:
+            raise Exception("< ERROR! > There is no 'fields' option in section %s !" % name)
+
+        tablelist = []
+        for table in moduledict:
+            tablelist.append(moduledict[table])
+            #create_mapping(mapping_name=name, tablename=moduledict[table], fieldlist=fields)
+
+
+        # send the list of tables and fields on to create_mapping
+        #print tablelist
+        create_mapping(mapping_name=name, tablename=tablelist, fieldlist=fields)
+
 
 
 def gen_all_modules_config():
@@ -268,19 +342,21 @@ if __name__ == "__main__":
                         action="store_true")
     parser.add_argument("--make-map-files", help="When set this will create JSON mapping files INSTEAD of sending them to Elasticsearch.",
                         action="store_true")
-    parser.add_argument("--make-es-mappings", help="Will generate all mappings and send them directly into Elasticsearch.", 
+    parser.add_argument("--make-es-mappings", help="Will generate all mappings and send them directly into Elasticsearch.(does not use your custom file)", 
                         action="store_true")
     parser.add_argument("--test-run", help="Reads data from database and outputs it to stdout.",
                         action="store_true")
     parser.add_argument("--delete-index", help="Delete the index set in your config file. (Default is Uforia)", 
                         action="store_true")
-    parser.add_argument("--all-fields-config", help="Create a config file with all fields for each module.",
+    parser.add_argument("--all-modules-config", help="Create a config file with all mimetypes and their respective modules.",
                         action="store_true")
-    parser.add_argument("--gen-mappings", help="Use the mapping config from 'include/custom_uforia_mapping.cfg' to create mappings.",
+    parser.add_argument("--gen-fields", help="Use the mapping config from 'include/custom_uforia_mapping.cfg' to create a list of fields, added onto the same config.",
                         action="store_true")
+    parser.add_argument("--make-custom-mapping", help="Uses the custom_uforia_mapping.cfg file to create mappings and fill them.", action="store_true")
 
     args = parser.parse_args()
     
+    # if no arguments supplied, show the help
     if len(sys.argv)==1:
         parser.print_help()
         sys.exit(1)
@@ -300,8 +376,11 @@ if __name__ == "__main__":
     elif args.delete_index:
         del_index()
 
-    elif args.all_fields_config:
-        gen_all_fields_config()
+    elif args.all_modules_config:
+        gen_all_modules_config()
 
-    elif args.gen_mappings:
+    elif args.gen_fields:
         parse_mapping_config()
+
+    elif args.make_custom_mapping:
+        make_custom_mapping()

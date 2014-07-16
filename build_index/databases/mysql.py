@@ -132,6 +132,9 @@ class Database(object):
         Generic func to read either only the columns or the entire table.
         If there is no table, will raise an exception.
 
+
+        data_type is used to determine if it should be an int/float/string
+        column_type simply returns the name of the column
         """
 
         if(not _table):
@@ -139,7 +142,7 @@ class Database(object):
 
         if(columnsonly):
             query = """
-            SELECT column_name
+            SELECT column_name,data_type
             FROM information_schema.columns
             WHERE table_schema = '""" + self.database + """'
             AND table_name = '"""+ _table +"""';
@@ -156,6 +159,46 @@ class Database(object):
         else:
             result = self.cursor.fetchall()
         return result
+
+    def read_table_list(self, _tablelist, columnsonly=True):
+        """
+        Generic func to read either only the columns or the entire table.
+        If there is no table, will raise an exception.
+
+
+        data_type is used to determine if it should be an int/float/string
+        column_type simply returns the name of the column
+        """
+
+        if(not _tablelist):
+            raise Exception("No table specified for read_tablelist!")
+
+        if(columnsonly):
+            query = """
+            SELECT column_name,data_type
+            FROM information_schema.columns
+            WHERE table_schema = '""" + self.database + """'
+            AND table_name = '""" +  _tablelist[0] + """'"""
+            
+            # skip first and last in list
+            for table in _tablelist[1:-1]:
+                query += """
+                OR table_name = '"""+ table +"""'
+                """
+            # add last and end query
+            query += "OR table_name = '" + _tablelist[-1] + "';"
+        else:
+            query = """
+            SELECT * FROM """
+            for table in _tablelist[:-1]:
+                query += "'" + table + "',"
+            query += "'" + _tablelist[-1] + "';"
+            
+        self.execute_query(query)
+        result = self.cursor.fetchall()
+ 
+        return result
+
 
     def like_mime(self, _mime=None,  _table="supported_mimetypes"):
         """
