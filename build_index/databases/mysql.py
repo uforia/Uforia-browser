@@ -129,7 +129,7 @@ class Database(object):
         result = self.execute_query(query)
         return self.cursor.fetchall()
 
-    def read_table(self, _table, columnsonly=True, onerow=False):
+    def read_table(self, _table, columnsonly=True, onerow=False, return_dict=False):
         """
         Generic func to read either only the columns or the entire table.
         If there is no table, will raise an exception.
@@ -153,7 +153,10 @@ class Database(object):
             query = """
             SELECT * FROM """+ _table +""";
             """
-            
+
+        if return_dict:
+            self.cursor = self.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
+
         self.execute_query(query)
  
         if(onerow):

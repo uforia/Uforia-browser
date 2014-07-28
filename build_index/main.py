@@ -19,13 +19,6 @@ import itertools
 import ConfigParser, argparse
 from ast import literal_eval
 
-#custom files
-import es_coretypes
-import build_tests
-import hardcoded
-import uf_mappingparser as ufm
-import uf_configparser as ufc
-
 # add pyes from the libraries subfolder
 # this will also force python to use the included module instead of the ones installed on the system
 pyes_libfolder =  os.path.realpath(os.path.abspath(os.path.join(os.path.split(inspect.getfile( inspect.currentframe() ))[0],"./libraries/pyes")))
@@ -36,15 +29,17 @@ from pyes import *
 # PyES - Python Elastic Search
 # https://pyes.readthedocs.org/en/latest/
 
-config = imp.load_source('config', 'include/default_config.py')
 
-try:
-    config = imp.load_source('config', 'include/config.py')
-except:
-    print("< WARNING! > Config file not found in include / or not configured correctly, loading default config.")
+#custom files
+import build_tests
 
-database = imp.load_source(config.DBTYPE, config.DATABASEDIR + config.DBTYPE + ".py")
-db = database.Database(config)
+# from uf_func folder
+from uf_func import hardcoded
+from uf_func import es_coretypes
+from uf_func import uf_mappingparser as ufm
+from uf_func import uf_configparser as ufc
+from uf_func import uf_globals
+
 def generate_table_list(_files = False):
     """
 
@@ -106,8 +101,6 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Interface between Elasticsearch and Uforia.')
     
-    parser.add_argument("--make-big-config", help="Generate a config file that contains fields for each individual module.", 
-                        action="store_true")
     parser.add_argument("--make-map-files", help="When set this will create JSON mapping files INSTEAD of sending them to Elasticsearch.",
                         action="store_true")
     parser.add_argument("--make-es-mappings", help="Will generate all mappings and send them directly into Elasticsearch.(does not use your custom file)", 
@@ -120,7 +113,8 @@ if __name__ == "__main__":
                         action="store_true")
     parser.add_argument("--gen-fields", help="Use the mapping config from 'include/custom_uforia_mapping.cfg' to create a list of fields, added onto the same config.",
                         action="store_true")
-    parser.add_argument("--make-custom-mapping", help="Uses the custom_uforia_mapping.cfg file to create mappings and fill them.", action="store_true")
+    parser.add_argument("--make-custom-mapping", help="Uses the custom_uforia_mapping.cfg file to create mappings.", action="store_true")
+    parser.add_argument("--fill-custom-mapping", help="Uses the custom_uforia_mapping.cfg file to fill mappings.", action="store_true")
     parser.add_argument("--fill-files", help="Uses the hardcoded format of the files table to fill it.", action="store_true")
 
 
@@ -131,7 +125,9 @@ if __name__ == "__main__":
         parser.print_help()
         sys.exit(1)
 
-    elif args.make_map_files:
+    uf_globals.init() # calls global config / db loading
+
+    if args.make_map_files:
         generate_table_list( _files = True )
 
     elif args.make_es_mappings:
@@ -154,3 +150,6 @@ if __name__ == "__main__":
 
     elif args.fill_files:
         hardcoded.populate_files_mapping()
+
+    elif args.fill_custom_mapping:
+        ufm.make_custom_mapping(fill = True)
