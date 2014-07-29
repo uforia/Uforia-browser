@@ -45,7 +45,7 @@ var opts = {
 
 //init the page
 $( document ).ready(function() {
-  target = $("#content");
+  target = $("#email");
   spinner = new Spinner(opts);
 
   //Not ideal but works for now
@@ -54,12 +54,12 @@ $( document ).ready(function() {
   $("#header").text(params.address1 + " - " + params.address2);
   params.hashids = params.hashids.split(",");
   api_call += $.param(params);
-  // spinner.spin(target);
+  spinner.spin(target);
   $.get(api_call, function( data ) {
+    spinner.stop();
     emails = data;
     fillSubjectSelect(emails);
 
-    // spinner.stop();
     if(emails.length > 0){
       showEmailDetails(emails[0].hashid);
     }
@@ -95,12 +95,13 @@ function defaultFor(arg, val) {
 function showEmailDetails(hashid){
   $.each(emails, function(index, email){
     if(email.hashid == hashid) {
-      $("#date").text(defaultFor(email.Date, 'Unknown date'));
-      $("#subject").text(defaultFor(email.Subject, 'Unknown Subject'));
-      $("#from").text(defaultFor(email.From, 'Unknown sender'));
-      $("#to").text(defaultFor(email.To, '') + " " + defaultFor(email.XTo, ''));
-      $("#cc").text(defaultFor(email.Cc,'') + " " + defaultFor(email.Xcc, ''));
-      $("#bcc").text(defaultFor(email.Bcc, '') + " " + defaultFor(email.Xbcc, ''));
+      // $("#date").text(defaultFor(email.Date, 'Unknown date'));
+      // $("#subject").text(defaultFor(email.Subject, 'Unknown Subject'));
+      // $("#from").text(defaultFor(email.From, 'Unknown sender'));
+      // $("#to").text(defaultFor(email.To, '') + " " + defaultFor(email.XTo, ''));
+      // $("#cc").text(defaultFor(email.Cc,'') + " " + defaultFor(email.Xcc, ''));
+      // $("#bcc").text(defaultFor(email.Bcc, '') + " " + defaultFor(email.Xbcc, ''));
+      $("#full_path").html(defaultFor(email.fullpath, 'Couldn\'t get file path'));
       $("#content").html(defaultFor(email.Email_Content, 'No Content'));
     }
   });
@@ -114,8 +115,11 @@ function showEmailDetails(hashid){
     <div class="sidebar">
       <div class="items_header">Evidence Items</div>
       <select id="subjects" size="2" onchange="showEmailDetails(this.value);" selected="selected"></select>
+      <p>Select an item for details</p>
     </div>
     <div class="email">
+        <div class="fullpath_header">Full path</div>
+        <div class="fullpath_contents" id="full_path"></div>
         <div class="email_header">E-mail Contents</div>
         <div class="email_contents" id="content"></div>
     </div>

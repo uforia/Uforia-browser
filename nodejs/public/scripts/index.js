@@ -1,9 +1,9 @@
 //Execute on page load 
-var type = 'message_rfc822';
+var type = 'email';
 var view = 'chord';
 
 function init(){
-    //loadMimetypeAttributes(type, '.parameter');
+    loadTypes();
     loadViewTypes(type);
     addParameter();
     showMessage("Enter a query");
@@ -22,25 +22,30 @@ function init(){
 
 //Load the right css for the right D3 visualisation
 function changeType(select){
+    type = select.value;
+
     switch(select.value){
         case "files":
-            type = 'files';
             view = 'bubble';
             break;
-        case "message_rfc822":
-            type = 'message_rfc822';
+        case "email":
             view = 'chord';
             break; 
+        case "documents":
+            view = 'bar_chart';
+            break;
         default:
-            type = 'files';
+            type = 'email';
+            view = 'chord';
             break;
     }
 
+    //Clear the visualization and search parameters
+    loadViewTypes(type);
     removeSVG();
     removeParameters();
-    loadViewTypes(type);
     changeScripts();
-    search();
+    loadResultCount();
 }
 
 //Load a different view for the same mimetype
@@ -58,10 +63,10 @@ function changeScripts(){
 
 //clear the d3 svg from the page
 function removeSVG(){
-    //$('#d3_svg').remove();
     $('#d3_visualization').empty();
 }
 
+// Add a search parameter
 function addParameter(){
     var param = $('<div class="param"></div>');
     var paramField = $('<select class="paramField" onchange="loadResultCount();changeParamType($(this).parent());"></select>');
@@ -81,7 +86,6 @@ function addParameter(){
 
     param.appendTo("#parameters").hide().slideDown('fast');
     loadMimetypeAttributes(type, param.find("select.paramField"));
-    changeParamType(param);
 }
 
 //This function decides wether a parameter should be a normal query or a date input and changes it if necessary
@@ -133,6 +137,22 @@ function loadMimetypeAttributes(type, element){
         element.find('option').remove().end();
         Object.keys(data).forEach(function(key){
             element.append($("<option>", { value: key, text: key, data : { 'type' : data[key].type}}));
+        });
+
+        //Check if it's a date field, if so change it to a date layout
+        changeParamType(element.parent());
+    });
+}
+
+function loadTypes(){
+    var select = $('#search_type');
+    $.get("api/get_types", function(data){
+        select.find('option').remove().end();
+
+        $.each(data, function(key, value) {
+                select
+                    .append($('<option>', { value : key})
+                    .text(value['name'])); 
         });
     });
 }
@@ -189,6 +209,7 @@ function search(){
         }
     };
 
+	//Get all the search parameters and add them to the query object.
     $(".param").each(function(index){
         var field = $(this).find("select.paramField").val();
         var operator = $(this).find("select.paramOperator").val();
@@ -225,6 +246,7 @@ function loadResultCount(){
         }
     };
 
+    //Get all the search parameters and add them to the query object.
     $(".param").each(function(index){
         var field = $(this).find("select.paramField").val();
         var operator = $(this).find("select.paramOperator").val();

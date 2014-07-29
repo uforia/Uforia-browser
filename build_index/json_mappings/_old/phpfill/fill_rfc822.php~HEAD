@@ -1,16 +1,9 @@
 ﻿<?php
 define ( 'MESSAGE_BATCH_PER_RUN', 10000000 );
-<<<<<<< HEAD
 define ( 'DB_USERNAME', 'uforia' );
 define ( 'DB_PASSWORD', 'uforia' );
 define ( 'DB_HOST', 'localhost' );
 define ( 'DB_NAME', 'uforia' );
-=======
-define ( 'DB_USERNAME', '' );
-define ( 'DB_PASSWORD', '' );
-define ( 'DB_HOST', '' );
-define ( 'DB_NAME', '' );
->>>>>>> a52356219b10e52dfda8d2a60963a981eafeb471
 
 // DO NOT EDIT ANYTHING BEYOND THIS LINE
 // Create database connection.
@@ -38,7 +31,7 @@ for($message_offset = 0; $message_offset < $total_messages; $message_offset += M
         echo "LIMIT: " . MESSAGE_BATCH_PER_RUN . "\n";
 
         $sql = "
-            SELECT `hashid`, `Delivered_To`, `Original_Recipient`, `Received`, `Return_Path`, `Received_SPF`, `Authentication_Results`, `DKIM_Signature`, `DomainKey_Signature`, `Organization`, `MIME_Version`, `List_Unsubscribe`, `X_Received`, `X_Priority`, `X_MSMail_Priority`, `X_Mailer`, `X_MimeOLE`, `X_Notifications`, `X_Notification_ID`, `X_Sender_ID`, `X_Notification_Category`, `X_Notification_Type`, `X_UB`, `Precedence`, `Reply_To`, `Auto_Submitted`, `Message_ID`, `Date`, `Subject`, `From`, `To`, `XTo`, `Xcc`, `Xbcc`, `Cc`, `Bcc`, `Content_Type`
+            SELECT `hashid`, `Delivered_To`, `Original_Recipient`, `Received`, `Return_Path`, `Received_SPF`, `Authentication_Results`, `DKIM_Signature`, `DomainKey_Signature`, `Organization`, `MIME_Version`, `List_Unsubscribe`, `X_Received`, `X_Priority`, `X_MSMail_Priority`, `X_Mailer`, `X_MimeOLE`, `X_Notifications`, `X_Notification_ID`, `X_Sender_ID`, `X_Notification_Category`, `X_Notification_Type`, `X_UB`, `Precedence`, `Reply_To`, `Auto_Submitted`, `Message_ID`, `Date`, `Subject`, `From`, `To`, `XTo`, `Xcc`, `Xbcc`, `Cc`, `Bcc`, `Content_Type`, `Email_Content`
                 FROM `63c5e0bd853105c84a2184539eb245`
                 ORDER BY `hashid` ASC";
                 //LIMIT " . ( int ) $message_offset . "," . ( int ) MESSAGE_BATCH_PER_RUN . "";
@@ -56,32 +49,7 @@ for($message_offset = 0; $message_offset < $total_messages; $message_offset += M
                 // Create data object
                 $data_string = json_encode ( array (
                                 "hashid" => $fetched_result ['hashid'],
-                                "Delivered_To" => $fetched_result ['Delivered_To'],
-                                "Original_Recipient" => $fetched_result ['Original_Recipient'],
-                                "Received" => $fetched_result ['Received'],
-                                "Return_Path" => $fetched_result ['Return_Path'],
-                                "Received_SPF" => $fetched_result ['Received_SPF'],
-                                "Authentication_Results" => $fetched_result ['Authentication_Results'],
-                                "DKIM_Signature" => $fetched_result ['DKIM_Signature'],
-                                "DomainKey_Signature" => $fetched_result ['DomainKey_Signature'],
                                 "Organization" => $fetched_result ['Organization'],
-                                "MIME_Version" => $fetched_result ['MIME_Version'],
-                                "List_Unsubscribe" => $fetched_result ['List_Unsubscribe'],
-                                "X_Received" => $fetched_result ['X_Received'],
-                                "X_Priority" => $fetched_result ['X_Priority'],
-                                "X_MSMail_Priority" => $fetched_result ['X_MSMail_Priority'],
-                                "X_Mailer" => $fetched_result ['X_Mailer'],
-                                "X_MimeOLE" => $fetched_result ['X_MimeOLE'],
-                                "X_Notifications" => $fetched_result ['X_Notifications'],
-                                "X_Notification_ID" => $fetched_result ['X_Notification_ID'],
-                                "X_Sender_ID" => $fetched_result ['X_Sender_ID'],
-                                "X_Notification_Category" => $fetched_result ['X_Notification_Category'],
-                                "X_Notification_Type" => $fetched_result ['X_Notification_Type'],
-                                "X_UB" => $fetched_result ['X_UB'],
-                                "Precedence" => $fetched_result ['Precedence'],
-                                "Reply_To" => $fetched_result ['Reply_To'],
-                                "Auto_Submitted" => $fetched_result ['Auto_Submitted'],
-                                "Message_ID" => $fetched_result ['Message_ID'],
                                 "Date" => $fetched_result ['Date'],
                                 "Subject" => $fetched_result ['Subject'],
                                 "From" => $fetched_result ['From'],
@@ -92,7 +60,7 @@ for($message_offset = 0; $message_offset < $total_messages; $message_offset += M
                                 "Cc" => $fetched_result ['Cc'],
                                 "Bcc" => $fetched_result ['Bcc'],
                                 "Content_Type" => $fetched_result ['Content_Type'],
-
+                                "Body" => $fetched_result ['Email_Content'],
                 ) );
 
                 $ch = curl_init ( 'http://localhost:9200/uforia/message_rfc822/' . $message_iterator );
