@@ -6,7 +6,9 @@ from pyes import *
 def make_custom_mapping(fill=False):
     """
     Uses the file 'include/custom_uforia_mapping.cfg' to create new mappings
-    and fill them accordingly.
+    and/or fill them accordingly.
+    Fires fill_mapping() for each table in the configfile or just supplies a list
+    if all it requires is to create a mapping.
 
     """
     mapconfig = ConfigParser.SafeConfigParser()
@@ -45,7 +47,6 @@ def make_custom_mapping(fill=False):
                 fill_mapping(mapping_name=name, tablename=moduledict[table], fieldlist=fields)
             else:
                 tablelist.append(moduledict[table])
-            #create_mapping(mapping_name=name, tablename=moduledict[table], fieldlist=fields)
 
 
         # send the list of tables and fields on to create_mapping
@@ -131,13 +132,21 @@ def create_mapping(mapping_name=None, tablename=None, fieldlist=None, make_files
             print "MAPPING: %s " % mapping
  
 def fill_mapping(mapping_name=None, tablename=None, fieldlist=None):
-    
+    """
+    fill_mapping() gets supplied a mapping_name from the config file
+    tablename is the hash that doubles as the tablename, telling us which tables to query
+    fieldlist contains every field the mapping will have, not all of them have to be filled
+
+    return_dict here returns the queried data back as 'key : value' pairs allowing us
+    to query for a value using the fieldlist.
+
+    """
     if not mapping_name:
         raise Exception("fill_mapping called without a mapping_name")
     elif not tablename:
         raise Exception("fill_mapping called without a table")
     else:
-        conn = ES(uf_globals.config.ESSERVER)
+        conn = ES([uf_globals.config.ESSERVER]) # ES(['']) is thrift ES('') is HTTP
         print("Retrieving table from database (this could take a little while).")
         tableData = uf_globals.db.read_table(_table=tablename, columnsonly=False, return_dict=True) # onerow=True)
 
@@ -162,6 +171,8 @@ def fill_mapping(mapping_name=None, tablename=None, fieldlist=None):
             fieldlist.append("tablename")
             print("< DEBUG! > appended 'tablename' to list")
 
+        mapdata = {}
+
         for row,field in itertools.izip(tableData,fieldlist):
 #            for value,field in itertools.izip(row,fieldlist):
 #             print "value %s" % value
@@ -169,25 +180,17 @@ def fill_mapping(mapping_name=None, tablename=None, fieldlist=None):
             # meaning we can use the fieldlist supplied from the config file
             # as a key to retrieve data from the dict SQL data
             try:
-                print row[field]
+                #print row[field]
+                mapdata[field] = row[field]
             except:
                 # If the key does not exist, we continue anyway
+                mapdata[field] = ""
                 pass
             print "field %s" % field
-#            print "row %s" % row # entire row
 
-            continue
-#             sys.exit(0)
-#            jsonName = _name[0][0].encode('ascii') # _name is a unicode string
-#            jsonName = jsonName.replace('"','') # or it'll give "\""_name"\"" in JSON
-#            if _name == "tablename": continue # forcefully added
-
-#            mapping[jsonName] = submap
-            # make sure only new fields get added to the mapping
-#            fieldlist.remove(jsonName)
-
-#        else:
-#            conn.indices.put_mapping(str(newname), {'properties':mapping}, [uf_globals.config.ESINDEX])
-#            print "NAME %s " % newname
-#            print "MAPPING: %s " % mapping
- 
+        # put the dict with data into our index and mapping
+        try:
+            conn.index(mapdata, uf_globals.config.ESINDEX, mapping_name)
+            print("Successfully input data into mapping %s for index %s" % mapping_name, uf_globals.config.ESINDEX)
+        except:
+            print("Unable to input data into mapping %s for index %s." % mapping_name, uf_globals.config.ESINDEX)
