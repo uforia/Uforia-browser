@@ -57,8 +57,6 @@ docs/_build/
 # custom
 backup/
 analytics.js
-<<<<<<< HEAD
 jsonfiles/
-=======
 uforia-config.js
 
