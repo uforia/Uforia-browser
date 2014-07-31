@@ -1,0 +1,199 @@
+/* general css */
+
+html {
+    height: 100%;
+    width: 100%;
+    margin: 0px;
+    padding: 0px;
+    font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+    font-size: 12px;
+    font-weight: normal;
+}
+
+body {
+    margin: 0px;
+}
+
+h1 {
+    font-size: 30px;
+    font-weight: normal;
+}
+
+h2 {
+    font: sans-serif;
+    font-size: 15px;
+}
+
+div.content div.sidebarLeft div.visualizeBox p select#view_type {
+    width: 180px;
+    height: 100px;
+    padding: 8px;
+    cursor:pointer;
+    border: 1px solid #000;
+    margin:0px 10px 10px 10px;
+}
+
+div.header {
+    width: 1400px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+div.content{
+    width: 100%;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+div.container {
+    width: 80%;
+    display: inline-block;
+    overflow: auto;
+}
+
+div.container h2 {
+    margin:0px 10px 10px 10px;
+}
+
+div.sidebarLeft {
+    float: left;
+    width: 200px;
+    text-align: center;
+    margin: auto;
+}
+
+div.sidebarRight {
+    float: right;
+    width: 200px;
+    text-align: center;
+    margin: auto;
+}
+
+input[type="button"] {
+    padding: 8px;
+    font-size: 16px;
+    color: #FFFFFF;
+    background-color: #747474;
+    cursor: pointer;
+    border: 1px solid #000;
+    margin:0px 10px 10px 10px;
+}
+
+input[type="text"]{
+    width: 230px;
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #000;
+    margin: 0px 10px 10px 10px;
+}
+
+select {
+    width: 180px;
+    padding: 8px;
+    cursor:pointer;
+    border: 1px solid #000;
+    margin:0px 10px 10px 10px;
+}
+
+select.listbox {
+    height: 400px;
+}
+
+#available_fields, #selected_fields {
+    border: 1px solid #eee;
+    min-width: 250px;
+    min-height: 60px;
+    list-style-type: none;
+    margin: 0;
+    padding: 5px 0 0 0;
+    float: left;
+    margin-right: 10px;
+}
+
+#available_fields li, #selected_fields li {
+    margin: 0 5px 5px 5px;
+    padding: 5px;
+    font-size: 1.2em;
+    width: auto;
+}
+
+
+/* Big red button */
+$colour:hsla(350,100%,25%,1);
+$grey:desaturate($colour,90%);
+body {
+  background:lighten($grey,30%);
+    background-image:
+    linear-gradient(40deg,transparentize($grey,0.95),transparentize($colour,0.95)),
+
+    linear-gradient(135deg,
+        lighten($grey,18%) 0%,
+        lighten($grey,18%) 10%,
+        lighten($grey,25%) 11%,
+        lighten($grey,25%) 40%,
+        lighten($grey,35%) 41%,
+        lighten($grey,35%) 50%,
+        lighten($grey,18%) 51%,
+        lighten($grey,18%) 60%,
+        lighten($grey,25%) 61%,
+        lighten($grey,25%) 90%,
+        lighten($grey,35%) 91%)
+    ;
+    background-size:7px 7px, 4px 4px;
+}
+
+
+button {
+  outline:none;
+  font-family:'helvetica neue' sans-serif; font-size:2em;
+  color:hsla(350,0%,100%,1); text-shadow:-1px -1px 1px hsla(350,0%,0%,0.7), 1px 1px 1px hsla(350,0%,100%,0.3);
+  display:block; margin:2em auto; padding:23px 37px 25px 35px;
+  cursor:pointer;
+  background-color:hsla(350,80%,10%,1);
+  background-image:
+    linear-gradient(273deg,hsla(350,80%,60%,1) 30%, hsla(350,80%,50%,1) 40%)
+  ;
+  border:none; border-radius:16px;
+  box-shadow:
+    inset 0px 0px 1px 1px hsla(350,80%,30%,0.9),
+    inset 0px 0px 2px 3px hsla(350,80%,50%,0.9),
+    inset 1px 1px 1px 4px hsla(350,80%,100%,0.8),
+    inset 0px 0px 2px 7px hsla(350,80%,60%,0.8),
+    inset 0px 0px 4px 10px hsla(350,80%,50%,0.9),
+    8px 10px 2px 6px hsla(350,80%,20%,0.55),
+    0px 0px 3px 2px hsla(350,80%,40%,0.9),
+    0px 0px 2px 6px hsla(350,80%,50%,0.9),
+    /*0px 0px 2px 3px hsla(350,80%,60%,0.9),*/
+    -1px -1px 1px 6px hsla(350,80%,100%,0.9),
+    /*0px 0px 2px 8px hsla(350,80%,60%,0.9),*/
+    0px 0px 2px 11px hsla(350,80%,50%,0.9),
+    0px 0px 1px 12px hsla(350,80%,40%,0.9),
+    1px 3px 14px 14px hsla(350,80%,0%,0.4)
+  ;
+}
+
+button:active {
+  color:hsla(350,0%,85%,1); padding:26px 34px 22px 38px;
+  background-image:
+    linear-gradient(273deg,hsla(350,80%,50%,1) 50%, hsla(350,80%,55%,1) 60%)
+  ;
+  box-shadow:
+    inset 3px 4px 3px 2px hsla(350,80%,20%,0.55),
+    inset 0px 0px 1px 1px hsla(350,80%,30%,0.9),
+    inset -1px -1px 2px 3px hsla(350,80%,50%,0.9),
+    inset -2px -2px 1px 3px hsla(350,80%,100%,0.8),
+    inset 0px 0px 2px 7px hsla(350,80%,60%,0.8),
+    inset 0px 0px 3px 10px hsla(350,80%,50%,0.9),
+    
+    0px 0px 3px 2px hsla(350,80%,40%,0.9),
+    0px 0px 2px 6px hsla(350,80%,50%,0.9),
+    /*0px 0px 2px 3px hsla(350,80%,60%,0.9),*/
+    -1px -1px 1px 6px hsla(350,80%,100%,0.9),
+    /*0px 0px 2px 8px hsla(350,80%,60%,0.9),*/
+    0px 0px 2px 11px hsla(350,80%,50%,0.9),
+    0px 0px 1px 12px hsla(350,80%,40%,0.9),
+    1px 3px 14px 14px hsla(350,80%,0%,0.4)
+  ;
+}
