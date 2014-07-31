@@ -13,22 +13,28 @@
 # GNU General Public License for more details.
 
 
-import ConfigParser
+import sys, json, ConfigParser
 from ast import literal_eval
 import uf_globals
 
-def parse_mapping_config():
-    """
-    parse_mapping_config will treat the mapfile var as a file when supplied.
-    If nothing is supplied it wil not run.
+class mdict(dict):
 
+    def __setitem__(self, key, value):
+        """add the given value to the list of values for this key"""
+        self.setdefault(key, []).append(value)
+
+
+def parse_mapping_config(configfile="include/custom_uforia_mapping.cfg"):
+    """
     What it'll do is add a 'fields' option to the configuration file.
+    It grabs all the fields for each module within the config file, removes doubles
+    and writes it to a list.
 
     """
     mapconfig = ConfigParser.SafeConfigParser()
 
     try:
-        mapconfig.read('include/custom_uforia_mapping.cfg')
+        mapconfig.read(configfile)
     except:
         print("< ERROR! > MAPPING Config file not supplied or not configured correctly.")
         sys.exit(1)
@@ -58,6 +64,49 @@ def parse_mapping_config():
             mapconfig.write(configfile)
 
         print("Successfully added 'fields' option to the config file for %s" % name)
+
+def gen_admin_config():
+    """
+    The admin config file is in full JSON format.
+
+    """
+    supmimetable = uf_globals.db.read_table(_table="supported_mimetypes", columnsonly=False)
+
+#    mainkey = 'modules'
+    ml = {}
+    configarray = []
+#    ml[mainkey] = {}
+
+    for line in supmimetable:
+        mimetype = line[0]
+        tables_dict = literal_eval(line[1])
+
+        mimetype = mimetype.replace("/","_")
+        ml['name'] = mimetype.encode('ascii')
+        ml['modules'] = tables_dict
+
+        #print ml
+        #sys.exit(0)
+
+        fields = []
+
+        for table in tables_dict:
+            columns = uf_globals.db.read_table(_table=tables_dict[table]) # returns columns only by default
+            fields.append([x[0].encode('ascii') for x in columns]) # mysql returns it in unicode format which we don't want
+        
+        # merge the lists
+        fields = [item for sublist in fields for item in sublist]
+        fields = list(set(fields)) # remove duplications
+
+        ml['fields'] = fields 
+        configarray.append(ml)
+
+
+    with open('include/uforia_admin.cfg', 'wb') as outfile:
+       json.dump(configarray, outfile, indent=4, sort_keys=True)
+
+    print("File intluce/uforia_admin.cfg has been successfully created.")
+
 
 def make_custom_mapping():
     """

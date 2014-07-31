@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+import uf_globals
+
 def read_data():
     """
     
@@ -11,10 +13,10 @@ def read_data():
    # db = database.Database(config)
     
     print("\nReading the mimetypes table:\n")
-    print(db.read_mimetypes()) # print the modules column first
-    print(db.read_mimetypes(column="mime_type"))
+    print(uf_globals.db.read_mimetypes()) # print the modules column first
+    print(uf_globals.db.read_mimetypes(column="mime_type"))
 
     print("\nReading the files table:\n")
-    print(db.read_filestable()) # just print the column names, files is table rather large
+    print(uf_globals.db.read_filestable()) # just print the column names, files is table rather large
 
 

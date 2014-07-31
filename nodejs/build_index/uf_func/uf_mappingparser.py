@@ -3,7 +3,7 @@ import uf_globals, es_coretypes
 from pyes import *
 
 
-def make_custom_mapping(fill=False):
+def make_custom_mapping(fill=False,configfile='include/custom_uforia_mapping.cfg'):
     """
     Uses the file 'include/custom_uforia_mapping.cfg' to create new mappings
     and/or fill them accordingly.
@@ -12,17 +12,21 @@ def make_custom_mapping(fill=False):
 
     """
     mapconfig = ConfigParser.SafeConfigParser()
+    print("< DEBUG! >Entering custom_mapping func")
 
     try:
-        mapconfig.read('include/custom_uforia_mapping.cfg')
+        mapconfig.read(configfile)
     except:
         print("< ERROR! > MAPPING Config file not supplied or not configured correctly.")
         sys.exit(1)
 
     mappings = mapconfig.sections()
     fields = None
+    #print("< DEBUG! > mapconfig %s" % mapconfig)
+    #print("< DEBUG! > mappings %s" % mappings)
 
     for name in mappings:
+        print("< DEBUG! > %s" %name)
 
         # check for the database names
         if (mapconfig.has_option(name, 'modules')):
@@ -128,8 +132,9 @@ def create_mapping(mapping_name=None, tablename=None, fieldlist=None, make_files
                 json.dump(mapping, outfile)
         else:
             conn.indices.put_mapping(str(newname), {'properties':mapping}, [uf_globals.config.ESINDEX])
-            print "NAME %s " % newname
-            print "MAPPING: %s " % mapping
+#            print "NAME %s " % newname
+#            print "MAPPING: %s " % mapping
+            print("Done.")
  
 def fill_mapping(mapping_name=None, tablename=None, fieldlist=None):
     """

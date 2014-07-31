@@ -14,7 +14,7 @@
 
 
 
-import imp
+import imp,os
 
 def init():
 
@@ -22,10 +22,10 @@ def init():
     global database
     global db
 
-    config = imp.load_source('config', 'include/default_config.py')
+    config = imp.load_source('config', os.path.dirname(os.path.realpath(__file__))+'include/default_config.py')
 
     try:
-        config = imp.load_source('config', 'include/config.py')
+        config = imp.load_source('config', os.path.dirname(os.path.realpath(__file__))+'include/config.py')
     except:
         print("< WARNING! > Config file not found in include / or not configured correctly, loading default config.")
 

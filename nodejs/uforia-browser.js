@@ -3,7 +3,9 @@ var express = require("express");
 var app = express();
 
 //Requirements
-var config = require('./uforia-config')
+var fs = require('fs');
+var python = require('python-shell');
+var config = require('./uforia-config');
 var util = require('./mimetype_modules/util');
 var files = require('./mimetype_modules/files');
 var email = require('./mimetype_modules/email');
@@ -26,6 +28,14 @@ var pool = mysql.createPool({
 });
 
 //'Constants'
+var MAPPINGS_SCRIPT = "main.py";
+var MAPPING_SCRIPT_OPTIONS = {
+  pythonPath : '/usr/bin/python',
+  args: ['--parse-admin-file'],
+  scriptPath : __dirname + '/build_index',
+};
+var MAPPINGS_INPUT_FILE = './build_index/include/uforia_admin.cfg';
+var MAPPINGS_OUTPUT_FILE = './build_index/admin_output/uforia_admin_output.cfg';
 var INDEX = 'uforia';
 var DEFAULT_TYPE = 'files';
 var DEFAULT_VIEW = 'bubble';
@@ -48,7 +58,7 @@ app.engine('html', require('ejs').renderFile);
 //Set the public files directory
 app.use(express.static(__dirname + '/public'));
 
-//Handle requests
+//renders index.html
 app.get('/', function(req, res){
   res.render('index.html');
 });
@@ -69,7 +79,15 @@ app.get('/file_details', function(req, res){
       res.render('index.html');
       break; 
   }
-})
+});
+
+/* Renders the admin panel
+* takes params:
+*
+*/
+app.get('/admin', function(req, res){
+    res.render('admin.html');
+});
 
 /* Query elasticsearch
 * takes params:
@@ -300,7 +318,62 @@ app.get("/api/get_file_details", function(req, res){
       });
     }
   });
-});  
+});
+
+/* Return the indexed mappings for a type
+* takes params:
+* 
+*/
+app.get("/api/get_mappings", function(req, res){
+  fs.readFile(MAPPINGS_INPUT_FILE, 'utf8', function (err, data) {
+    if (err) {
+      console.log("File read err " + err.message);
+      res.send();
+    };
+    res.send(JSON.parse(data));
+  });
+});
+
+/*
+* Writes a costom mapping format to a file and starts the mapping script
+* takes params:
+* name
+* modules - object
+* fields - array
+*/
+app.get("/api/create_mapping", function(req, res){
+  var name = util.defaultFor(req.param('name'), "");
+  var modules = util.defaultFor(req.param('modules'), {});
+  var fields = util.defaultFor(req.param('fields'), []);
+
+  if(name == "" || modules == {} || fields == []){
+    res.send("Unsuccessful");
+    return;
+  }
+
+  //Create or truncate the file
+  fs.openSync(MAPPINGS_OUTPUT_FILE, 'w');
+  fs.chmodSync(MAPPINGS_OUTPUT_FILE, 0666);
+
+  //Write it
+  var stream = fs.createWriteStream(MAPPINGS_OUTPUT_FILE);
+  stream.once('open', function(fd) {
+    stream.write('[' + name + ']\n');
+    stream.write('modules = '+ JSON.stringify(modules) + '\n');
+    stream.write('fields = '+ JSON.stringify(fields) + '\n');
+    stream.end();
+
+    python.run(MAPPINGS_SCRIPT, MAPPING_SCRIPT_OPTIONS, function(err, results){
+      if(err) {
+        console.log("Can't start mapping script: " + err.stack);
+        res.send("Written mapping file but couldn't start mapping script");
+        return;
+      }
+      console.log(results);
+      res.send("Successfully started script");
+    });
+  });
+});
 
 //Search and return the result
 var search = function(search_request, res, view){

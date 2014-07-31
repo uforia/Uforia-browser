@@ -14,7 +14,7 @@
 
 
 import os, sys, imp, inspect
-import json
+import json, time
 import itertools
 import ConfigParser, argparse
 from ast import literal_eval
@@ -39,6 +39,7 @@ from uf_func import es_coretypes
 from uf_func import uf_mappingparser as ufm
 from uf_func import uf_configparser as ufc
 from uf_func import uf_globals
+from uf_func import uf_admin as ufa
 
 def generate_table_list(_files = False):
     """
@@ -105,8 +106,8 @@ if __name__ == "__main__":
                         action="store_true")
     parser.add_argument("--make-es-mappings", help="Will generate all mappings and send them directly into Elasticsearch.(does not use your custom file)", 
                         action="store_true")
-    parser.add_argument("--test-run", help="Reads data from database and outputs it to stdout.",
-                        action="store_true")
+#    parser.add_argument("--test-run", help="Reads data from database and outputs it to stdout.",
+#                        action="store_true")
     parser.add_argument("--delete-index", help="Delete the index set in your config file. (Default is Uforia)", 
                         action="store_true")
     parser.add_argument("--all-modules-config", help="Create a config file with all mimetypes and their respective modules.",
@@ -116,7 +117,8 @@ if __name__ == "__main__":
     parser.add_argument("--make-custom-mapping", help="Uses the custom_uforia_mapping.cfg file to create mappings.", action="store_true")
     parser.add_argument("--fill-custom-mapping", help="Uses the custom_uforia_mapping.cfg file to fill mappings.", action="store_true")
     parser.add_argument("--fill-files", help="Uses the hardcoded format of the files table to fill it.", action="store_true")
-
+    parser.add_argument("--gen-admin-file", help="Generates a new file for use by the front-end admin interface.", action="store_true")
+    parser.add_argument("--parse-admin-file", help="Uses the file admin_output/uforia_admin_output.cfg to make mappings.", action="store_true")
 
     args = parser.parse_args()
     
@@ -133,8 +135,8 @@ if __name__ == "__main__":
     elif args.make_es_mappings:
         generate_table_list()
 
-    elif args.test_run:
-        build_tests.read_data()
+#    elif args.test_run:
+#        build_tests.read_data()
 
     elif args.delete_index:
         del_index()
@@ -153,3 +155,11 @@ if __name__ == "__main__":
 
     elif args.fill_custom_mapping:
         ufm.make_custom_mapping(fill = True)
+
+    elif args.gen_admin_file:
+        ufc.gen_admin_config()
+
+    elif args.parse_admin_file:
+        #time.sleep(5) # nodejs async, temp fix
+        #print("< DEBUG! >Starting custom_mapping function")
+        ufm.make_custom_mapping(configfile="build_index/admin_output/uforia_admin_output.cfg")

@@ -59,4 +59,5 @@ backup/
 analytics.js
 jsonfiles/
 uforia-config.js
-
+admin_output/
+uforia_admin.cfg
