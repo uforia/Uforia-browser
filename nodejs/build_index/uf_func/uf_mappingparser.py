@@ -100,7 +100,11 @@ def create_mapping(mapping_name=None, tablename=None, fieldlist=None, make_files
         # hashid should always be included
         if "hashid" not in fieldlist:
             fieldlist.append("hashid")
-            print("< DEBUG! > appended 'hashid' to list")
+            print("< DEBUG! > appended 'hashid' to mapping")
+
+        if "visualization" not in fieldlist:
+            fieldlist.append("visualization")
+            print("< DEBUG! > appended 'visualization' to mapping")
 
         for _name in itertools.izip(tableData):
             jsonName = _name[0][0].encode('ascii') # _name is a unicode string
@@ -177,25 +181,34 @@ def fill_mapping(mapping_name=None, tablename=None, fieldlist=None):
             print("< DEBUG! > appended 'tablename' to list")
 
         mapdata = {}
+        skip = False
 
-        for row,field in itertools.izip(tableData,fieldlist):
-#            for value,field in itertools.izip(row,fieldlist):
-#             print "value %s" % value
+        for row,field in itertools.izip_longest(tableData,fieldlist):
+            # for value,field in itertools.izip(row,fieldlist):
+            # print "value %s" % value
             # We're using a dict cursor in mySQL
             # meaning we can use the fieldlist supplied from the config file
             # as a key to retrieve data from the dict SQL data
             try:
-                #print row[field]
                 mapdata[field] = row[field]
             except:
                 # If the key does not exist, we continue anyway
-                mapdata[field] = ""
-                pass
-            print "field %s" % field
+                mapdata[field] = "NULL"
+                #pass
+       # put the dict with data into our index and mapping
 
-        # put the dict with data into our index and mapping
-        try:
-            conn.index(mapdata, uf_globals.config.ESINDEX, mapping_name)
-            print("Successfully input data into mapping %s for index %s" % mapping_name, uf_globals.config.ESINDEX)
-        except:
-            print("Unable to input data into mapping %s for index %s." % mapping_name, uf_globals.config.ESINDEX)
+        if mapdata["hashid"] == "NULL":
+            skip = True
+
+        if skip:
+            #print("No hashid, skipping: %s" % (mapdata))
+            return
+        else:
+            #print ("this would input into ES: %s " % (mapdata))
+            #return
+        
+            try:
+                conn.index(mapdata, uf_globals.config.ESINDEX, mapping_name)
+                print("Successfully input data into mapping %s for index %s" % (mapping_name, uf_globals.config.ESINDEX))
+            except:
+                print("Unable to input data into mapping %s for index %s." % (mapping_name, uf_globals.config.ESINDEX))

@@ -2,14 +2,24 @@
 var express = require("express");
 var app = express();
 
-//Requirements
+//3rd party Requirements
 var fs = require('fs');
+// var threadPool = require('threads_a_gogo'); //If this line starts erroring unexpectedly: https://github.com/xk/node-threads-a-gogo/issues/47
 var python = require('python-shell');
+var workerFarm = require('worker-farm');
+var workerOptions = { maxCallTime : 10000 } //Kill a process after 10 secs
+
+var workersEmail = workerFarm(require.resolve('./mimetype_modules/email'), ['createEmailChordDiagram' , 'createEmailGraph', 'createBarChart']);
+var workersFiles = workerFarm(require.resolve('./mimetype_modules/files'), ['createFilesBubble']);
+var workersDocuments = workerFarm(require.resolve('./mimetype_modules/documents'), ['createBarChart']);
+
+//Uforia made requirements
 var config = require('./uforia-config');
 var util = require('./mimetype_modules/util');
 var files = require('./mimetype_modules/files');
 var email = require('./mimetype_modules/email');
 var documents = require('./mimetype_modules/documents');
+
 
 //Set up elasticsearch
 var elasticsearch = require('elasticsearch');
@@ -34,8 +44,8 @@ var MAPPING_SCRIPT_OPTIONS = {
   args: ['--parse-admin-file'],
   scriptPath : __dirname + '/build_index',
 };
-var MAPPINGS_INPUT_FILE = './build_index/include/uforia_admin.cfg';
-var MAPPINGS_OUTPUT_FILE = './build_index/admin_output/uforia_admin_output.cfg';
+var MAPPINGS_INPUT_FILE = __dirname + '/build_index/include/uforia_admin.cfg';
+var MAPPINGS_OUTPUT_FILE = __dirname + '/build_index/admin_output/uforia_admin_output.cfg';
 var INDEX = 'uforia';
 var DEFAULT_TYPE = 'files';
 var DEFAULT_VIEW = 'bubble';
@@ -330,7 +340,7 @@ app.get("/api/get_mappings", function(req, res){
       console.log("File read err " + err.message);
       res.send();
     };
-    res.send(JSON.parse(data));
+    res.send(data);
   });
 });
 
@@ -370,7 +380,7 @@ app.get("/api/create_mapping", function(req, res){
         return;
       }
       console.log(results);
-      res.send("Successfully started script");
+      res.send("Elasticsearch is now filling the mapping in the background.");
     });
   });
 });
@@ -381,7 +391,9 @@ var search = function(search_request, res, view){
     switch(search_request.type){
         case TYPES.files.mappings.toString():
                 try {
-                    res.send(files.groupByUser(resp.hits.hits));
+                  workersFiles.createFilesBubble(resp.hits.hits, function(data){
+                    res.send(data);
+                  });
                 }catch(err){
                     res.send();
                 }
@@ -389,19 +401,26 @@ var search = function(search_request, res, view){
         case TYPES.email.mappings.toString():
             if(view == 'chord'){
                 try {
-                    res.send(email.createEmailChordDiagram(resp.hits.hits));
+                  workersEmail.createEmailChordDiagram(resp.hits.hits, function(data){
+                    res.send(data);
+                  });
                 }catch(err){
+                    console.log(err.message);
                     res.send();
                 }
-            } else if (view == 'graph') { 
+            } else if (view == 'graph') {
                 try {
-                    res.send(email.createEmailGraph(resp.hits.hits));
+                  workersEmail.createEmailGraph(resp.hits.hits, function(data){
+                    res.send(data);
+                  });
                 }catch(err){
                     res.send();
                 }
             } else if(view == 'bar_chart'){
                 try {
-                    res.send(email.createBarChart(resp.hits.hits));
+                  workersEmail.createBarChart(resp.hits.hits, function(data){
+                    res.send(data);
+                  });
                 } catch(err){
                     res.send();
                 }
@@ -429,7 +448,12 @@ var server = app.listen(config.SERVER_PORT, function(){
 
 //Gracefully shutdown the server on termination signal
 process.on('SIGTERM', function () {
-  console.log("Shutting down");
+  
+    console.log("Shutting down");
+    console.log("Closing MySQL connections");
   pool.destroy();
+  console.log("Shutting down express");
   server.close();
+  console.log("Closing worker threads");
+  workerFarm.end();
 });

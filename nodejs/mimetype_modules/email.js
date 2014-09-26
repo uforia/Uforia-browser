@@ -2,12 +2,43 @@
 var util = require('./util');
 
 //These function will be public
-module.exports = {
+//Produces data for the Chord Diagram
+module.exports.createVisualization = function(res, view, resp) {
+    var thread = threads.create();
 
-	//Produces data for the Chord Diagram
-  createEmailChordDiagram: function(root){
+    if(view == 'chord'){
+        thread.eval(createEmailChordDiagram).eval('createEmailChordDiagram(' + JSON.stringify(resp.hits.hits) +')', function(err, result){
+            if(err){
+                console.log(err.message);
+            }
+            console.log(result);
+            res.send(result);
+        });
+
+        // try {
+        //   res.send(email.createEmailChordDiagram(resp.hits.hits));
+        // }catch(err){
+        //     console.log(err.message);
+        //     res.send();
+        // }
+    } else if (view == 'graph') { 
+        try {
+            res.send(email.createEmailGraph(resp.hits.hits));
+        }catch(err){
+            res.send();
+        }
+    } else if(view == 'bar_chart'){
+        try {
+            res.send(email.createBarChart(resp.hits.hits));
+        } catch(err){
+            res.send();
+        }
+    }
+}
+
+
+module.exports.createEmailChordDiagram = function(root, callback){
     var data = {total : 0, names : [], matrix : [], hashids : []};
-
 
     //Add all the emailaddresses to the names array
     root.forEach(function(child){
@@ -27,7 +58,7 @@ module.exports = {
         }
 
         to.forEach(function(receipient){
-        	//Check if this receipient alreayd has an entry
+            //Check if this receipient alreayd has an entry
             var toIndex = util.arrayObjectIndexOf(data.names, receipient, "name");
             if(toIndex > -1){ //Receipient has entry
                 data.names[toIndex].received += 1;
@@ -58,7 +89,7 @@ module.exports = {
         to.forEach(function(receipient){
             var toIndex = util.arrayObjectIndexOf(data.names, receipient, "name")
             if(toIndex > -1){
-            	//Create the link between the from 'address' and this 'to' address
+                //Create the link between the from 'address' and this 'to' address
                 data.matrix[fromIndex][toIndex] += 1;
                 data.matrix[toIndex][fromIndex] += 1;
                 //Also store the hashids of the email
@@ -68,11 +99,11 @@ module.exports = {
         });
     });
 
-    return data;
-  },
+    return callback(data);
+};
 
-  //Modify the result for an email graph
-  createEmailGraph: function(root){
+//Modify the result for an email graph
+module.exports.createEmailGraph = function(root, callback){
     var data = { total : 0, nodes : [], links : []};
 
     //check if a link already exists and returns its position
@@ -102,7 +133,7 @@ module.exports = {
         }
 
         to.forEach(function(receipient){
-        	//Check if the to address already has an entry. If so update it, otherwise create it
+            //Check if the to address already has an entry. If so update it, otherwise create it
             var toIndex = util.arrayObjectIndexOf(data.nodes, receipient, "name");
             if(toIndex > -1){
                 data.nodes[toIndex].received += 1;
@@ -134,10 +165,10 @@ module.exports = {
         });
     });
 
-    return data;
-  },
+    return callback(data);
+}
 
-  createBarChart: function(root){
+module.exports.createBarChart = function(root, callback){
     var data = { total : 0, dates : []};
 
     root.forEach(function(child){
@@ -162,8 +193,7 @@ module.exports = {
         return date1 - date2;
     });
 
-    return data;
-  }
+    return callback(data);
 };
 
 //Functions below are private

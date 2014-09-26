@@ -61,3 +61,5 @@ jsonfiles/
 uforia-config.js
 admin_output/
 uforia_admin.cfg
+nodejs/build_index/json_mappings/_old/phpfill/rebuild.sh
+.gitignore

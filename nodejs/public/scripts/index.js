@@ -99,8 +99,8 @@ function changeParamType(element){
             queryField.hide().fadeOut("slow", function(){
                 $(this).remove();
             });
-            var paramStartDate = $('<input class="paramStartDate paramDateField" type="text" placeholder="Start date" onchange="loadResultCount()" onkeydown="loadResultCount()" onpaste="loadResultCount()" oninput="loadResultCount()" />').datepicker({ dateFormat: 'dd-M-yy', changeYear : true , changeMonth : true, yearRange : "-50:+1"});
-            var paramEndDate = $('<input class="paramEndDate paramDateField" type="text" placeholder="End date" onchange="loadResultCount()" onkeydown="loadResultCount()" onpaste="loadResultCount()" oninput="loadResultCount()" />').datepicker({ dateFormat: 'dd-M-yy', changeYear : true , changeMonth : true, yearRange : "-50:+1"});
+            var paramStartDate = $('<input class="paramStartDate paramDateField" type="text" placeholder="Start date" onchange="loadResultCount()" onkeydown="loadResultCount()" onpaste="loadResultCount()" oninput="loadResultCount()" />').datepicker({ dateFormat: 'dd M yy', changeYear : true , changeMonth : true, yearRange : "-50:+1"});
+            var paramEndDate = $('<input class="paramEndDate paramDateField" type="text" placeholder="End date" onchange="loadResultCount()" onkeydown="loadResultCount()" onpaste="loadResultCount()" oninput="loadResultCount()" />').datepicker({ dateFormat: 'dd M yy', changeYear : true , changeMonth : true, yearRange : "-50:+1"});
             paramStartDate.insertAfter(element.find('.paramOperator'));
             paramStartDate.hide().fadeIn("slow");
             paramEndDate.insertAfter(element.find('.paramStartDate'));
