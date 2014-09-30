@@ -102,9 +102,9 @@ def create_mapping(mapping_name=None, tablename=None, fieldlist=None, make_files
             fieldlist.append("hashid")
             print("< DEBUG! > appended 'hashid' to mapping")
 
-        if "visualization" not in fieldlist:
-            fieldlist.append("visualization")
-            print("< DEBUG! > appended 'visualization' to mapping")
+        if "visualization_type" not in fieldlist:
+            fieldlist.append("visualization_type")
+            print("< DEBUG! > appended 'visualization_type' to mapping")
 
         for _name in itertools.izip(tableData):
             jsonName = _name[0][0].encode('ascii') # _name is a unicode string

@@ -1,35 +1,36 @@
-// Set up express
+//3rd party Requirements
+var elasticsearch = require('elasticsearch');
 var express = require("express");
 var app = express();
-
-//3rd party Requirements
+var mysql = require('mysql');
 var fs = require('fs');
-// var threadPool = require('threads_a_gogo'); //If this line starts erroring unexpectedly: https://github.com/xk/node-threads-a-gogo/issues/47
 var python = require('python-shell');
 var workerFarm = require('worker-farm');
+
+
+//Set up workers processes for longer tasks
 var workerOptions = { maxCallTime : 10000 } //Kill a process after 10 secs
+var workersEmail = workerFarm(workerOptions, require.resolve('./mimetype_modules/email'), ['createEmailChordDiagram' , 'createEmailGraph', 'createBarChart']);
+var workersFiles = workerFarm(workerOptions, require.resolve('./mimetype_modules/files'), ['createFilesBubble']);
+var workersDocuments = workerFarm(workerOptions, require.resolve('./mimetype_modules/documents'), ['createBarChart']);
+var workersBarChart = workerFarm(workerOptions, require.resolve('./visualizations/bar_chart'), ['barChart']);
 
-var workersEmail = workerFarm(require.resolve('./mimetype_modules/email'), ['createEmailChordDiagram' , 'createEmailGraph', 'createBarChart']);
-var workersFiles = workerFarm(require.resolve('./mimetype_modules/files'), ['createFilesBubble']);
-var workersDocuments = workerFarm(require.resolve('./mimetype_modules/documents'), ['createBarChart']);
-
-//Uforia made requirements
+//Uforia requirements
 var config = require('./uforia-config');
 var util = require('./mimetype_modules/util');
 var files = require('./mimetype_modules/files');
 var email = require('./mimetype_modules/email');
 var documents = require('./mimetype_modules/documents');
 
+var barChart = require('./visualizations/bar_chart');
 
 //Set up elasticsearch
-var elasticsearch = require('elasticsearch');
 var client = new elasticsearch.Client({
   host: config.ELASTIC_SEARCH_HOST + ":" + config.ELASTIC_SEARCH_PORT
   // log: 'trace'
 });
 
-//Connect to the Database
-var mysql = require('mysql');
+//Create a database connection pool
 var pool = mysql.createPool({
     host : config.DATABASE_HOST,
     user : config.DATABASE_USER,
@@ -49,6 +50,7 @@ var MAPPINGS_OUTPUT_FILE = __dirname + '/build_index/admin_output/uforia_admin_o
 var INDEX = 'uforia';
 var DEFAULT_TYPE = 'files';
 var DEFAULT_VIEW = 'bubble';
+var DEFAULT_VISUALIZATION = 'bar_chart';
 var DEFAULT_SIZE = 10;
 var TYPES = {
     email: {name : 'Email', mappings : ["message_rfc822"]},
@@ -99,6 +101,11 @@ app.get('/admin', function(req, res){
     res.render('admin.html');
 });
 
+
+/*********************
+**** START API *******
+*********************/
+
 /* Query elasticsearch
 * takes params:
 * type
@@ -109,12 +116,14 @@ app.get('/admin', function(req, res){
 *   must(objects with a field, stard_date and end_date)
 *   must_not(objects with a field, stard_date and end_date) 
 * view
+* visualization
 * 
 */
 app.get("/api/search", function(req, res) {
   var search_request = {};
   var query_skeleton = { "query": { "filtered": { "query": { "bool": { "must": [], "must_not": [] } }, "filter": { "bool": { "must": [], "must_not": [] } } } } };
   var view = util.defaultFor(req.param('view'), DEFAULT_VIEW);
+  var visualizationParams = util.defaultFor(req.param('visualization'), DEFAULT_VISUALIZATION);
 
   search_request['index'] = INDEX;
   search_request['type'] = TYPES[util.defaultFor(req.param('type'), DEFAULT_TYPE)].mappings.toString();
@@ -164,7 +173,7 @@ app.get("/api/search", function(req, res) {
   client.count(search_request).then(function(resp){
     try {
       search_request['size'] = resp.count;
-      search(search_request, res, view)
+      search(search_request, res, view, visualizationParams);
     } catch(err){
       console.trace(err.message);
       res.send();
@@ -386,7 +395,7 @@ app.get("/api/create_mapping", function(req, res){
 });
 
 //Search and return the result
-var search = function(search_request, res, view){
+var search = function(search_request, res, view, parameters){
     client.search(search_request).then(function(resp){
     switch(search_request.type){
         case TYPES.files.mappings.toString():
@@ -428,12 +437,271 @@ var search = function(search_request, res, view){
             break;
         case TYPES.documents.mappings.toString():
           if(view == 'bar_chart'){
-            res.send(documents.createBarChart(resp.hits.hits));
+            try{
+              //TEST DATA REMOVE THIS
+              var resp = {
+                          "took": 2,
+                          "timed_out": false,
+                          "_shards": {
+                              "total": 5,
+                              "successful": 5,
+                              "failed": 0
+                          },
+                          "hits": {
+                              "total": 1,
+                              "max_score": 1,
+                              "hits": [
+                                  {
+                                      "_index": "uforia",
+                                      "_type": "documents",
+                                      "_id": "qq-Kt0gCTBO6aEARJF7_fA",
+                                      "_score": 1,
+                                      "_source": {
+                                          "cookies": "NULL",
+                                          "producer": "NULL",
+                                          "page_count": "NULL",
+                                          "word_count": "NULL",
+                                          "creation_date": "21-9-2014",
+                                          "revision_number": "NULL",
+                                          "hashid": 39,
+                                          "keywords": "NULL",
+                                          "null": "Arnim",
+                                          "subject": "NULL",
+                                          "object_count": "NULL",
+                                          "author": "Arnim",
+                                          "tablename": "NULL",
+                                          "save_date": "NULL",
+                                          "content": "# Copyright (C) 2001, 2002  Earnie Boyd  <earnie@users.sf.net>\n# This file is part of the Minimal SYStem.\n#   http://www.mingw.org/msys.shtml\n# \n#         File:\tprofile\n#  Description:\tShell environment initialization script\n# Last Revised:\t2002.05.04\n\nif [ -z \"$MSYSTEM\" ]; then\n  MSYSTEM=MINGW32\nfi\n\n# My decision to add a . to the PATH and as the first item in the path list\n# is to mimick the Win32 method of finding executables.\n#\n# I filter the PATH value setting in order to get ready for self hosting the\n# MSYS runtime and wanting different paths searched first for files.\nif [ $MSYSTEM == MINGW32 ]; then\n  export PATH=\".:/usr/local/bin:/mingw/bin:/bin:$PATH\"\nelse\n  export PATH=\".:/usr/local/bin:/bin:/mingw/bin:$PATH\"\nfi\n\nif [ -z \"$USERNAME\" ]; then\n  LOGNAME=\"`id -un`\"\nelse\n  LOGNAME=\"$USERNAME\"\nfi\n\n# Set up USER's home directory\nif [ -z \"$HOME\" ]; then\n  HOME=\"/home/$LOGNAME\"\nfi\n\nif [ ! -d \"$HOME\" ]; then\n  mkdir -p \"$HOME\"\n  cp /etc/inputrc.default \"$HOME\"/.inputrc\nfi\n\nif [ \"x$HISTFILE\" == \"x/.bash_history\" ]; then\n  HISTFILE=$HOME/.bash_history\nfi\n\nexport HOME LOGNAME MSYSTEM HISTFILE\n\nfor i in /etc/profile.d/*.sh ; do\n  if [ -f $i ]; then\n    . $i\n  fi\ndone\n\nexport MAKE_MODE=unix\nexport PS1='\\[\\033]0;$MSYSTEM:\\w\\007\n\\033[32m\\]\\u@\\h \\[\\033[33m\\w\\033[0m\\]\n$ '\n\nalias clear=clsb\n\ncd \"$HOME\"\n\n",
+                                          "table_count": "NULL",
+                                          "template": "NULL",
+                                          "character_count": "NULL",
+                                          "last_author": "NULL",
+                                          "modified_date": "NULL",
+                                          "company": "NULL",
+                                          "paragraph_count": "NULL",
+                                          "title": "NULL",
+                                          "messages": "NULL",
+                                          "image_count": "NULL"
+                                      }
+                                  },
+                                                                    {
+                                      "_index": "uforia",
+                                      "_type": "documents",
+                                      "_id": "qq-Kt0gCTBO6aEARJF7_fA",
+                                      "_score": 1,
+                                      "_source": {
+                                          "cookies": "NULL",
+                                          "producer": "NULL",
+                                          "page_count": "NULL",
+                                          "word_count": "NULL",
+                                          "creation_date": "21-9-2014",
+                                          "revision_number": "NULL",
+                                          "hashid": 39,
+                                          "keywords": "NULL",
+                                          "null": "NULL",
+                                          "subject": "NULL",
+                                          "object_count": "NULL",
+                                          "author": "Arnim",
+                                          "tablename": "NULL",
+                                          "save_date": "NULL",
+                                          "content": "# Copyright (C) 2001, 2002  Earnie Boyd  <earnie@users.sf.net>\n# This file is part of the Minimal SYStem.\n#   http://www.mingw.org/msys.shtml\n# \n#         File:\tprofile\n#  Description:\tShell environment initialization script\n# Last Revised:\t2002.05.04\n\nif [ -z \"$MSYSTEM\" ]; then\n  MSYSTEM=MINGW32\nfi\n\n# My decision to add a . to the PATH and as the first item in the path list\n# is to mimick the Win32 method of finding executables.\n#\n# I filter the PATH value setting in order to get ready for self hosting the\n# MSYS runtime and wanting different paths searched first for files.\nif [ $MSYSTEM == MINGW32 ]; then\n  export PATH=\".:/usr/local/bin:/mingw/bin:/bin:$PATH\"\nelse\n  export PATH=\".:/usr/local/bin:/bin:/mingw/bin:$PATH\"\nfi\n\nif [ -z \"$USERNAME\" ]; then\n  LOGNAME=\"`id -un`\"\nelse\n  LOGNAME=\"$USERNAME\"\nfi\n\n# Set up USER's home directory\nif [ -z \"$HOME\" ]; then\n  HOME=\"/home/$LOGNAME\"\nfi\n\nif [ ! -d \"$HOME\" ]; then\n  mkdir -p \"$HOME\"\n  cp /etc/inputrc.default \"$HOME\"/.inputrc\nfi\n\nif [ \"x$HISTFILE\" == \"x/.bash_history\" ]; then\n  HISTFILE=$HOME/.bash_history\nfi\n\nexport HOME LOGNAME MSYSTEM HISTFILE\n\nfor i in /etc/profile.d/*.sh ; do\n  if [ -f $i ]; then\n    . $i\n  fi\ndone\n\nexport MAKE_MODE=unix\nexport PS1='\\[\\033]0;$MSYSTEM:\\w\\007\n\\033[32m\\]\\u@\\h \\[\\033[33m\\w\\033[0m\\]\n$ '\n\nalias clear=clsb\n\ncd \"$HOME\"\n\n",
+                                          "table_count": "NULL",
+                                          "template": "NULL",
+                                          "character_count": "NULL",
+                                          "last_author": "NULL",
+                                          "modified_date": "NULL",
+                                          "company": "NULL",
+                                          "paragraph_count": "NULL",
+                                          "title": "NULL",
+                                          "messages": "NULL",
+                                          "image_count": "NULL"
+                                      }
+                                  },
+                                                                    {
+                                      "_index": "uforia",
+                                      "_type": "documents",
+                                      "_id": "qq-Kt0gCTBO6aEARJF7_fA",
+                                      "_score": 1,
+                                      "_source": {
+                                          "cookies": "NULL",
+                                          "producer": "NULL",
+                                          "page_count": "NULL",
+                                          "word_count": "NULL",
+                                          "creation_date": "21-9-2014",
+                                          "revision_number": "NULL",
+                                          "hashid": 39,
+                                          "keywords": "NULL",
+                                          "null": "NULL",
+                                          "subject": "NULL",
+                                          "object_count": "NULL",
+                                          "author": "Sijmen",
+                                          "tablename": "NULL",
+                                          "save_date": "NULL",
+                                          "content": "# Copyright (C) 2001, 2002  Earnie Boyd  <earnie@users.sf.net>\n# This file is part of the Minimal SYStem.\n#   http://www.mingw.org/msys.shtml\n# \n#         File:\tprofile\n#  Description:\tShell environment initialization script\n# Last Revised:\t2002.05.04\n\nif [ -z \"$MSYSTEM\" ]; then\n  MSYSTEM=MINGW32\nfi\n\n# My decision to add a . to the PATH and as the first item in the path list\n# is to mimick the Win32 method of finding executables.\n#\n# I filter the PATH value setting in order to get ready for self hosting the\n# MSYS runtime and wanting different paths searched first for files.\nif [ $MSYSTEM == MINGW32 ]; then\n  export PATH=\".:/usr/local/bin:/mingw/bin:/bin:$PATH\"\nelse\n  export PATH=\".:/usr/local/bin:/bin:/mingw/bin:$PATH\"\nfi\n\nif [ -z \"$USERNAME\" ]; then\n  LOGNAME=\"`id -un`\"\nelse\n  LOGNAME=\"$USERNAME\"\nfi\n\n# Set up USER's home directory\nif [ -z \"$HOME\" ]; then\n  HOME=\"/home/$LOGNAME\"\nfi\n\nif [ ! -d \"$HOME\" ]; then\n  mkdir -p \"$HOME\"\n  cp /etc/inputrc.default \"$HOME\"/.inputrc\nfi\n\nif [ \"x$HISTFILE\" == \"x/.bash_history\" ]; then\n  HISTFILE=$HOME/.bash_history\nfi\n\nexport HOME LOGNAME MSYSTEM HISTFILE\n\nfor i in /etc/profile.d/*.sh ; do\n  if [ -f $i ]; then\n    . $i\n  fi\ndone\n\nexport MAKE_MODE=unix\nexport PS1='\\[\\033]0;$MSYSTEM:\\w\\007\n\\033[32m\\]\\u@\\h \\[\\033[33m\\w\\033[0m\\]\n$ '\n\nalias clear=clsb\n\ncd \"$HOME\"\n\n",
+                                          "table_count": "NULL",
+                                          "template": "NULL",
+                                          "character_count": "NULL",
+                                          "last_author": "NULL",
+                                          "modified_date": "NULL",
+                                          "company": "NULL",
+                                          "paragraph_count": "NULL",
+                                          "title": "NULL",
+                                          "messages": "NULL",
+                                          "image_count": "NULL"
+                                      }
+                                  },
+                                                                    {
+                                      "_index": "uforia",
+                                      "_type": "documents",
+                                      "_id": "qq-Kt0gCTBO6aEARJF7_fA",
+                                      "_score": 1,
+                                      "_source": {
+                                          "cookies": "NULL",
+                                          "producer": "NULL",
+                                          "page_count": "NULL",
+                                          "word_count": "NULL",
+                                          "creation_date": "21-9-2014",
+                                          "revision_number": "NULL",
+                                          "hashid": 39,
+                                          "keywords": "NULL",
+                                          "null": "NULL",
+                                          "subject": "NULL",
+                                          "object_count": "NULL",
+                                          "author": "Bart",
+                                          "tablename": "NULL",
+                                          "save_date": "NULL",
+                                          "content": "# Copyright (C) 2001, 2002  Earnie Boyd  <earnie@users.sf.net>\n# This file is part of the Minimal SYStem.\n#   http://www.mingw.org/msys.shtml\n# \n#         File:\tprofile\n#  Description:\tShell environment initialization script\n# Last Revised:\t2002.05.04\n\nif [ -z \"$MSYSTEM\" ]; then\n  MSYSTEM=MINGW32\nfi\n\n# My decision to add a . to the PATH and as the first item in the path list\n# is to mimick the Win32 method of finding executables.\n#\n# I filter the PATH value setting in order to get ready for self hosting the\n# MSYS runtime and wanting different paths searched first for files.\nif [ $MSYSTEM == MINGW32 ]; then\n  export PATH=\".:/usr/local/bin:/mingw/bin:/bin:$PATH\"\nelse\n  export PATH=\".:/usr/local/bin:/bin:/mingw/bin:$PATH\"\nfi\n\nif [ -z \"$USERNAME\" ]; then\n  LOGNAME=\"`id -un`\"\nelse\n  LOGNAME=\"$USERNAME\"\nfi\n\n# Set up USER's home directory\nif [ -z \"$HOME\" ]; then\n  HOME=\"/home/$LOGNAME\"\nfi\n\nif [ ! -d \"$HOME\" ]; then\n  mkdir -p \"$HOME\"\n  cp /etc/inputrc.default \"$HOME\"/.inputrc\nfi\n\nif [ \"x$HISTFILE\" == \"x/.bash_history\" ]; then\n  HISTFILE=$HOME/.bash_history\nfi\n\nexport HOME LOGNAME MSYSTEM HISTFILE\n\nfor i in /etc/profile.d/*.sh ; do\n  if [ -f $i ]; then\n    . $i\n  fi\ndone\n\nexport MAKE_MODE=unix\nexport PS1='\\[\\033]0;$MSYSTEM:\\w\\007\n\\033[32m\\]\\u@\\h \\[\\033[33m\\w\\033[0m\\]\n$ '\n\nalias clear=clsb\n\ncd \"$HOME\"\n\n",
+                                          "table_count": "NULL",
+                                          "template": "NULL",
+                                          "character_count": "NULL",
+                                          "last_author": "NULL",
+                                          "modified_date": "NULL",
+                                          "company": "NULL",
+                                          "paragraph_count": "NULL",
+                                          "title": "NULL",
+                                          "messages": "NULL",
+                                          "image_count": "NULL"
+                                      }
+                                  },
+                                                                    {
+                                      "_index": "uforia",
+                                      "_type": "documents",
+                                      "_id": "qq-Kt0gCTBO6aEARJF7_fA",
+                                      "_score": 1,
+                                      "_source": {
+                                          "cookies": "NULL",
+                                          "producer": "NULL",
+                                          "page_count": "NULL",
+                                          "word_count": "NULL",
+                                          "creation_date": "21-9-2014",
+                                          "revision_number": "NULL",
+                                          "hashid": 39,
+                                          "keywords": "NULL",
+                                          "null": "NULL",
+                                          "subject": "NULL",
+                                          "object_count": "NULL",
+                                          "author": "Bart",
+                                          "tablename": "NULL",
+                                          "save_date": "NULL",
+                                          "content": "# Copyright (C) 2001, 2002  Earnie Boyd  <earnie@users.sf.net>\n# This file is part of the Minimal SYStem.\n#   http://www.mingw.org/msys.shtml\n# \n#         File:\tprofile\n#  Description:\tShell environment initialization script\n# Last Revised:\t2002.05.04\n\nif [ -z \"$MSYSTEM\" ]; then\n  MSYSTEM=MINGW32\nfi\n\n# My decision to add a . to the PATH and as the first item in the path list\n# is to mimick the Win32 method of finding executables.\n#\n# I filter the PATH value setting in order to get ready for self hosting the\n# MSYS runtime and wanting different paths searched first for files.\nif [ $MSYSTEM == MINGW32 ]; then\n  export PATH=\".:/usr/local/bin:/mingw/bin:/bin:$PATH\"\nelse\n  export PATH=\".:/usr/local/bin:/bin:/mingw/bin:$PATH\"\nfi\n\nif [ -z \"$USERNAME\" ]; then\n  LOGNAME=\"`id -un`\"\nelse\n  LOGNAME=\"$USERNAME\"\nfi\n\n# Set up USER's home directory\nif [ -z \"$HOME\" ]; then\n  HOME=\"/home/$LOGNAME\"\nfi\n\nif [ ! -d \"$HOME\" ]; then\n  mkdir -p \"$HOME\"\n  cp /etc/inputrc.default \"$HOME\"/.inputrc\nfi\n\nif [ \"x$HISTFILE\" == \"x/.bash_history\" ]; then\n  HISTFILE=$HOME/.bash_history\nfi\n\nexport HOME LOGNAME MSYSTEM HISTFILE\n\nfor i in /etc/profile.d/*.sh ; do\n  if [ -f $i ]; then\n    . $i\n  fi\ndone\n\nexport MAKE_MODE=unix\nexport PS1='\\[\\033]0;$MSYSTEM:\\w\\007\n\\033[32m\\]\\u@\\h \\[\\033[33m\\w\\033[0m\\]\n$ '\n\nalias clear=clsb\n\ncd \"$HOME\"\n\n",
+                                          "table_count": "NULL",
+                                          "template": "NULL",
+                                          "character_count": "NULL",
+                                          "last_author": "NULL",
+                                          "modified_date": "NULL",
+                                          "company": "NULL",
+                                          "paragraph_count": "NULL",
+                                          "title": "NULL",
+                                          "messages": "NULL",
+                                          "image_count": "NULL"
+                                      }
+                                  },
+                                                                    {
+                                      "_index": "uforia",
+                                      "_type": "documents",
+                                      "_id": "qq-Kt0gCTBO6aEARJF7_fA",
+                                      "_score": 1,
+                                      "_source": {
+                                          "cookies": "NULL",
+                                          "producer": "NULL",
+                                          "page_count": "NULL",
+                                          "word_count": "NULL",
+                                          "creation_date": "22-9-2014",
+                                          "revision_number": "NULL",
+                                          "hashid": 39,
+                                          "keywords": "NULL",
+                                          "null": "NULL",
+                                          "subject": "NULL",
+                                          "object_count": "NULL",
+                                          "author": "Corne",
+                                          "tablename": "NULL",
+                                          "save_date": "NULL",
+                                          "content": "# Copyright (C) 2001, 2002  Earnie Boyd  <earnie@users.sf.net>\n# This file is part of the Minimal SYStem.\n#   http://www.mingw.org/msys.shtml\n# \n#         File:\tprofile\n#  Description:\tShell environment initialization script\n# Last Revised:\t2002.05.04\n\nif [ -z \"$MSYSTEM\" ]; then\n  MSYSTEM=MINGW32\nfi\n\n# My decision to add a . to the PATH and as the first item in the path list\n# is to mimick the Win32 method of finding executables.\n#\n# I filter the PATH value setting in order to get ready for self hosting the\n# MSYS runtime and wanting different paths searched first for files.\nif [ $MSYSTEM == MINGW32 ]; then\n  export PATH=\".:/usr/local/bin:/mingw/bin:/bin:$PATH\"\nelse\n  export PATH=\".:/usr/local/bin:/bin:/mingw/bin:$PATH\"\nfi\n\nif [ -z \"$USERNAME\" ]; then\n  LOGNAME=\"`id -un`\"\nelse\n  LOGNAME=\"$USERNAME\"\nfi\n\n# Set up USER's home directory\nif [ -z \"$HOME\" ]; then\n  HOME=\"/home/$LOGNAME\"\nfi\n\nif [ ! -d \"$HOME\" ]; then\n  mkdir -p \"$HOME\"\n  cp /etc/inputrc.default \"$HOME\"/.inputrc\nfi\n\nif [ \"x$HISTFILE\" == \"x/.bash_history\" ]; then\n  HISTFILE=$HOME/.bash_history\nfi\n\nexport HOME LOGNAME MSYSTEM HISTFILE\n\nfor i in /etc/profile.d/*.sh ; do\n  if [ -f $i ]; then\n    . $i\n  fi\ndone\n\nexport MAKE_MODE=unix\nexport PS1='\\[\\033]0;$MSYSTEM:\\w\\007\n\\033[32m\\]\\u@\\h \\[\\033[33m\\w\\033[0m\\]\n$ '\n\nalias clear=clsb\n\ncd \"$HOME\"\n\n",
+                                          "table_count": "NULL",
+                                          "template": "NULL",
+                                          "character_count": "NULL",
+                                          "last_author": "NULL",
+                                          "modified_date": "NULL",
+                                          "company": "NULL",
+                                          "paragraph_count": "NULL",
+                                          "title": "NULL",
+                                          "messages": "NULL",
+                                          "image_count": "NULL"
+                                      }
+                                  },
+                                                                    {
+                                      "_index": "uforia",
+                                      "_type": "documents",
+                                      "_id": "qq-Kt0gCTBO6aEARJF7_fA",
+                                      "_score": 1,
+                                      "_source": {
+                                          "cookies": "NULL",
+                                          "producer": "NULL",
+                                          "page_count": "NULL",
+                                          "word_count": "NULL",
+                                          "creation_date": "23-9-2014",
+                                          "revision_number": "NULL",
+                                          "hashid": 39,
+                                          "keywords": "NULL",
+                                          "null": "NULL",
+                                          "subject": "NULL",
+                                          "object_count": "NULL",
+                                          "author": "Arnim",
+                                          "tablename": "NULL",
+                                          "save_date": "NULL",
+                                          "content": "# Copyright (C) 2001, 2002  Earnie Boyd  <earnie@users.sf.net>\n# This file is part of the Minimal SYStem.\n#   http://www.mingw.org/msys.shtml\n# \n#         File:\tprofile\n#  Description:\tShell environment initialization script\n# Last Revised:\t2002.05.04\n\nif [ -z \"$MSYSTEM\" ]; then\n  MSYSTEM=MINGW32\nfi\n\n# My decision to add a . to the PATH and as the first item in the path list\n# is to mimick the Win32 method of finding executables.\n#\n# I filter the PATH value setting in order to get ready for self hosting the\n# MSYS runtime and wanting different paths searched first for files.\nif [ $MSYSTEM == MINGW32 ]; then\n  export PATH=\".:/usr/local/bin:/mingw/bin:/bin:$PATH\"\nelse\n  export PATH=\".:/usr/local/bin:/bin:/mingw/bin:$PATH\"\nfi\n\nif [ -z \"$USERNAME\" ]; then\n  LOGNAME=\"`id -un`\"\nelse\n  LOGNAME=\"$USERNAME\"\nfi\n\n# Set up USER's home directory\nif [ -z \"$HOME\" ]; then\n  HOME=\"/home/$LOGNAME\"\nfi\n\nif [ ! -d \"$HOME\" ]; then\n  mkdir -p \"$HOME\"\n  cp /etc/inputrc.default \"$HOME\"/.inputrc\nfi\n\nif [ \"x$HISTFILE\" == \"x/.bash_history\" ]; then\n  HISTFILE=$HOME/.bash_history\nfi\n\nexport HOME LOGNAME MSYSTEM HISTFILE\n\nfor i in /etc/profile.d/*.sh ; do\n  if [ -f $i ]; then\n    . $i\n  fi\ndone\n\nexport MAKE_MODE=unix\nexport PS1='\\[\\033]0;$MSYSTEM:\\w\\007\n\\033[32m\\]\\u@\\h \\[\\033[33m\\w\\033[0m\\]\n$ '\n\nalias clear=clsb\n\ncd \"$HOME\"\n\n",
+                                          "table_count": "NULL",
+                                          "template": "NULL",
+                                          "character_count": "NULL",
+                                          "last_author": "NULL",
+                                          "modified_date": "NULL",
+                                          "company": "NULL",
+                                          "paragraph_count": "NULL",
+                                          "title": "NULL",
+                                          "messages": "NULL",
+                                          "image_count": "NULL"
+                                      }
+                                  }
+                              ]
+                          }
+                      };
+
+
+
+              workersBarChart.barChart(resp.hits.hits, parameters, function(data){
+                res.send(data);
+              });
+            } catch(err){
+              console.log(err.message);
+              res.send();
+            }
           }
           break;
         default: // default is files
-            res.send(files.groupByUser(resp.hits.hits));
-            break;
+          workersFiles.createFilesBubble(resp.hits.hits, function(data){
+            res.send(data);
+          });
+        break;
     }
   }, function(err){
     res.send();

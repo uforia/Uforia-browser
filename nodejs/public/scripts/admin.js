@@ -50,10 +50,12 @@ function sendMappingRequest(){
 	var request = {
 		'name' : name,
 		'fields' : [],
-		'modules' : {}
+		'modules' : {},
+                'visualization_type' : "NULL" 
 	};
 
 	request['name'] = $('#mapping_name').val();
+        request['visualization_type'] = $('#visual_type').val();
 
 	//Get the selected fields
 	$("#selected_fields li").each(function() { request['fields'].push($(this).text()) });

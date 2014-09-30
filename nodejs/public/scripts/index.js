@@ -1,6 +1,7 @@
 //Execute on page load 
 var type = 'email';
 var view = 'chord';
+var visualization = {};
 
 function init(){
     loadTypes();
@@ -33,6 +34,10 @@ function changeType(select){
             break; 
         case "documents":
             view = 'bar_chart';
+            //THIS should be moved to something seperate - bart 28-9-2014
+            visualization.x = prompt("Order X axis by");
+            visualization.y = prompt("Order Y axis by");
+    
             break;
         default:
             type = 'email';
@@ -199,6 +204,7 @@ function search(){
     var api_params = {
         'type' : type,
         'view' : view,
+        'visualization' : visualization,
         'parameters' : {
             'must' : [],
             'must_not' : []
