@@ -63,3 +63,6 @@ admin_output/
 uforia_admin.cfg
 nodejs/build_index/json_mappings/_old/phpfill/rebuild.sh
 .gitignore
+custom_uforia_mapping.cfg
+documents_mapping.cfg
+uforia_modules.cfg
