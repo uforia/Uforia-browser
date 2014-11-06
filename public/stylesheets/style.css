@@ -10,3 +10,19 @@ a {
 .email_contents {
 	white-space: pre-line;
 }
+
+.matchesBox.danger {
+	box-shadow: 0px 0px 10px red;
+}
+
+.matchesBox.warning {
+	box-shadow: 0px 0px 10px orange;
+}
+
+.matchesBox.success {
+	box-shadow: 0px 0px 10px green;
+}
+
+.matchesBox {
+	margin-top: 10px !important;
+}

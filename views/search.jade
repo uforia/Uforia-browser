@@ -3,7 +3,7 @@
     h2 Evidence Type
     select.listbox(size='2', ng-model='searchType')
       option(ng-repeat="(key, item) in searchTypes", value="{{key}}", ng-bind="item.name")
-  .matchesBox(ng-class="{danger: queryMatchesCount > 200}")
+  .matchesBox(ng-class="{success: queryMatchesCount <= 100 && queryMatchesCount>0, warning: queryMatchesCount > 100, danger: queryMatchesCount > 200}")
     p
       span(ng-bind='queryMatchesCount')
       |  evidence items match
