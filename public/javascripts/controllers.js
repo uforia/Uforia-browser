@@ -24,7 +24,7 @@ angular.module('uforia')
     var api_params = {};
     console.log(newVal);
     $http
-      .post('api/count', formatParams())
+      .get('api/count', formatParams())
       .success(function(data){
         $scope.queryMatchesCount = data.count;
       });
@@ -53,14 +53,14 @@ angular.module('uforia')
       break;
     }
     $http
-      .post("api/mapping_info", {type: type})
+      .get("api/mapping_info", {type: type})
       .success(function(data){
         console.log(data);
         $scope.memeTypes = data;
       });
 
     $http
-      .post("api/view_info?type=" + type, '')
+      .get("api/view_info?type=" + type, '')
       .success(function(data){
         $scope.viewTypes = data;
       });
