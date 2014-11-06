@@ -13,6 +13,7 @@
     "express": "~4.8.6",
     "jade": "~1.5.0",
     "morgan": "~1.2.3",
+    "mysql": "^2.5.3",
     "serve-favicon": "~2.0.1",
     "worker-farm": "^1.0.1"
   },

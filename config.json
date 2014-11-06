@@ -2,7 +2,7 @@
   "service_port": 8888,
   "assets": "",
   "elasticsearch": {
-    "host": "127.0.0.1",
+    "host": "localhost",
     "port": 9200
   },
   "mysql": {
