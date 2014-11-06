@@ -25,19 +25,7 @@ var DEFAULT_VIEW = 'bubble';
 var DEFAULT_VISUALIZATION = 'bar_chart';
 //**********************
 
-router.use(function(req, res, next){
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-  res.header("Access-Control-Allow-Headers", "X-Requested-With,Content-Type,Cache-Control");
-  if (req.method === 'OPTIONS') {
-    res.statusCode = 204;
-    return res.end();
-  } else {
-    return next();
-  }
-});
-
-router.post('/get_types', function(req, res) {
+router.get('/get_types', function(req, res) {
   res.send(TYPES);
 });
 
@@ -55,7 +43,7 @@ router.post('/get_types', function(req, res) {
 * visualization
 * 
 */
-router.post("/search", function(req, res) {
+router.get("/search", function(req, res) {
   var data = req.body;
   var search_request = {};
   var query_skeleton = { "query": { "filtered": { "query": { "bool": { "must": [], "must_not": [] } }, "filter": { "bool": { "must": [], "must_not": [] } } } } };
@@ -209,7 +197,7 @@ var search = function(search_request, res, view, parameters){
 * view
 * 
 */
-router.post("/count", function(req, res){
+router.get("/count", function(req, res){
   var data = req.body;
   var search_request = {};
   var query_skeleton = { "query": { "filtered": { "query": { "bool": { "must": [], "must_not": [] } }, "filter": { "bool": { "must": [], "must_not": [] } } } } };
@@ -279,7 +267,7 @@ router.post("/count", function(req, res){
 * takes params:
 * none
 */
-router.post("/get_types", function(req, res){
+router.get("/get_types", function(req, res){
   res.send(TYPES);
 });
 
@@ -289,7 +277,7 @@ router.post("/get_types", function(req, res){
 * type
 *
 */
-router.post("/mapping_info", function(req, res){
+router.get("/mapping_info", function(req, res){
   var type = TYPES[req.body.type].mappings.toString();
 
   c.elasticsearch.indices.getMapping({ 
@@ -312,7 +300,7 @@ router.post("/mapping_info", function(req, res){
 * type
 *
 */
-router.post("/view_info", function(req, res){
+router.get("/view_info", function(req, res){
   type = util.defaultFor(req.param('type'), DEFAULT_TYPE);
   res.send(VIEWS[type]);
 });
@@ -324,7 +312,7 @@ router.post("/view_info", function(req, res){
 * tablenames
 * hashids
 */
-router.post("/get_file_details", function(req, res){
+router.get("/get_file_details", function(req, res){
   console.log(req.body);
   var type = TYPES[util.defaultFor(req.body.type, DEFAULT_TYPE)].mappings.toString();
   var hashids = util.defaultFor(req.body.hashids, []);
@@ -366,7 +354,7 @@ router.post("/get_file_details", function(req, res){
 * takes params:
 * 
 */
-router.post("/get_mappings", function(req, res){
+router.get("/get_mappings", function(req, res){
   fs.readFile(MAPPINGS_INPUT_FILE, 'utf8', function (err, data) {
     if (err) {
       console.log("File read err " + err.message);
@@ -384,7 +372,7 @@ router.post("/get_mappings", function(req, res){
 * modules - object
 * fields - array
 */
-router.post("/create_mapping", function(req, res){
+router.get("/create_mapping", function(req, res){
   var name = util.defaultFor(req.param('name'), "");
   var modules = util.defaultFor(req.param('modules'), {});
   var fields = util.defaultFor(req.param('fields'), []);
