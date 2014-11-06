@@ -1,0 +1,25 @@
+.modal-header
+  button.close(ng-click="modalInstance.dismiss()", type='button', aria-hidden="true") &times;
+  h3.modal-title E-mail details for: {{addresses.join(' - ')}}
+
+.modal-body
+  .row
+    .col-lg-3
+      select.form-control(size='2', ng-model="selectedFile", ng-change="openFile(selectedFile)", required)
+        option(ng-repeat="item in files", value="{{item.hashid}}", ng-selected="selectedFile == item.hashid") {{item.Subject}}
+    .col-lg-9
+      div(ng-show="!showFile") Select a file from the list.
+      div(ng-show="showFile")
+        .panel.panel-default
+          .panel-heading(ng-bind="showFile.Subject")
+          .panel-body
+            .fullpath_header Original path of the evidence item
+            .fullpath_contents "{{showFile.fullpath}}"
+        .panel.panel-default
+          .panel-heading E-mail contents
+          .panel-body
+            .email_contents(ng-bind-html="showFile.Email_Content")
+  
+
+.modal-footer
+  button.btn.btn-sm.btn-default(ng-click="modalInstance.dismiss()()") Close

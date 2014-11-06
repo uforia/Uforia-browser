@@ -1,0 +1,34 @@
+.sidebarLeft
+  .evidenceTypeBox
+    h2 Evidence Type
+    select.listbox(size='2', ng-model='searchType')
+      option(ng-repeat="(key, item) in searchTypes", value="{{key}}", ng-bind="item.name")
+  .matchesBox(ng-class="{danger: queryMatchesCount > 200}")
+    p
+      span(ng-bind='queryMatchesCount')
+      |  evidence items match
+  .visualizeBox
+    h2 Visualization Type
+    p
+      select(size='2', ng-model="viewType")
+        option(ng-repeat="(key, item) in viewTypes", value="{{key}}", ng-bind="item")
+      input(type='button', ng-click='search()', value='Visualize')
+    p(ng-if="queryMatchesCount > 200") Warning: high document counts (more than 200 matches or so) might slow or crash your browser!
+.container
+  h2 Enter your query below (you can use [+] and [x] to refine your search)
+  #parameters
+    .row(ng-repeat="parameter in parameters")
+      select(ng-model="parameter.memeType")
+        option(ng-repeat="(key, item) in memeTypes", value="{{key}}", ng-bind="key")
+      select(ng-model="parameter.operator")
+        option(value="must") Must match
+        option(value="must_not") Must not match
+      input(type="text", ng-model="parameter.query", ng-if="parameter.memeType != 'Date'")
+      span(ng-if="parameter.memeType == 'Date'")
+        input(type="date", ng-model="parameter.startDate")
+        input(type="date", ng-model="parameter.endDate")
+      button.btn.btn-sm.btn-primary(type="button", ng-click="parameters.splice($index+1, 0, {})") +
+      button.btn.btn-sm.btn-danger(type="button", ng-click="parameters.splice($index,1)", ng-if="parameters.length > 1") x
+  #content
+    #tooltip.tooltip
+    #d3_visualization

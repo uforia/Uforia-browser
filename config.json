@@ -1,0 +1,18 @@
+{
+  "service_port": 8888,
+  "assets": "",
+  "elasticsearch": {
+    "host": "127.0.0.1",
+    "port": 9200
+  },
+  "mysql": {
+    "host": "127.0.0.1",
+    "user": "uforia",
+    "password": "uforia",
+    "database": "uforia",
+    "multipleStatements": false
+  },
+  "workers": {
+    "maxCallTime": 10000
+  }
+}
