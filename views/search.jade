@@ -27,7 +27,7 @@
       span(ng-if="parameter.memeType == 'Date'")
         input(type="date", ng-model="parameter.startDate")
         input(type="date", ng-model="parameter.endDate")
-      button.btn.btn-sm.btn-primary(type="button", ng-click="parameters.splice($index+1, 0, {})") +
+      button.btn.btn-sm.btn-primary(type="button", ng-click="parameters.splice($index+1, 0, {operator: 'must'})") +
       button.btn.btn-sm.btn-danger(type="button", ng-click="parameters.splice($index,1)", ng-if="parameters.length > 1") x
   #content
     #tooltip.tooltip

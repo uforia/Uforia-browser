@@ -96,9 +96,6 @@ router.post("/search", function(req, res) {
 
   search_request['body'] = query_skeleton;
 
-  console.log(require('util').inspect(search_request, false, null));
-
-
   c.elasticsearch.count(search_request).then(function(resp){
     try {
       search_request['size'] = resp.count;
@@ -116,7 +113,6 @@ router.post("/search", function(req, res) {
 //Search and return the result
 var search = function(search_request, res, view, parameters){
     c.elasticsearch.search(search_request).then(function(resp){
-      console.log(resp);
     switch(search_request.type){
       case TYPES.files.mappings.toString():
         try {
@@ -130,12 +126,10 @@ var search = function(search_request, res, view, parameters){
       case TYPES.email.mappings.toString():
           if(view == 'chord'){
               try {
-                console.log('try');
                 workers.email.createEmailChordDiagram(resp.hits.hits, function(data){
                   res.send(data);
                 });
               }catch(err){
-                  console.log(err.message);
                   res.send(err.message);
               }
           } else if (view == 'graph') {
@@ -211,7 +205,6 @@ router.post("/count", function(req, res){
     parameters.must.forEach(function(param){
       var query = {};
       util.createNestedObject(query, ['wildcard', param.field], param.query);
-      console.log(query);
       query_skeleton.query.filtered.query.bool.must.push(query);
     });
   }
@@ -249,7 +242,6 @@ router.post("/count", function(req, res){
   search_request['body'] = query_skeleton;
   
   c.elasticsearch.count(search_request).then(function(resp){
-    console.log(resp);
     try {
       res.send(resp);
     } catch(err){
@@ -313,14 +305,12 @@ router.post("/view_info", function(req, res){
 * hashids
 */
 router.post("/get_file_details", function(req, res){
-  console.log(req.body);
   var type = TYPES[util.defaultFor(req.body.type, DEFAULT_TYPE)].mappings.toString();
   var hashids = util.defaultFor(req.body.hashids, []);
   var filesTable = 'files';
   var tableName = '63c5e0bd853105c84a2184539eb245'; //temp for demonstration
 
   //Remove duplicates from the hashids
-  console.log(hashids);
   hashids = hashids.filter (function (v, i, a) { return a.indexOf (v) == i });
 
   //Escape the values for safety

@@ -22,7 +22,6 @@ angular.module('uforia')
 
   $scope.$watch('parameters', function(newVal, oldVal){
     var api_params = {};
-    console.log(newVal);
     $http
       .post('api/count', formatParams())
       .success(function(data){
@@ -55,7 +54,6 @@ angular.module('uforia')
     $http
       .post("api/mapping_info", {type: type})
       .success(function(data){
-        console.log(data);
         $scope.memeTypes = data;
       });
 
@@ -67,10 +65,10 @@ angular.module('uforia')
 
     //Clear the visualization and search parameters
     removeSVG();
-    if(type=='email')
-      $scope.parameters = [{memeType: "Body", operator: "must", query: "blockbuster"},{memeType: "Bcc", operator: "must", query: "*frank*"}];
-    else
-      $scope.parameters = [{operator: "must"}];
+    // if(type=='email')
+    //   $scope.parameters = [{memeType: "Body", operator: "must", query: "blockbuster"},{memeType: "Bcc", operator: "must", query: "*frank*"}];
+    // else
+    $scope.parameters = [{operator: "must"}];
   }
 
   $scope.search = function(){
@@ -91,7 +89,6 @@ angular.module('uforia')
 
   //click on a item
   function openDetails(data){
-    console.log(data);
     var modalInstance = $modal.open({
       templateUrl: 'views/modals/details',
       controller: 'detailsModalCtrl',
@@ -115,7 +112,7 @@ angular.module('uforia')
     $http
       .post('api/search', params)
       .success(function(data){
-        console.log(data);
+
         cb(data);
       });
   }
@@ -170,7 +167,6 @@ angular.module('uforia')
 })
 
 .controller('detailsModalCtrl', function($scope, $modalInstance, files, addresses){
-  console.log(files);
   $scope.addresses = addresses;
   $scope.files = files;
   $scope.modalInstance = $modalInstance;
