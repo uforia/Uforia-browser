@@ -4,7 +4,7 @@ var model = {
     var defer = $q.defer();
   
     $http
-      .get('/api/get_types')
+      .get('api/get_types')
       .success(function(data) {
         defer.resolve(data);
       });
@@ -16,7 +16,7 @@ var model = {
       var defer = $q.defer();
 
       $http
-        .get('/api/get_file_details', data)
+        .get('api/get_file_details', data)
         .success(function(data) {
         defer.resolve(data);
       });

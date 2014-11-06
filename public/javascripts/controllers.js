@@ -113,7 +113,7 @@ angular.module('uforia')
 
   function getData(params, cb){
     $http
-      .get('/api/search', params)
+      .get('api/search', params)
       .success(function(data){
         console.log(data);
         cb(data);
