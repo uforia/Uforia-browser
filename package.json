@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": false,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node app.js"
   },
   "dependencies": {
     "body-parser": "~1.6.6",
@@ -17,7 +17,7 @@
     "worker-farm": "^1.0.1"
   },
   "description": "Browser for the Uforia project",
-  "main": "bin/www",
+  "main": "app.js",
   "devDependencies": {},
   "keywords": [
     "Uforia",
