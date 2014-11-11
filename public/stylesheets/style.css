@@ -11,18 +11,34 @@ a {
 	white-space: pre-line;
 }
 
-.matchesBox.danger {
-	box-shadow: 0px 0px 10px red;
+.form-horizontal .control-label.center {
+	text-align: center;
 }
 
-.matchesBox.warning {
-	box-shadow: 0px 0px 10px orange;
+.dash:before {
+	content: '-';
+	position: absolute;
+	left: -4px;
+	top: 6.5px;
 }
 
-.matchesBox.success {
-	box-shadow: 0px 0px 10px green;
+.control-text {
+	padding-top: 7px;
 }
 
-.matchesBox {
-	margin-top: 10px !important;
+.border-top {
+	border-top: 1px solid black;
+	padding-top: 15px;
+}
+
+.btn + .btn {
+	margin-left: 4px;
+}
+
+.logo {
+	font-size: 18pt;
+}
+
+.logo b {
+	color: #428bca;
 }

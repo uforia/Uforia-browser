@@ -1,34 +1,62 @@
-.sidebarLeft
-  .evidenceTypeBox
-    h2 Evidence Type
-    select.listbox(size='2', ng-model='searchType')
-      option(ng-repeat="(key, item) in searchTypes", value="{{key}}", ng-bind="item.name")
-  .matchesBox(ng-class="{success: queryMatchesCount <= 100 && queryMatchesCount>0, warning: queryMatchesCount > 100, danger: queryMatchesCount > 200}")
-    p
-      span(ng-bind='queryMatchesCount')
-      |  evidence items match
-  .visualizeBox
-    h2 Visualization Type
-    p
-      select(size='2', ng-model="viewType")
-        option(ng-repeat="(key, item) in viewTypes", value="{{key}}", ng-bind="item")
-      input(type='button', ng-click='search()', value='Visualize')
-    p(ng-if="queryMatchesCount > 200") Warning: high document counts (more than 200 matches or so) might slow or crash your browser!
-.container
-  h2 Enter your query below (you can use [+] and [x] to refine your search)
-  #parameters
-    .row(ng-repeat="parameter in parameters")
-      select(ng-model="parameter.memeType")
-        option(ng-repeat="(key, item) in memeTypes", value="{{key}}", ng-bind="key")
-      select(ng-model="parameter.operator")
-        option(value="must") Must match
-        option(value="must_not") Must not match
-      input(type="text", ng-model="parameter.query", ng-if="parameter.memeType != 'Date'")
-      span(ng-if="parameter.memeType == 'Date'")
-        input(type="date", ng-model="parameter.startDate")
-        input(type="date", ng-model="parameter.endDate")
-      button.btn.btn-sm.btn-primary(type="button", ng-click="parameters.splice($index+1, 0, {operator: 'must'})") +
-      button.btn.btn-sm.btn-danger(type="button", ng-click="parameters.splice($index,1)", ng-if="parameters.length > 1") x
-  #content
-    #tooltip.tooltip
-    #d3_visualization
+.row.border-top
+  form.form-horizontal(name="searchForm")
+    .col-lg-3.form-group
+      label.control-label.col-lg-6(for="searchType") Use evidence type
+      .col-lg-6
+        select.form-control#searchType(ng-model='searchType')
+          option(ng-repeat="(key, item) in searchTypes", value="{{key}}", ng-bind="item.name", ng-selected="{{searchType == key}}")
+    .col-lg-9.form-group
+      .row.col-lg-12(ng-repeat="parameter in parameters")
+        label.control-label.col-lg-1.center(ng-if="$index == 0") and
+        .col-lg-1(ng-if="$index > 0")
+          //- This select is disabled because it doesn't work yet.
+          select.form-control(ng-model="parameter.andOr", required, disabled)
+            option And
+            option Or
+        .col-lg-2
+          select.form-control(ng-model="parameter.memeType", required)
+            option(ng-repeat="(key, item) in memeTypes", value="{{key}}", ng-bind="key")
+        .col-lg-2
+          select.form-control(ng-model="parameter.operator")
+            option(value="must") Must match
+            option(value="must_not") Must not match
+        .col-lg-5(ng-if="parameter.memeType != 'Date'")
+          input.form-control(type="text", ng-model="parameter.query", required)
+        .col-lg-5(ng-if="parameter.memeType == 'Date'")
+          .row
+            .col-lg-6
+              .input-group
+                input.form-control(type="text", ng-model="parameter.startDate", datepicker-popup="dd-MM-yyyy", is-open="parameter.startDateOpen", max-date="parameter.endDate", close-text="Close", required)
+                span.input-group-btn
+                  button(type="button", class="btn btn-default", ng-click="openDatePicker($event, $index, 'startDateOpen')")
+                    i.glyphicon.glyphicon-calendar
+            .col-lg-6.dash
+              .input-group
+                input.form-control(type="text", ng-model="parameter.endDate", datepicker-popup="dd-MM-yyyy", is-open="parameter.endDateOpen", min-date="parameter.startDate", close-text="Close", required)
+                span.input-group-btn
+                  button(type="button", class="btn btn-default", ng-click="openDatePicker($event, $index, 'endDateOpen')")
+                    i.glyphicon.glyphicon-calendar
+        .col-lg-2
+          button.btn.btn-sm.btn-primary(type="button", ng-click="add($index)") +
+          button.btn.btn-sm.btn-danger(type="button", ng-click="remove($index)", ng-if="parameters.length > 1") x
+
+.row.border-top
+  form.form-horizontal
+    .col-lg-3.form-group
+      label.control-label.col-lg-6(for="viewType") Visualization type
+      .col-lg-6
+        select.form-control#viewType(ng-model="viewType")
+          option(ng-repeat="(key, item) in viewTypes", value="{{key}}", ng-bind="item", ng-selected="{{viewType == key}}")
+    .col-lg-9.form-group
+      .row.col-lg-12
+        .col-lg-10.control-text.text-center
+          p -- 
+            span(ng-class="{'text-danger': queryMatchesCount > 200}", ng-bind="queryMatchesCount") 
+            |  evidence items match --
+        .col-lg-2
+          button.btn.btn-sm.btn-primary(ng-disabled="searchForm.$invalid", type="button", ng-click="search()", ng-class="{'btn-danger': queryMatchesCount > 200}") Visualize
+      .row.col-lg-12(ng-if="queryMatchesCount > 200")
+        .col-lg-10.control-text.text-center.text-danger Warning: high document counts (more than 200 matches or so) might slow or crash your browser!
+
+.row
+  .col-lg-12#d3_visualization

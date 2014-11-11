@@ -1,5 +1,5 @@
 angular.module('uforia',
-    ['ui.router', 'ui.bootstrap.modal'])
+    ['ui.router', 'ui.bootstrap.modal', 'ui.bootstrap.datepicker'])
   
   .run(function($rootScope) {
 

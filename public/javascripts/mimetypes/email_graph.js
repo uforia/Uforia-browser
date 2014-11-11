@@ -3,7 +3,7 @@ var state = 0; // 0 is normal, 1 is radius size sent, 2 is radius size received;
 var force;
 var link;
 
-function render(data, openDetails, cb){
+function render(data, options, openDetails, cb){
   var width = 900,
     height = 600;
 
@@ -158,8 +158,7 @@ function render(data, openDetails, cb){
 
   //For clicks on a link
   function mouseclickLink(d){
-    var url = 'file_details?type=email&hashids=' + d.hashids.toString() + '&address1=' + d.name + "&address2=";
-    window.open(url, d.hashids.toString(),'height=768, width=1100, left=100, top=100, resizable=yes, scrollbars=yes, toolbar=no, menubar=no, location=no, directories=no, status=no, location=no');
+    openDetails({hashids: d.hashids, adressses:[d.name]});
   }
   cb(); // send callback, no errors
 }

@@ -1,4 +1,4 @@
-function render(data, openDetails, cb){
+function render(data, options, openDetails, cb){
   var diameter = 900;
 
   var color = d3.scale.linear()

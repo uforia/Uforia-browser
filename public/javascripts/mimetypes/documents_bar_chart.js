@@ -1,4 +1,4 @@
-function render(data, openDetails, cb){
+function render(data, options, openDetails, cb){
   var margin = {top: 20, right: 20, bottom: 60, left: 40},
     width = 960 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
@@ -86,9 +86,7 @@ function render(data, openDetails, cb){
 
   // //click on a bar
   function mouseclick(d){
-    openDetails();
-    // var url = 'file_details?type=email&hashids=' + d.hashids.toString() + '&address1=' + d.x;
-    // window.open(url, d.hashids.toString(),'height=768, width=1100, left=100, top=100, resizable=yes, scrollbars=yes, toolbar=no, menubar=no, location=no, directories=no, status=no, location=no');
+    openDetails({hashids: d.hashids, adressses:[d.x]});
   }
   cb();
 }

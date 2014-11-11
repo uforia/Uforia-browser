@@ -29,6 +29,24 @@ angular.module('uforia')
       });
   }, true);
 
+  $scope.openDatePicker = function($event, index, parameter){
+    $event.preventDefault();
+    $event.stopPropagation();
+    $scope.parameters[index][parameter] = true;
+  }
+
+  $scope.add = function($index){
+    $scope.parameters.splice($index+1, 0, {
+      operator: "must",
+      andOr: "And"
+    });
+  }
+
+  $scope.remove = function($index){
+    $scope.parameters.splice($index,1);
+    $scope.parameters[0].andOr = 'And';
+  }
+
   //Load the right css for the right D3 visualization
   function changeType(type){
 
@@ -68,7 +86,7 @@ angular.module('uforia')
     // if(type=='email')
     //   $scope.parameters = [{memeType: "Body", operator: "must", query: "blockbuster"},{memeType: "Bcc", operator: "must", query: "*frank*"}];
     // else
-    $scope.parameters = [{operator: "must"}];
+    $scope.parameters = [{operator: "must", andOr: "And"}];
   }
 
   $scope.search = function(){
@@ -78,10 +96,15 @@ angular.module('uforia')
     
     getData(formatParams(), function(data){
       $('#d3_visualization').empty();
-      if(data){
-        render(data, openDetails, function(error){
+      if(data.total > 0){
+        render(data, {}, openDetails, function(error){
           if(error)
             console.log(error); // TODO: show error to user
+          else{
+            $('html, body').animate({
+              scrollTop: $("#d3_visualization").offset().top
+            }, 1000);
+          }
         });
       }
     });
@@ -102,7 +125,9 @@ angular.module('uforia')
     modalInstance.result.then(function () {
       //closed
     }, function () {
-      //dismissed
+      $('html, body').animate({
+        scrollTop: $("#d3_visualization").offset().top
+      }, 1000);
     });
     // var url = 'file_details?type=email&hashids=' + d.hashids.toString() + '&address1=' + d.date;
     // window.open(url, d.hashids.toString(),'height=768, width=1100, left=100, top=100, resizable=yes, scrollbars=yes, toolbar=no, menubar=no, location=no, directories=no, status=no, location=no');

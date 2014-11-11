@@ -1,6 +1,16 @@
-function render(data, openDetails, cb){
-  var outerRadius = 900 / 2,
-      innerRadius = outerRadius - 130;
+function render(data, options, openDetails, cb){
+  var width = $('#d3_visualization').width(),
+    labelOffset = options.labelOffset || 300,
+    height = options.height || window.innerHeight,
+    innerRadius = Math.min(width, height- labelOffset) * .41,
+    outerRadius = innerRadius * 1.1;
+
+    console.log(innerRadius, outerRadius);
+
+    console.log(height);
+
+  // var outerRadius = 900 / 2,
+  //     innerRadius = outerRadius - 130;
 
   var fill = d3.scale.category20c();
 
@@ -11,20 +21,20 @@ function render(data, openDetails, cb){
 
   var arc = d3.svg.arc()
       .innerRadius(innerRadius)
-      .outerRadius(innerRadius + 20);
+      .outerRadius(outerRadius);
 
   var svg = d3.select("#d3_visualization").append("svg")
       .attr("id", "d3_svg")
-      .attr("width", outerRadius * 2)
-      .attr("height", outerRadius * 2)
+      .attr("width", width)
+      .attr("height", height)
     .append("g")
       .attr("id", "circle")
-      .attr("transform", "translate(" + outerRadius + "," + outerRadius + ")");
+      .attr("transform", "translate(" + width / 2 + "," + (height/ 2) + ")");
 
   svg.append("circle")
     .attr("r", innerRadius);
 
-  console.log(JSON.stringify(data));
+  // console.log(JSON.stringify(data));
 
   if(data.total == 0){
     cb({error: "No results for this query"});
@@ -85,7 +95,7 @@ function render(data, openDetails, cb){
       .attr("dy", ".35em")
       .attr("transform", function(d) {
         return "rotate(" + (d.angle * 180 / Math.PI - 90) + ")"
-            + "translate(" + (innerRadius + 26) + ")"
+            + "translate(" + (innerRadius + 35) + ")"
             + (d.angle > Math.PI ? "rotate(180)" : "");
       })
       .style("text-anchor", function(d) { return d.angle > Math.PI ? "end" : null; })
@@ -142,8 +152,7 @@ function render(data, openDetails, cb){
 
   //Open a window on the click of a chord group
   function groupClick(d){
-    var url = 'file_details?type=email&hashids=' + data.names[d.index].hashids.toString() + '&address1=' + data.names[d.index].name;
-    window.open(url, data.names[d.index].hashids.toString(),'height=768, width=1100, left=100, top=100, resizable=yes, scrollbars=yes, toolbar=no, menubar=no, location=no, directories=no, status=no, location=no');
+    openDetails({hashids: data.names[d.index].hashids, adressses:[data.names[d.index].name]});
   }
 
   //Show the tooltip for a chord on mouseover
