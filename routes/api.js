@@ -238,7 +238,6 @@ router.post("/count", function(req, res){
       query_skeleton.query.filtered.filter.bool.must_not.push(query);
     }); 
   }
-
   search_request['body'] = query_skeleton;
   
   c.elasticsearch.count(search_request).then(function(resp){
@@ -390,7 +389,7 @@ router.post("/create_mapping", function(req, res){
         res.send("Written mapping file but couldn't start mapping script");
         return;
       }
-      console.log(results);
+      // console.log(results);
       res.send("Elasticsearch is now filling the mapping in the background.");
     });
   });

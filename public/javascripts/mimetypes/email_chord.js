@@ -5,10 +5,6 @@ function render(data, options, openDetails, cb){
     innerRadius = Math.min(width, height- labelOffset) * .41,
     outerRadius = innerRadius * 1.1;
 
-    console.log(innerRadius, outerRadius);
-
-    console.log(height);
-
   // var outerRadius = 900 / 2,
   //     innerRadius = outerRadius - 130;
 

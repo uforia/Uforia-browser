@@ -34,7 +34,7 @@ function render(data, options, openDetails, cb){
 
   svg.call(tip);
 
-  console.log(JSON.stringify(data));
+  // console.log(JSON.stringify(data));
 
   if(data.total == 0){
     cb({error: "No results for this query"});

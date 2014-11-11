@@ -159,7 +159,7 @@ angular.module('uforia')
 
     //Get all the search parameters and add them to the query object.
     $scope.parameters.forEach(function(parameter){
-      if(parameter.memetype && parameter.memetype.toLowerCase() == 'date'){
+      if(parameter.memeType && parameter.memeType.toLowerCase() == 'date' && parameter.startDate && parameter.endDate){
         api_params.filters[parameter.operator].push({'field' : parameter.memeType, 'start_date' : parameter.startDate.getTime(), 'end_date' :  parameter.endDate.getTime()});
       }
       else if(parameter.query && parameter.query.length > 0){

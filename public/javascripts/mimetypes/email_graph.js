@@ -28,7 +28,7 @@ function render(data, options, openDetails, cb){
       .attr("width", width)
       .attr("height", height);
 
-  console.log(JSON.stringify(data));
+  // console.log(JSON.stringify(data));
 
   if(data.total == 0){
     cb({error: "No results for this query"});
