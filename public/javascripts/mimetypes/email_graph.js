@@ -4,8 +4,8 @@ var force;
 var link;
 
 function render(data, options, openDetails, cb){
-  var width = 900,
-    height = 600;
+  var width = $('#d3_visualization').width(),
+    height = options.height || window.innerHeight;
 
   var color = d3.scale.category20();
 

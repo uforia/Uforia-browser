@@ -27,6 +27,7 @@ angular.module('uforia')
     $http
       .post('api/count', formatParams())
       .success(function(data){
+        $scope.loading=false;
         if(!data.error)
           $scope.queryMatchesCount = data.count;
         else 
@@ -107,7 +108,7 @@ angular.module('uforia')
             console.log(error); // TODO: show error to user
           else{
             $('html, body').animate({
-              scrollTop: $("#d3_visualization").offset().top
+              scrollTop: $("#d3_visualization").offset().top - 65
             }, 1000);
           }
         });
@@ -117,6 +118,7 @@ angular.module('uforia')
 
   //click on a item
   function openDetails(data){
+    $scope.loading = true;
     var modalInstance = $modal.open({
       templateUrl: 'views/modals/details',
       controller: 'detailsModalCtrl',
@@ -125,6 +127,10 @@ angular.module('uforia')
         files: model.getFileDetails({hashids: data.hashids, type:$scope.searchType}),
         addresses: function(){ return data.adressses; }
       }
+    });
+
+    modalInstance.opened.then(function(){
+      $scope.loading = false;
     });
 
     modalInstance.result.then(function () {
@@ -139,10 +145,11 @@ angular.module('uforia')
   }
 
   function getData(params, cb){
+    $scope.loading=true;
     $http
       .post('api/search', params)
       .success(function(data){
-
+        $scope.loading=false;
         cb(data);
       });
   }
@@ -215,6 +222,8 @@ angular.module('uforia')
 .controller('adminCtrl', function($scope, modules){
   console.log(modules);
   $scope.modules = modules;
+  $scope.mapping = {};
+  $scope.mapping.selectedFields = [];
 
   $scope.models = {
     selected: null,
@@ -234,4 +243,25 @@ angular.module('uforia')
       console.log($scope.fields);
     }
   })
+
+  $scope.$watch('selectFields', function(newVal){
+    if(newVal){
+      newVal.forEach(function(field){
+        if($scope.mapping.selectedFields.indexOf(field) == -1){
+          $scope.mapping.selectedFields.push(field);
+        }
+      });
+    }
+  }); 
+
+  $scope.$watch('deselectFields', function(newVal){
+    if(newVal){
+      console.log(newVal);
+      newVal.forEach(function(field){
+        if($scope.mapping.selectedFields.indexOf(field) != -1){
+          $scope.mapping.selectedFields.splice($scope.mapping.selectedFields.indexOf(field), 1);
+        }
+      });
+    }
+  });
 });

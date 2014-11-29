@@ -8,15 +8,18 @@
       option(ng-repeat="(key, item) in modules", value="{{item.fields}}") {{key}}
   .col-lg-2.dnd
     label Fields
-    select.form-control(ng-model="selectedFields", ng-size="{{(fields | unique).length}}", multiple)
-      option(ng-repeat="field in fields | unique", value="{{field}}") {{field}}
+    select.form-control(ng-model="selectFields", ng-size="{{(fields | unique).length}}", multiple)
+      option(ng-repeat="field in fields | unique", value="{{field}}", ng-hide="mapping.selectedFields.indexOf(field) != -1") {{field}}
     //- ul(dnd-list='models.lists.fields')
       li(ng-repeat='(key,item) in models.lists.fields', dnd-draggable='item', dnd-moved='models.lists.fields.splice($index, 1)', dnd-effect-allowed='move') {{item.name}}
   .col-lg-2.dnd
     label Selected
-    //- select.form-control(ng-model="test", ng-size="{{selectedFields.length}}", multiple)
-      option(ng-repeat="(key, item) in selectedFields", value="{{value}}") {{item.name}}
+    select.form-control(ng-model="deselectFields", ng-size="{{mapping.selectedFields.length+1}}", multiple)
+      option(ng-repeat="field in mapping.selectedFields", value="{{field}}") {{field}}
     //- ul(dnd-list='models.lists.selectedFields')
       li(ng-repeat='(key,item) in models.lists.selectedFields', dnd-draggable='item', dnd-moved='models.lists.selectedFields.splice($index, 1)', dnd-effect-allowed='move') {{item.name}}
-  .col-lg-2
+  .col-lg-2.visualizations
     label Visualizations
+    img(src="./images/visualizations/graph.png", width="100%", ng-click="mapping.visualizations.graph = !mapping.visualizations.graph", ng-class="{selected: mapping.visualizations.graph}")
+    img(src="./images/visualizations/bar.png", width="100%", ng-click="mapping.visualizations.bar = !mapping.visualizations.bar", ng-class="{selected: mapping.visualizations.bar}")
+    img(src="./images/visualizations/chord.png", width="100%", ng-click="mapping.visualizations.chord = !mapping.visualizations.chord", ng-class="{selected: mapping.visualizations.chord}")
