@@ -51,8 +51,11 @@
       .row.col-lg-12
         .col-lg-10.control-text.text-center
           p -- 
-            span(ng-class="{'text-danger': queryMatchesCount > 200}", ng-bind="queryMatchesCount") 
-            |  evidence items match --
+            span(ng-if="!errorMessage")
+              span(ng-class="{'text-danger': queryMatchesCount > 200}", ng-bind="queryMatchesCount") 
+              |  evidence items match
+            span(ng-if="errorMessage", ng-bind="errorMessage").text-danger
+            |  --
         .col-lg-2
           button.btn.btn-sm.btn-primary(ng-disabled="searchForm.$invalid", type="button", ng-click="search()", ng-class="{'btn-danger': queryMatchesCount > 200}") Visualize
       .row.col-lg-12(ng-if="queryMatchesCount > 200")

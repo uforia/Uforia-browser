@@ -27,7 +27,10 @@ angular.module('uforia')
     $http
       .post('api/count', formatParams())
       .success(function(data){
-        $scope.queryMatchesCount = data.count;
+        if(!data.error)
+          $scope.queryMatchesCount = data.count;
+        else 
+          $scope.errorMessage = data.error.message;
       });
   }, true);
 

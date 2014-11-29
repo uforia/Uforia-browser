@@ -108,7 +108,7 @@ router.post("/search", function(req, res) {
     }
   }, function(err){
     console.trace(err.message);
-    res.send();
+    res.send(err);
   });
 });
 
@@ -241,7 +241,7 @@ router.post("/count", function(req, res){
     }); 
   }
   search_request['body'] = query_skeleton;
-  
+
   c.elasticsearch.count(search_request).then(function(resp){
     try {
       res.send(resp);
@@ -251,7 +251,7 @@ router.post("/count", function(req, res){
     }
   }, function(err){
     console.trace(err.message);
-    res.send({count : "Invalid query" });
+    res.send({error: err});
   });
 });
 
