@@ -3,7 +3,9 @@ var express   = require('express'),
     workers   = require('../lib/workers'),
     router    = express.Router(),
     util      = require('../lib/mimetype_modules/util'),
-    fs        = require('fs');
+    fs        = require('fs'), 
+    mime      = require('mime'),
+    async     = require('async');
 
 //** FOR TESTING
 var testdata = require('./testdata/documents');
@@ -344,12 +346,62 @@ router.post("/get_file_details", function(req, res){
 * 
 */
 router.post("/get_mappings", function(req, res){
-  fs.readFile(MAPPINGS_INPUT_FILE, 'utf8', function (err, data) {
-    if (err) {
-      console.log("File read err " + err.message);
-      res.send();
-    };
-    res.send(data);
+  c.mysql_db.query('SELECT * FROM supported_mimetypes', function(err, results){
+    if(err) throw err;    
+
+    var modules = {};
+    var mime_types = {};
+
+    async.each(results, function(result, callback){
+      if(mime.extension(result.mime_type)){
+        modules[mime.extension(result.mime_type)] = modules[mime.extension(result.mime_type)] || {
+          meme_types: [],
+          fields: []
+        };
+
+        result.modules = JSON.parse(result.modules);
+
+        // for(var key in result.modules)
+        modules[mime.extension(result.mime_type)].meme_types = result.modules;
+
+        var tables = [];
+        for(var mime_type in result.modules)
+          tables.push(result.modules[mime_type]);
+
+        async.each(tables, function(table, callback){
+          c.mysql_db.query('SHOW COLUMNS FROM ??', [table], function(err, fields){
+            if(err) throw err;
+
+            fields.forEach(function(field){
+              modules[mime.extension(result.mime_type)].fields.push(field.Field);
+            });
+
+            callback();
+          });
+        }, function(err){
+          if(err) throw err;
+          callback();
+        });
+
+      } else {
+        console.log('Cannot find extension for mime type: ' + result.mime_type);
+        callback();
+      }
+    }, function(err){
+      if(err) throw err;
+      res.send(modules);
+    });
+        
+
+      // if(mime.extension(result.mime_type)){
+      //   modules.push({
+      //     name: mime.extension(result.mime_type),
+      //     tables: table_names
+      //   })
+      // }
+
+      // mime_types[mime.extension(result.mime_type)] = mime_types[mime.extension(result.mime_type)] || [];
+      // mime_types[mime.extension(result.mime_type)] = result.modules;
   });
 });
 

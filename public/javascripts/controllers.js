@@ -1,7 +1,9 @@
 angular.module('uforia')
 
-.controller('appCtrl', function(){
-
+.controller('appCtrl', function($rootScope){
+  $rootScope.Utils = {
+     keys : Object.keys
+  }
 })
 
 .controller('searchCtrl', function($rootScope, $scope, $http, $modal, types) {
@@ -207,6 +209,26 @@ angular.module('uforia')
 
 })
 
-.controller('adminCtrl', function(){
+.controller('adminCtrl', function($scope, modules){
+  console.log(modules);
+  $scope.modules = modules;
 
+  $scope.models = {
+    selected: null,
+    lists:{
+      fields: [],
+      selectedFields: []
+    }
+  };
+
+  $scope.$watch('selectedModules', function(newVal){
+    if(newVal){
+      $scope.fields = [];
+      newVal.forEach(function(module){
+        console.log(module);
+        $scope.fields = $scope.fields.concat(JSON.parse(module));
+      });
+      console.log($scope.fields);
+    }
+  })
 });

@@ -1,0 +1,38 @@
+{
+  "name": "angular-drag-and-drop-lists",
+  "main": "angular-drag-and-drop-lists.js",
+  "version": "1.1.0",
+  "homepage": "https://github.com/marceljuenemann/angular-drag-and-drop-lists",
+  "authors": [
+    "Marcel Juenemann <mail@marcel-juenemann.de>"
+  ],
+  "description": "Angular directives for sorting nested lists using the HTML5 Drag & Drop API",
+  "keywords": [
+    "angular",
+    "drag",
+    "drop",
+    "dnd",
+    "nested",
+    "sortable",
+    "lists",
+    "html5"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "_release": "1.1.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "v1.1.0",
+    "commit": "289b68007bb08254cec3f12199920b63196dd899"
+  },
+  "_source": "git://github.com/marceljuenemann/angular-drag-and-drop-lists.git",
+  "_target": "~1.1.0",
+  "_originalSource": "angular-drag-and-drop-lists",
+  "_direct": true
+}

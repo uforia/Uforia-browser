@@ -1,13 +1,22 @@
 .row
-  .col-lg-3
-    h3 Modules
-    select.form-control
-  .col-lg-3
-    h3 Modules
-    select.form-control
-  .col-lg-3
-    h3 Modules
-    select.form-control
-  .col-lg-3
-    h3 Modules
-    select.form-control
+  .col-lg-2
+    label Name
+    input.form-control(ng-model="mapping.name")
+  .col-lg-2
+    label Modules
+    select.form-control(ui-sortable, ng-model="selectedModules", ng-size="{{Utils.keys(modules).length}}", multiple)
+      option(ng-repeat="(key, item) in modules", value="{{item.fields}}") {{key}}
+  .col-lg-2.dnd
+    label Fields
+    select.form-control(ng-model="selectedFields", ng-size="{{(fields | unique).length}}", multiple)
+      option(ng-repeat="field in fields | unique", value="{{field}}") {{field}}
+    //- ul(dnd-list='models.lists.fields')
+      li(ng-repeat='(key,item) in models.lists.fields', dnd-draggable='item', dnd-moved='models.lists.fields.splice($index, 1)', dnd-effect-allowed='move') {{item.name}}
+  .col-lg-2.dnd
+    label Selected
+    //- select.form-control(ng-model="test", ng-size="{{selectedFields.length}}", multiple)
+      option(ng-repeat="(key, item) in selectedFields", value="{{value}}") {{item.name}}
+    //- ul(dnd-list='models.lists.selectedFields')
+      li(ng-repeat='(key,item) in models.lists.selectedFields', dnd-draggable='item', dnd-moved='models.lists.selectedFields.splice($index, 1)', dnd-effect-allowed='move') {{item.name}}
+  .col-lg-2
+    label Visualizations

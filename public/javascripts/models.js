@@ -23,6 +23,17 @@ var model = {
 
       return defer.promise;
     }];
-  }
+  },
+  getAvailableModules: ['$http', '$q', function($http, $q) {
+    var defer = $q.defer();
+  
+    $http
+      .post('api/get_mappings')
+      .success(function(data) {
+        defer.resolve(data);
+      });
+  
+    return defer.promise;
+  }]
 
 };

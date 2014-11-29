@@ -1,5 +1,6 @@
+
 angular.module('uforia',
-    ['ui.router', 'ui.bootstrap.modal', 'ui.bootstrap.datepicker'])
+    ['ui.router', 'ui.bootstrap.modal', 'ui.bootstrap.datepicker', 'dndLists', 'ui'])
   
   .run(function($rootScope) {
 
@@ -27,7 +28,7 @@ angular.module('uforia',
         templateUrl: "views/admin",
         controller: 'adminCtrl',
         resolve: {
-          // types: model.getTypes
+          modules: model.getAvailableModules
         }
       });
   });
