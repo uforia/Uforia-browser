@@ -1,7 +1,7 @@
 function render(data, options, openDetails, cb){
   var margin = {top: 20, right: 20, bottom: 60, left: 40},
-    width = 960 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
+    width = $('#d3_visualization').width(),
+    height = options.height || window.innerHeight;
 
   var x = d3.scale.ordinal()
       .rangeRoundBands([0, width], .1);

@@ -6,34 +6,43 @@ angular.module('uforia')
   }
 })
 
-.controller('searchCtrl', function($rootScope, $scope, $http, $modal, types) {
+.controller('searchCtrl', function($rootScope, $scope, $http, $modal, $timeout, types) {
   $scope.queryMatchesCount = 0;
 
   $scope.searchTypes = types;
   $scope.searchType = Object.keys(types)[0];
+  $scope.parameters = [{operator: "must", andOr: "And"}];
   var visualization = {};
 
-  $scope.$watch('searchType', function(newVal, oldVal){
-    changeType(newVal);
-  });
+  $timeout(function(){
+    $scope.$watch('searchType', function(newVal, oldVal){
+      changeType(newVal);
+    });
 
-  $scope.$watch('viewType', function(newVal, oldVal){
-    changeScripts();
-    $scope.search();
-  });
+    $scope.$watch('viewType', function(newVal, oldVal){
+      if($scope.searchForm.$valid){
+        changeScripts();
+        $scope.search();
+      }
+    });
 
-  $scope.$watch('parameters', function(newVal, oldVal){
-    var api_params = {};
-    $http
-      .post('api/count', formatParams())
-      .success(function(data){
-        $scope.loading=false;
-        if(!data.error)
-          $scope.queryMatchesCount = data.count;
-        else 
-          $scope.errorMessage = data.error.message;
-      });
-  }, true);
+    $scope.$watch('parameters', function(newVal, oldVal){
+      var api_params = {};
+      if($scope.searchForm.$valid){
+        $scope.loading = true;
+        $http
+          .post('api/count', formatParams())
+          .success(function(data){
+            $scope.loading = false;
+            $scope.loading=false;
+            if(!data.error)
+              $scope.queryMatchesCount = data.count;
+            else 
+              $scope.errorMessage = data.error.message;
+          });
+      }
+    }, true);
+  },0);
 
   $scope.openDatePicker = function($event, index, parameter){
     $event.preventDefault();
@@ -103,7 +112,7 @@ angular.module('uforia')
     getData(formatParams(), function(data){
       $('#d3_visualization').empty();
       if(data.total > 0){
-        render(data, {}, openDetails, function(error){
+        render(data, {height: window.innerHeight-65}, openDetails, function(error){
           if(error)
             console.log(error); // TODO: show error to user
           else{
@@ -223,7 +232,8 @@ angular.module('uforia')
   console.log(modules);
   $scope.modules = modules;
   $scope.mapping = {};
-  $scope.mapping.selectedFields = [];
+  $scope.mapping.selectedFields = {};
+  $scope.selectedModules = undefined;
 
   $scope.models = {
     selected: null,
@@ -234,34 +244,72 @@ angular.module('uforia')
   };
 
   $scope.$watch('selectedModules', function(newVal){
-    if(newVal){
-      $scope.fields = [];
-      newVal.forEach(function(module){
-        console.log(module);
-        $scope.fields = $scope.fields.concat(JSON.parse(module));
-      });
+    if(newVal && newVal.length > 0){
+      $scope.fields = {};
+      $scope.fields[newVal] = modules[newVal].fields;
       console.log($scope.fields);
     }
+    $scope.selectFields = undefined;
   })
 
   $scope.$watch('selectFields', function(newVal){
-    if(newVal){
-      newVal.forEach(function(field){
-        if($scope.mapping.selectedFields.indexOf(field) == -1){
-          $scope.mapping.selectedFields.push(field);
+    if(newVal && newVal.length > 0){
+      newVal.forEach(function(item){
+        var module = item.split(':')[0];
+        var field = item.split(':')[1];
+        if($scope.fields[module] && (!$scope.mapping.selectedFields[module] || $scope.mapping.selectedFields[module].indexOf(field) == -1)){
+          $scope.mapping.selectedFields[module] = $scope.mapping.selectedFields[module] || [];
+          $scope.mapping.selectedFields[module].push(field);
         }
       });
     }
   }); 
 
   $scope.$watch('deselectFields', function(newVal){
-    if(newVal){
-      console.log(newVal);
-      newVal.forEach(function(field){
-        if($scope.mapping.selectedFields.indexOf(field) != -1){
-          $scope.mapping.selectedFields.splice($scope.mapping.selectedFields.indexOf(field), 1);
+    if(newVal && newVal.length > 0){
+      newVal.forEach(function(item){
+        var module = item.split(':')[0];
+        var field = item.split(':')[1];
+        if($scope.mapping.selectedFields[module] && $scope.mapping.selectedFields[module].indexOf(field) != -1){
+          $scope.mapping.selectedFields[module].splice($scope.mapping.selectedFields[module].indexOf(field), 1);
+          if($scope.mapping.selectedFields[module].length ==0)
+            delete $scope.mapping.selectedFields[module];
         }
       });
     }
   });
+
+  $scope.getSize = function(object){
+    var count = 1;
+    for(var key in object){
+      count++;
+      count+=object[key].length;
+    }
+    return count;
+  }
+
+  $scope.createMapping = function(){
+    console.log($scope.mapping);
+
+    var mapping = {
+      name: $scope.mapping.name,
+      modules: {},
+      fields: {},
+      visualizations: $scope.mapping.visualizations
+    }
+
+    for(var module in $scope.mapping.selectedFields){
+
+      for(var type in modules[module].meme_types){
+        $scope.mapping.selectedFields[module].forEach(function(field){
+          mapping.fields[field] = mapping.fields[field] || [];
+          mapping.fields[field].push(type);
+        });
+
+        mapping.modules[type] = modules[module].meme_types[type];
+      }
+    }
+
+    console.log(mapping);
+  }
 });
