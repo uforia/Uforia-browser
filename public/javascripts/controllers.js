@@ -327,12 +327,12 @@ angular.module('uforia')
     var mapping = {
       name: $scope.mapping.name,
       modules: {},
-      fields: [],
+      fields: {},
       visualizations: $scope.mapping.visualizations
     }
 
     $scope.models.lists.selectedFields.forEach(function(field){
-      mapping.fields.push(field.field);
+      mapping.fields[field.field] = field.modules;
       field.modules.forEach(function(module){
         mapping.modules[module] = [];
         for(var type in modules[module].meme_types)

@@ -240,7 +240,7 @@ router.post("/count", function(req, res){
       query_skeleton.query.filtered.filter.bool.must_not.push(query);
     }); 
   }
-  // search_request['body'] = query_skeleton;
+  search_request['body'] = query_skeleton;
   c.elasticsearch.count(search_request).then(function(resp){
     try {
       res.send(resp);
