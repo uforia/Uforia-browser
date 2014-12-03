@@ -4,22 +4,22 @@
     input.form-control(ng-model="mapping.name")
   .col-lg-2
     label Modules
-    select.form-control.selectFields(ui-sortable, ng-model="selectedModules", ng-size="{{Utils.keys(modules).length+1}}")
+    select.form-control.selectFields(ui-sortable, ng-model="selectedModules", ng-size="{{Utils.keys(modules).length+1}}", multiple)
       option(ng-repeat="(key, item) in modules", value="{{key}}") {{key}}
   .col-lg-2.dnd
     label Fields
-    select.form-control.selectFields(ng-model="selectFields", ng-size="{{getSize(fields)}}", multiple)
+    //- select.form-control.selectFields(ng-model="selectFields", ng-size="{{getSize(fields)}}", multiple)
       optgroup(ng-repeat="(key, item) in fields", label="{{key}}")
         option(ng-repeat="field in item | unique", value="{{key}}:{{field}}", ng-hide="mapping.selectedFields[key] && mapping.selectedFields[key].indexOf(field) != -1") {{field}}
-    //- ul(dnd-list='models.lists.fields')
-      li(ng-repeat='(key,item) in models.lists.fields', dnd-draggable='item', dnd-moved='models.lists.fields.splice($index, 1)', dnd-effect-allowed='move') {{item.name}}
+    ul(dnd-list='models.lists.fields')
+      li(ng-repeat='(key,item) in models.lists.fields | unique:"field"', dnd-draggable='item', dnd-moved='models.lists.fields.splice($index, 1)', dnd-effect-allowed='move') {{item.field}}
   .col-lg-2.dnd
     label Selected
-    select.form-control.selectFields(ui-sortable, ng-model="deselectFields", ng-size="{{getSize(mapping.selectedFields)}}", multiple)
+    //- select.form-control.selectFields(ui-sortable, ng-model="deselectFields", ng-size="{{getSize(mapping.selectedFields)}}", multiple)
       optgroup(ng-repeat="(key, item) in mapping.selectedFields", label="{{key}}")
         option(ng-repeat="field in item", value="{{key}}:{{field}}") {{field}}
-    //- ul(dnd-list='models.lists.selectedFields')
-      li(ng-repeat='(key,item) in models.lists.selectedFields', dnd-draggable='item', dnd-moved='models.lists.selectedFields.splice($index, 1)', dnd-effect-allowed='move') {{item.name}}
+    ul(dnd-list='models.lists.selectedFields', dnd-drop="selectField(event, index, item, type)")
+      li(ng-repeat='(key,item) in models.lists.selectedFields', dnd-draggable='item', dnd-moved='models.lists.selectedFields.splice($index, 1); reloadFields();', dnd-effect-allowed='move') {{item.field}}
   .col-lg-2.visualizations
     label Visualizations
     img(src="./images/visualizations/graph.png", width="100%", ng-click="mapping.visualizations.graph = !mapping.visualizations.graph", ng-class="{selected: mapping.visualizations.graph}")

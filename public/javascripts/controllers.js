@@ -243,41 +243,76 @@ angular.module('uforia')
     }
   };
 
-  $scope.$watch('selectedModules', function(newVal){
-    if(newVal && newVal.length > 0){
-      $scope.fields = {};
-      $scope.fields[newVal] = modules[newVal].fields;
-      console.log($scope.fields);
+  $scope.reloadFields = function(){
+    loadFields($scope.selectedModules);
+  }
+
+  $scope.$watch('selectedModules', loadFields);
+
+  function loadFields(mime_types){
+    $scope.models.lists.fields = [];
+    if(mime_types && mime_types.length > 0){
+      mime_types.forEach(function(mime_type){
+        modules[mime_type].fields.forEach(function(field){
+          var exists, selected;
+          $scope.models.lists.selectedFields.forEach(function(item){
+            if(item.field == field && item.modules.indexOf(mime_type) != -1){
+              selected = true;
+              return;
+            }
+          });
+          $scope.models.lists.fields.forEach(function(item){
+            if(item.field == field && !selected){
+              item.modules.push(mime_type);
+              exists = true;
+              return;
+            }
+          });
+          if(!exists && !selected)
+            $scope.models.lists.fields.push({modules:[mime_type], field:field});
+        });
+      })
+      // console.log($scope.models);
     }
     $scope.selectFields = undefined;
-  })
+  }
 
-  $scope.$watch('selectFields', function(newVal){
-    if(newVal && newVal.length > 0){
-      newVal.forEach(function(item){
-        var module = item.split(':')[0];
-        var field = item.split(':')[1];
-        if($scope.fields[module] && (!$scope.mapping.selectedFields[module] || $scope.mapping.selectedFields[module].indexOf(field) == -1)){
-          $scope.mapping.selectedFields[module] = $scope.mapping.selectedFields[module] || [];
-          $scope.mapping.selectedFields[module].push(field);
-        }
-      });
-    }
-  }); 
+  $scope.selectField = function(event, index, item, type){
+    $scope.models.lists.selectedFields.forEach(function(field, index){
+      if(field.field == item.field){
+        item.modules = item.modules.concat(field.modules);
+        $scope.models.lists.selectedFields.splice(index, 1);
+      }
+    });
+    return item;
+  }
 
-  $scope.$watch('deselectFields', function(newVal){
-    if(newVal && newVal.length > 0){
-      newVal.forEach(function(item){
-        var module = item.split(':')[0];
-        var field = item.split(':')[1];
-        if($scope.mapping.selectedFields[module] && $scope.mapping.selectedFields[module].indexOf(field) != -1){
-          $scope.mapping.selectedFields[module].splice($scope.mapping.selectedFields[module].indexOf(field), 1);
-          if($scope.mapping.selectedFields[module].length ==0)
-            delete $scope.mapping.selectedFields[module];
-        }
-      });
-    }
-  });
+  // $scope.$watch('selectFields', function(newVal){
+  //   if(newVal && newVal.length > 0){
+  //     newVal.forEach(function(item){
+  //       var module = item.split(':')[0];
+  //       var field = item.split(':')[1];
+  //       if($scope.fields[module] && (!$scope.mapping.selectedFields[module] || $scope.mapping.selectedFields[module].indexOf(field) == -1)){
+  //         $scope.mapping.selectedFields[module] = $scope.mapping.selectedFields[module] || [];
+  //         $scope.mapping.selectedFields[module].push(field);
+  //       }
+  //     });
+  //   }
+  // }); 
+
+  // $scope.$watch('deselectFields', function(newVal){
+  //   if(newVal && newVal.length > 0){
+  //     newVal.forEach(function(item){
+  //       var module = item.split(':')[0];
+  //       var field = item.split(':')[1];
+  //       if($scope.mapping.selectedFields[module] && $scope.mapping.selectedFields[module].indexOf(field) != -1){
+  //         $scope.mapping.selectedFields[module].splice($scope.mapping.selectedFields[module].indexOf(field), 1);
+  //         if($scope.mapping.selectedFields[module].length ==0)
+  //           delete $scope.mapping.selectedFields[module];
+  //       }
+  //     });
+  //   }
+  // });
 
   $scope.getSize = function(object){
     var count = 1;
@@ -289,26 +324,21 @@ angular.module('uforia')
   }
 
   $scope.createMapping = function(){
-    console.log($scope.mapping);
-
     var mapping = {
       name: $scope.mapping.name,
       modules: {},
-      fields: {},
+      fields: [],
       visualizations: $scope.mapping.visualizations
     }
 
-    for(var module in $scope.mapping.selectedFields){
-
-      for(var type in modules[module].meme_types){
-        $scope.mapping.selectedFields[module].forEach(function(field){
-          mapping.fields[field] = mapping.fields[field] || [];
-          mapping.fields[field].push(type);
-        });
-
-        mapping.modules[type] = modules[module].meme_types[type];
-      }
-    }
+    $scope.models.lists.selectedFields.forEach(function(field){
+      mapping.fields.push(field.field);
+      field.modules.forEach(function(module){
+        mapping.modules[module] = [];
+        for(var type in modules[module].meme_types)
+          mapping.modules[module].push(modules[module].meme_types[type]);
+      });
+    });
 
     console.log(mapping);
   }
