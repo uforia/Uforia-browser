@@ -9,8 +9,10 @@ angular.module('uforia')
 .controller('searchCtrl', function($rootScope, $scope, $http, $modal, $timeout, types) {
   $scope.queryMatchesCount = 0;
 
+  console.log(types.length);
+
   $scope.searchTypes = types;
-  $scope.searchType = Object.keys(types)[0];
+  $scope.searchType = $scope.searchTypes[0];
   $scope.parameters = [{operator: "must", andOr: "And"}];
   var visualization = {};
 
@@ -35,8 +37,10 @@ angular.module('uforia')
           .success(function(data){
             $scope.loading = false;
             $scope.loading=false;
-            if(!data.error)
+            if(!data.error){
               $scope.queryMatchesCount = data.count;
+              delete $scope.errorMessage;
+            }
             else 
               $scope.errorMessage = data.error.message;
           });
@@ -80,8 +84,8 @@ angular.module('uforia')
 
       break;
       default:
-        $scope.searchType = 'email';
-        $scope.viewType = 'chord';
+        // $scope.searchType = 'email';
+        // $scope.viewType = 'chord';
       break;
     }
     $http
@@ -121,6 +125,10 @@ angular.module('uforia')
             }, 1000);
           }
         });
+      }
+      else {
+        console.log('No data');
+        console.log(data);
       }
     });
   }
@@ -228,12 +236,18 @@ angular.module('uforia')
 
 })
 
-.controller('adminCtrl', function($scope, modules){
-  console.log(modules);
+.controller('adminCtrl', function($scope, $http, modules, types){
   $scope.modules = modules;
+  $scope.types = types;
   $scope.mapping = {};
   $scope.mapping.selectedFields = {};
   $scope.selectedModules = undefined;
+
+  $scope.modulesList = {};
+  for(var key in modules){
+    $scope.modulesList[key.split('/')[0]] = $scope.modulesList[key.split('/')[0]] || [];
+    $scope.modulesList[key.split('/')[0]].push(key);
+  }
 
   $scope.models = {
     selected: null,
@@ -271,9 +285,27 @@ angular.module('uforia')
           if(!exists && !selected)
             $scope.models.lists.fields.push({modules:[mime_type], field:field});
         });
-      })
+      });
+      $scope.models.lists.fields.forEach(function(item){
+        // console.log(item.field + ':' + item.modules.length);
+      }); 
       // console.log($scope.models);
     }
+    // sort by module list length
+    $scope.models.lists.fields.sort(function(a,b){
+      return b.modules.length - a.modules.length;
+    });
+    // Sort by field name
+    // $scope.models.lists.fields.sort(function(a,b){
+    //   return a.field > b.field;
+    // });
+
+    $scope.models.lists.fields.forEach(function(field, index){
+      if($scope.checkPresent(field)){
+        ArrayMove($scope.models.lists.fields, index, 0);
+      }
+    });
+    console.log($scope.models.lists.fields);
     $scope.selectFields = undefined;
   }
 
@@ -285,6 +317,38 @@ angular.module('uforia')
       }
     });
     return item;
+  }
+
+  $scope.addField = function(item){
+    var exists = false;
+    $scope.models.lists.selectedFields.forEach(function(field, index){
+      if(field.field == item.field){
+        field.modules = field.modules.concat(item.modules);
+        return exists = true;
+      }
+    });
+    if(!exists)
+      $scope.models.lists.selectedFields.push(item);
+  }
+
+  $scope.checkSelected = function(){
+    $scope.models.lists.selectedFields.forEach(function(field){
+      field.modules.forEach(function(field){
+        if($scope.selectedModules.indexOf(field) == -1)
+          $scope.selectedModules.push(field);
+      });
+    }); 
+  }
+
+  $scope.checkPresent = function(item){
+    var present = false;
+    $scope.models.lists.selectedFields.forEach(function(field){
+      if(field.field == item.field){
+        present = true;
+        return;
+      }
+    });
+    return present;
   }
 
   // $scope.$watch('selectFields', function(newVal){
@@ -326,20 +390,37 @@ angular.module('uforia')
   $scope.createMapping = function(){
     var mapping = {
       name: $scope.mapping.name,
-      modules: {},
+      tables: {},
       fields: {},
       visualizations: $scope.mapping.visualizations
     }
 
     $scope.models.lists.selectedFields.forEach(function(field){
       mapping.fields[field.field] = field.modules;
-      field.modules.forEach(function(module){
-        mapping.modules[module] = [];
-        for(var type in modules[module].meme_types)
-          mapping.modules[module].push(modules[module].meme_types[type]);
+      mapping.fields.hashid = (mapping.fields.hashid || []).concat(field.modules);
+      field.modules.forEach(function(mime_type){
+        mapping.tables[modules[mime_type].table] = mapping.tables[modules[mime_type].table] || ['hashid'];
+        mapping.tables[modules[mime_type].table].push(field.field);
+        // for(var type in modules[mime_type].meme_types)
+          // mapping.tables[mime_type].push(modules[mime_type].meme_types[type]);
       });
     });
 
     console.log(mapping);
+    $http.post('/api/create_mapping', mapping)
+    .success(function(res){
+      console.log(res);
+    });
   }
 });
+
+function ArrayMove(array, old_index, new_index) {
+  if (new_index >= array.length) {
+    var k = new_index - array.length;
+    while ((k--) + 1) {
+      array.push(undefined);
+    }
+  }
+  array.splice(new_index, 0, array.splice(old_index, 1)[0]);
+  return array; // for testing purposes
+};

@@ -4,7 +4,7 @@
       label.control-label.col-lg-6(for="searchType") Use evidence type
       .col-lg-6
         select.form-control#searchType(ng-model='searchType')
-          option(ng-repeat="(key, item) in searchTypes", value="{{key}}", ng-bind="item.name", ng-selected="{{searchType == key}}")
+          option(ng-repeat="item in searchTypes", value="{{item}}", ng-bind="item", ng-selected="{{searchType == item}}", required)
     .col-lg-9.form-group
       .row.col-lg-12(ng-repeat="parameter in parameters")
         label.control-label.col-lg-2.center(ng-if="$index == 0") and

@@ -25,11 +25,6 @@ var INDEX = 'uforia';
 var DEFAULT_TYPE = 'files';
 var DEFAULT_VIEW = 'bubble';
 var DEFAULT_VISUALIZATION = 'bar_chart';
-//**********************
-
-router.post('/get_types', function(req, res) {
-  res.send(TYPES);
-});
 
 /* Query elasticsearch
 * url: /api/search
@@ -53,7 +48,7 @@ router.post("/search", function(req, res) {
   var visualizationParams = util.defaultFor(data.visualization, DEFAULT_VISUALIZATION);
 
   search_request['index'] = INDEX;
-  search_request['type'] = TYPES[util.defaultFor(data.type, DEFAULT_TYPE)].mappings.toString();
+  search_request['type'] = data.type;
 
   var parameters = util.defaultFor(data.parameters, {});
   var filters = util.defaultFor(data.filters, {});
@@ -199,7 +194,7 @@ router.post("/count", function(req, res){
   var query_skeleton = { "query": { "filtered": { "query": { "bool": { "must": [], "must_not": [] } }, "filter": { "bool": { "must": [], "must_not": [] } } } } };
 
   search_request['index'] = INDEX;
-  search_request['type'] = TYPES[util.defaultFor(data.type, DEFAULT_TYPE)].mappings.toString();
+  search_request['type'] = data.type;
   var parameters = util.defaultFor(data.parameters, {});
   var filters = util.defaultFor(data.filters, {});
 
@@ -260,8 +255,20 @@ router.post("/count", function(req, res){
 * none
 */
 router.post("/get_types", function(req, res){
-  res.send(TYPES);
+  c.elasticsearch.indices.getMapping({
+    index: INDEX
+  }).then(function(resp){
+    var mappings = [];
+    for(var mapping in resp[INDEX].mappings)
+      mappings.push(mapping);
+
+    res.send(mappings);
+  });
 });
+
+router.get("/test", function(req, res){
+
+}); 
 
 /*Return the fields each item in a mapping has
 * url: /api/mapping_info
@@ -270,15 +277,17 @@ router.post("/get_types", function(req, res){
 *
 */
 router.post("/mapping_info", function(req, res){
-  var type = TYPES[req.body.type].mappings.toString();
+  var type = req.body.type;
+  console.log(type);
 
   c.elasticsearch.indices.getMapping({ 
-    index : INDEX,
-    type : type,
+    index : INDEX
   }).then(function(resp){
+    console.log(resp);
     try{
       res.send(resp[INDEX].mappings[type].properties); 
     } catch(err){
+      console.trace(err);
       res.send();
     }
   }, function(err){
@@ -305,7 +314,7 @@ router.post("/view_info", function(req, res){
 * hashids
 */
 router.post("/get_file_details", function(req, res){
-  var type = TYPES[util.defaultFor(req.body.type, DEFAULT_TYPE)].mappings.toString();
+  var type = req.body.type;
   var hashids = util.defaultFor(req.body.hashids, []);
   var filesTable = 'files';
   var tableName = '63c5e0bd853105c84a2184539eb245'; //temp for demonstration
@@ -352,40 +361,36 @@ router.post("/get_mappings", function(req, res){
     var mime_types = {};
 
     async.each(results, function(result, callback){
-      if(mime.extension(result.mime_type)){
-        modules[mime.extension(result.mime_type)] = modules[mime.extension(result.mime_type)] || {
-          meme_types: [],
-          fields: []
-        };
+      modules[result.mime_type] = {
+        table: undefined,
+        fields: []
+      };
 
-        result.modules = JSON.parse(result.modules);
+      result.modules = JSON.parse(result.modules);
 
-        // for(var key in result.modules)
-        modules[mime.extension(result.mime_type)].meme_types = result.modules;
+      // for(var key in result.modules)
+      // modules[mime.extension(result.mime_type)].meme_types = result.modules;
 
-        var tables = [];
-        for(var mime_type in result.modules)
-          tables.push(result.modules[mime_type]);
+      var tables = [];
+      for(var mime_type in result.modules)
+        tables.push(result.modules[mime_type]);
 
-        async.each(tables, function(table, callback){
-          c.mysql_db.query('SHOW COLUMNS FROM ??', [table], function(err, fields){
-            if(err) throw err;
-
-            fields.forEach(function(field){
-              modules[mime.extension(result.mime_type)].fields.push(field.Field);
-            });
-
-            callback();
-          });
-        }, function(err){
+      async.each(tables, function(table, callback){
+        c.mysql_db.query('SHOW COLUMNS FROM ??', [table], function(err, fields){
           if(err) throw err;
+
+          fields.forEach(function(field){
+            modules[result.mime_type].fields.push(field.Field);
+          });
+
+          modules[result.mime_type].table = table;
+
           callback();
         });
-
-      } else {
-        console.log('Cannot find extension for mime type: ' + result.mime_type);
+      }, function(err){
+        if(err) throw err;
         callback();
-      }
+      });
     }, function(err){
       if(err) throw err;
       res.send(modules);
@@ -413,37 +418,140 @@ router.post("/get_mappings", function(req, res){
 * fields - array
 */
 router.post("/create_mapping", function(req, res){
-  var name = util.defaultFor(req.param('name'), "");
-  var modules = util.defaultFor(req.param('modules'), {});
-  var fields = util.defaultFor(req.param('fields'), []);
+  var mapping = req.body;
+  var num = 4;
+  var queues = [];
+  var completed = 0;
+  var start = new Date();
+  var meta = {
+    tables: Object.keys(mapping.tables)
+  };
+  var emitInterval;
 
-  if(name == "" || modules == {} || fields == []){
-    res.send("Unsuccessful");
-    return;
+  if(!mapping.name){
+    return res.send({error: 'Please define a mapping name.'});
   }
 
-  //Create or truncate the file
-  fs.openSync(MAPPINGS_OUTPUT_FILE, 'w');
-  fs.chmodSync(MAPPINGS_OUTPUT_FILE, 0666);
+  async.series([deleteOldMapping, setupWorkers, getMetaData], function(err){
+    if(err) throw err;
 
-  //Write it
-  var stream = fs.createWriteStream(MAPPINGS_OUTPUT_FILE);
-  stream.once('open', function(fd) {
-    stream.write('[' + name + ']\n');
-    stream.write('modules = '+ JSON.stringify(modules) + '\n');
-    stream.write('fields = '+ JSON.stringify(fields) + '\n');
-    stream.end();
+    res.send({error: false, message: "Elasticsearch is now filling " + meta.totalRows + " rows into the mapping with index '" + mapping.name + "'."})
 
-    python.run(MAPPINGS_SCRIPT, MAPPING_SCRIPT_OPTIONS, function(err, results){
+    emitInterval = setInterval(emitProgress, 1000);
+
+    //Get all data and spread data over workers
+    async.each(Object.keys(mapping.tables), function(table, callback){
+
+      var isData = true;
+      var iterate = -1;
+
+      async.whilst(function(){
+        return isData;
+      }, function(callback){
+        iterate++;
+        c.mysql_db.query('SELECT ?? FROM ?? LIMIT 1000 OFFSET ?', [mapping.tables[table], table, iterate*1000], function(err, result){
+          
+          isData = (result && result.length > 0);
+
+          // Divide results over queues
+          if(result){
+            for(var i=0; i < num; i++){
+              var part = Math.ceil((result.length)/num);
+              // console.log('part', part);
+              // console.log(result.slice(i*part, i*part+part));
+              queues[i].push(result.slice(i*part, i*part+part));
+            }
+          }
+          callback();
+        });
+      }, function(err){
+        if(err) throw err;
+        callback();
+      });
+    }, function(err){
       if(err) {
-        console.log("Can't start mapping script: " + err.stack);
-        res.send("Written mapping file but couldn't start mapping script");
-        return;
+        console.error(err);
       }
-      // console.log(results);
-      res.send("Elasticsearch is now filling the mapping in the background.");
+
+      var done = 0;
+      for(var i=0; i<num; i++){
+        if(queues[i].length > 0){
+          queues[i].empty = function(){
+            done++;
+            if(done == num){
+              // var now = new Date();
+              // res.send('request took ' + (now-start)/1000 + ' seconds.');
+            }
+          };
+        }
+        else{
+          done++;
+          if(done == num){
+            // var now = new Date();
+            // res.send('request took ' + (now-start)/1000 + ' seconds.');
+          }
+        }
+      }
     });
   });
+
+  function deleteOldMapping(callback){
+    c.elasticsearch.indices.deleteMapping({
+      index: INDEX,
+      type: mapping.name
+    }, function (error, response) {
+      if(error){
+        console.error(error);
+        // Type might nog exist, not a problem, continue
+      }
+      callback();
+    });
+  }
+
+  function setupWorkers(callback){
+    //Create worker queues to fill elasticsearch
+    for(var i=0; i<num; i++){
+      queues.push(async.queue(function (data, callback) {
+        c.elasticsearch.create({
+          index: INDEX,
+          type: mapping.name,
+          body: data
+        }, function (error, response) {
+          if(error) throw error;
+          // ...
+          completed++;
+          callback();
+        });
+      }, 1));
+    }
+    callback();
+  }
+
+  function getMetaData(callback){
+    var query = 'SELECT ';
+    var data = Object.keys(mapping.tables);
+
+    for(var i=0; i < data.length; i++){
+      query += '(SELECT COUNT(*) FROM ??)';
+      if(i<data.length-1)
+        query += ' + ';
+    }
+    query+=' AS count;';
+
+    c.mysql_db.query(query, data, function(err, result){
+      if(err) throw err;
+
+      meta.totalRows = result[0].count;
+      callback();
+    });
+  }
+
+  function emitProgress(){
+    var progress = completed/meta.totalRows; //Math.round((completed/meta.totalRows)*100)/100;
+
+    c.io.emit('uforia', {mapping: mapping.name, progres: progress});
+  }
 });
+
 
 module.exports = router;

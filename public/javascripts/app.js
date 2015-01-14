@@ -3,7 +3,12 @@ angular.module('uforia',
     ['ui.router', 'ui.bootstrap.modal', 'ui.bootstrap.datepicker', 'dndLists', 'ui'])
   
   .run(function($rootScope) {
-
+    $rootScope.mappings = {};
+    var socket = io();
+    socket.on('uforia', function(info){
+      console.log(info);
+      $rootScope.mappings[info.mapping] = info;
+    });
   })
 
   .config(function($stateProvider, $urlRouterProvider, $sceProvider){
@@ -28,7 +33,8 @@ angular.module('uforia',
         templateUrl: "views/admin",
         controller: 'adminCtrl',
         resolve: {
-          modules: model.getAvailableModules
+          modules: model.getAvailableModules,
+          types: model.getTypes
         }
       });
   });

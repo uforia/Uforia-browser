@@ -178,3 +178,7 @@ ul[dnd-list], ul[dnd-list] > li {
   }
 }
 /***** END OF SPINNER *****/
+
+.dnd ul[dnd-list] li.present {
+  background-color: #D4D4D4;
+}

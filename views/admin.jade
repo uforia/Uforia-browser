@@ -2,24 +2,22 @@
   .col-lg-2
     label Name
     input.form-control(ng-model="mapping.name")
+    label or select existing
+    select.form-control(ng-size="{{types.length}}")
+      option(ng-repeat="item in types") {{item}}
   .col-lg-2
-    label Modules
-    select.form-control.selectFields(ui-sortable, ng-model="selectedModules", ng-size="{{Utils.keys(modules).length+1}}", multiple)
-      option(ng-repeat="(key, item) in modules", value="{{key}}") {{key}}
+    label Mime-types
+    select.form-control.selectFields(ui-sortable, ng-model="selectedModules", ng-size="{{Utils.keys(modules).length+1}}", multiple, ng-change="checkSelected()", ng-click="checkSelected()")
+      optgroup(ng-repeat="(key, meme_types) in modulesList", label="{{key}}")
+        option(ng-repeat="type in meme_types", value="{{type}}") {{type.split('/')[1] || type}}
   .col-lg-2.dnd
     label Fields
-    //- select.form-control.selectFields(ng-model="selectFields", ng-size="{{getSize(fields)}}", multiple)
-      optgroup(ng-repeat="(key, item) in fields", label="{{key}}")
-        option(ng-repeat="field in item | unique", value="{{key}}:{{field}}", ng-hide="mapping.selectedFields[key] && mapping.selectedFields[key].indexOf(field) != -1") {{field}}
     ul(dnd-list='models.lists.fields')
-      li(ng-repeat='(key,item) in models.lists.fields | unique:"field"', dnd-draggable='item', dnd-moved='models.lists.fields.splice($index, 1)', dnd-effect-allowed='move') {{item.field}}
+      li(ng-repeat='(key,item) in models.lists.fields | unique:"field"', dnd-draggable='item', dnd-moved='models.lists.fields.splice($index, 1)', dnd-effect-allowed='move', ng-hide="item.field=='hashid'", ng-click="models.lists.fields.splice($index, 1); addField(item);", ng-class="{present: checkPresent(item)}") {{item.field}}
   .col-lg-2.dnd
     label Selected
-    //- select.form-control.selectFields(ui-sortable, ng-model="deselectFields", ng-size="{{getSize(mapping.selectedFields)}}", multiple)
-      optgroup(ng-repeat="(key, item) in mapping.selectedFields", label="{{key}}")
-        option(ng-repeat="field in item", value="{{key}}:{{field}}") {{field}}
     ul(dnd-list='models.lists.selectedFields', dnd-drop="selectField(event, index, item, type)")
-      li(ng-repeat='(key,item) in models.lists.selectedFields', dnd-draggable='item', dnd-moved='models.lists.selectedFields.splice($index, 1); reloadFields();', dnd-effect-allowed='move') {{item.field}}
+      li(ng-repeat='(key,item) in models.lists.selectedFields', dnd-draggable='item', dnd-moved='models.lists.selectedFields.splice($index, 1); reloadFields();', dnd-effect-allowed='move', ng-click='models.lists.selectedFields.splice($index, 1); reloadFields();') {{item.field}}
   .col-lg-2.visualizations
     label Visualizations
     img(src="./images/visualizations/graph.png", width="100%", ng-click="mapping.visualizations.graph = !mapping.visualizations.graph", ng-class="{selected: mapping.visualizations.graph}")

@@ -14,5 +14,9 @@
   },
   "workers": {
     "maxCallTime": 10000
+  },
+  "fillqueues": {
+    "maxQueues": 4,
+    "workersPerQueue": 1
   }
 }
