@@ -442,13 +442,13 @@ router.post("/get_mapping", function(req, res){
 */
 router.post("/create_mapping", function(req, res){
   var mapping = req.body;
-  var num = 5;
+  var num = 4;
   var queues = [];
   var completed = 0;
   var tableIndex = 0;
   var tableOffset = -1;
   var start = new Date();
-  var maxItems = 1000;
+  var maxItems = 10000;
   var mysqlIterateVar = start.getTime();
   var meta = {
     tables: Object.keys(mapping.tables)
