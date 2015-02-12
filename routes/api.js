@@ -12,7 +12,7 @@ var testdata = require('./testdata/documents');
 
 // ***** move this *****
 var TYPES = {
-    email: {name : 'Email', mappings : ["message_rfc822"]},
+    email: {name : 'email', mappings : ["email"]},
     documents: { name : 'Documents', mappings : ["documents"]}, 
     files: { name : 'Files', mappings : ["files"]}
 };
@@ -42,6 +42,7 @@ var DEFAULT_VISUALIZATION = 'bar_chart';
 */
 router.post("/search", function(req, res) {
   var data = req.body;
+  console.log(req.body);
   var search_request = {};
   var query_skeleton = { "query": { "filtered": { "query": { "bool": { "must": [], "must_not": [] } }, "filter": { "bool": { "must": [], "must_not": [] } } } } };
   var view = util.defaultFor(data.view, DEFAULT_VIEW);

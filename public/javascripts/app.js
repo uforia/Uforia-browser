@@ -4,7 +4,10 @@ angular.module('uforia',
   
   .run(function($rootScope) {
     $rootScope.mappings = {};
-    var socket = io.connect('http://www.uforia.nl/socket.io/');
+    var socket = io.connect('http://uforia.nl/');
+    socket.on('connect', function(){
+      console.log(socket);
+    });
     socket.on('uforia', function(info){
       console.log(info);
       $rootScope.mappings[info.mapping] = info;
