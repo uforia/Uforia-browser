@@ -243,7 +243,7 @@ angular.module('uforia')
 
   $scope.deleteMapping = function(type, index){
     if(confirm("Are you sure you want to delete the mapping '" + type + "'?")){
-      $http.post('/api/delete_mapping', {type: type})
+      $http.post('./api/delete_mapping', {type: type})
       .success(function(data){
         console.log(data);
         $scope.types.splice(index, 1);
@@ -449,7 +449,7 @@ angular.module('uforia')
     });
 
     console.log(mapping);
-    $http.post('/api/create_mapping', mapping)
+    $http.post('./api/create_mapping', mapping)
     .success(function(res){
       console.log(res);
       $state.go('admin.overview');
