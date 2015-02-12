@@ -236,18 +236,33 @@ angular.module('uforia')
 
 })
 
-.controller('adminCtrl', function($scope, $http, modules, types){
+.controller('adminCtrl', function($rootScope, $scope, $http, types){
+  $scope.types = types;
+
+  var socket = io();
+
+  $scope.deleteMapping = function(type, index){
+    if(confirm("Are you sure you want to delete the mapping '" + type + "'?")){
+      $http.post('/api/delete_mapping', {type: type})
+      .success(function(data){
+        console.log(data);
+        $scope.types.splice(index, 1);
+      })
+    }
+  }
+
+  $scope.pauseFilling = function(type){
+    socket.emit('pauseFilling', {type: type});
+  }
+})
+
+.controller('mappingCtrl', function($scope, $http, $stateParams, $state, mapping, modules, types){
+  console.log(mapping);
   $scope.modules = modules;
   $scope.types = types;
-  $scope.mapping = {};
+  $scope.mapping = {name: $stateParams.type};
   $scope.mapping.selectedFields = {};
-  $scope.selectedModules = undefined;
-
-  $scope.modulesList = {};
-  for(var key in modules){
-    $scope.modulesList[key.split('/')[0]] = $scope.modulesList[key.split('/')[0]] || [];
-    $scope.modulesList[key.split('/')[0]].push(key);
-  }
+  $scope.selectedModules = [];
 
   $scope.models = {
     selected: null,
@@ -256,6 +271,23 @@ angular.module('uforia')
       selectedFields: []
     }
   };
+
+  if(mapping){
+    mapping.forEach(function(field){
+      var types = field._source.types.split(',');
+      types.forEach(function(type){
+        if($scope.selectedModules.indexOf(type) == -1)
+          $scope.selectedModules.push(type);
+      });
+      $scope.models.lists.selectedFields.push({field: field._source.field, modules: types});
+    });
+  }
+
+  $scope.modulesList = {};
+  for(var key in modules){
+    $scope.modulesList[key.split('/')[0]] = $scope.modulesList[key.split('/')[0]] || [];
+    $scope.modulesList[key.split('/')[0]].push(key);
+  }
 
   $scope.reloadFields = function(){
     loadFields($scope.selectedModules);
@@ -351,6 +383,16 @@ angular.module('uforia')
     return present;
   }
 
+  $scope.checkForFields = function(type){
+    for(var field in modules[type].fields){
+      var field = modules[type].fields[field];
+      if(field != 'hashid' && $scope.checkPresent({field: field})){
+        return true;
+      }
+    }
+    return false;
+  }
+
   // $scope.$watch('selectFields', function(newVal){
   //   if(newVal && newVal.length > 0){
   //     newVal.forEach(function(item){
@@ -410,6 +452,7 @@ angular.module('uforia')
     $http.post('/api/create_mapping', mapping)
     .success(function(res){
       console.log(res);
+      $state.go('admin.overview');
     });
   }
 });

@@ -182,3 +182,7 @@ ul[dnd-list], ul[dnd-list] > li {
 .dnd ul[dnd-list] li.present {
   background-color: #D4D4D4;
 }
+
+.available:not([selected]):before {
+  content: '>';
+}

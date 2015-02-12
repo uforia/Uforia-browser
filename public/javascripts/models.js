@@ -28,7 +28,18 @@ var model = {
     var defer = $q.defer();
   
     $http
-      .post('api/get_mappings')
+      .post('api/get_modules')
+      .success(function(data) {
+        defer.resolve(data);
+      });
+  
+    return defer.promise;
+  }],
+  getMapping: ['$http', '$q', '$stateParams', function($http, $q, $stateParams) {
+    var defer = $q.defer();
+  
+    $http
+      .post('api/get_mapping', {type: $stateParams.type})
       .success(function(data) {
         defer.resolve(data);
       });

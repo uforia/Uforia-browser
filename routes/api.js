@@ -259,16 +259,19 @@ router.post("/get_types", function(req, res){
     index: INDEX
   }).then(function(resp){
     var mappings = [];
-    for(var mapping in resp[INDEX].mappings)
-      mappings.push(mapping);
+    for(var mapping in resp[INDEX].mappings){
+      var last = mapping.split('_');
+      last = last[last.length-1];
+
+      var exclude = ['fields', 'visualizations'];
+
+      if(exclude.indexOf(last) == -1)
+        mappings.push(mapping);
+    }
 
     res.send(mappings);
   });
 });
-
-router.get("/test", function(req, res){
-
-}); 
 
 /*Return the fields each item in a mapping has
 * url: /api/mapping_info
@@ -349,11 +352,11 @@ router.post("/get_file_details", function(req, res){
 });
 
 /* Return the indexed mappings for a type
-* url: /api/get_mappings
+* url: /api/get_modules
 * takes params:
 * 
 */
-router.post("/get_mappings", function(req, res){
+router.post("/get_modules", function(req, res){
   c.mysql_db.query('SELECT * FROM supported_mimetypes', function(err, results){
     if(err) throw err;    
 
@@ -409,6 +412,26 @@ router.post("/get_mappings", function(req, res){
   });
 });
 
+/* Return the indexed mapping
+* url: /api/get_mapping
+* takes params:
+* type - string
+*/
+router.post("/get_mapping", function(req, res){
+  c.elasticsearch.search({
+    index: INDEX,
+    type: req.body.type + '_fields',
+    body: { query: { match_all: {} } },
+    size: 999 // all
+  }).then(function(resp){
+    // if(resp[INDEX].mappings[req.body.type])
+    //   res.send({fields: Object.keys(resp[INDEX].mappings[req.body.type].properties)});
+    // else
+    //   res.send({});
+    res.send(resp.hits.hits);
+  });
+});
+
 /*
 * Writes a costom mapping format to a file and starts the mapping script
 * url: /api/create_mapping
@@ -419,91 +442,46 @@ router.post("/get_mappings", function(req, res){
 */
 router.post("/create_mapping", function(req, res){
   var mapping = req.body;
-  var num = 4;
+  var num = 5;
   var queues = [];
   var completed = 0;
+  var tableIndex = 0;
+  var tableOffset = -1;
   var start = new Date();
+  var maxItems = 1000;
+  var mysqlIterateVar = start.getTime();
   var meta = {
     tables: Object.keys(mapping.tables)
   };
-  var emitInterval;
 
   if(!mapping.name){
     return res.send({error: 'Please define a mapping name.'});
   }
 
-  async.series([deleteOldMapping, setupWorkers, getMetaData], function(err){
+  async.series([deleteOldMapping, setupWorkers, getMetaData, setFieldInfo], function(err){
     if(err) throw err;
 
     res.send({error: false, message: "Elasticsearch is now filling " + meta.totalRows + " rows into the mapping with index '" + mapping.name + "'."})
 
     emitInterval = setInterval(emitProgress, 1000);
 
-    //Get all data and spread data over workers
-    async.each(Object.keys(mapping.tables), function(table, callback){
+    console.log(c.io);
 
-      var isData = true;
-      var iterate = -1;
-
-      async.whilst(function(){
-        return isData;
-      }, function(callback){
-        iterate++;
-        c.mysql_db.query('SELECT ?? FROM ?? LIMIT 1000 OFFSET ?', [mapping.tables[table], table, iterate*1000], function(err, result){
-          
-          isData = (result && result.length > 0);
-
-          // Divide results over queues
-          if(result){
-            for(var i=0; i < num; i++){
-              var part = Math.ceil((result.length)/num);
-              // console.log('part', part);
-              // console.log(result.slice(i*part, i*part+part));
-              queues[i].push(result.slice(i*part, i*part+part));
-            }
-          }
-          callback();
-        });
-      }, function(err){
-        if(err) throw err;
-        callback();
-      });
-    }, function(err){
-      if(err) {
-        console.error(err);
-      }
-
-      var done = 0;
-      for(var i=0; i<num; i++){
-        if(queues[i].length > 0){
-          queues[i].empty = function(){
-            done++;
-            if(done == num){
-              // var now = new Date();
-              // res.send('request took ' + (now-start)/1000 + ' seconds.');
-            }
-          };
-        }
-        else{
-          done++;
-          if(done == num){
-            // var now = new Date();
-            // res.send('request took ' + (now-start)/1000 + ' seconds.');
-          }
-        }
-      }
+    c.io.on('pauseFilling', function(data){
+      console.log(data);
     });
+
   });
 
   function deleteOldMapping(callback){
     c.elasticsearch.indices.deleteMapping({
       index: INDEX,
-      type: mapping.name
+      type: [mapping.name, mapping.name + '_fields'],
+      ignore: [404] // Ignore not found error
     }, function (error, response) {
-      if(error){
-        console.error(error);
-        // Type might nog exist, not a problem, continue
-      }
+      if(error)
+        throw error;
+  
       callback();
     });
   }
@@ -512,6 +490,9 @@ router.post("/create_mapping", function(req, res){
     //Create worker queues to fill elasticsearch
     for(var i=0; i<num; i++){
       queues.push(async.queue(function (data, callback) {
+        var queue = data.queue;
+        delete data.queue;
+
         c.elasticsearch.create({
           index: INDEX,
           type: mapping.name,
@@ -520,10 +501,26 @@ router.post("/create_mapping", function(req, res){
           if(error) throw error;
           // ...
           completed++;
-          callback();
+          // Check if queue length is below 10, if so get new results from the database
+          if(queues[queue] && queues[queue].length() < 10){
+            fillQueue(queue, function(queue, results){
+              console.log('filled queue ' + queue + ' with ' + results + ' results.');
+              callback();
+            });
+          }
+          else {
+            callback();
+          }
+
         });
       }, 1));
+
+      // Fill initial rows into queue
+      fillQueue(i, function(queue, results){
+        console.log('filled queue ' + queue + ' with ' + results + ' results.');
+      });
     }
+
     callback();
   }
 
@@ -546,11 +543,77 @@ router.post("/create_mapping", function(req, res){
     });
   }
 
+  function setFieldInfo(callback){
+    for(var field in mapping.fields){
+        c.elasticsearch.create({
+        index: INDEX,
+        type: mapping.name + '_fields',
+        body: {field: field, types: mapping.fields[field].join(',')}
+      }, function (error, response) {
+        if(error) throw error;
+      });
+    }
+
+    callback();
+  }
+
+  function fillQueue(queue, callback){
+    tableOffset++;
+    if(meta.tables[tableIndex]){
+      console.log('results from ' + meta.tables[tableIndex]);
+      c.mysql_db.query('SELECT ? AS _table, ? AS queue, ?? FROM ?? LIMIT ? OFFSET ? ', [meta.tables[tableIndex], queue, mapping.tables[meta.tables[tableIndex]], meta.tables[tableIndex], maxItems, maxItems*tableOffset], function(err, result){
+        if(err) throw err;
+        // Divide results over queues
+        if(result && result.length > 0){
+          queues[queue].push(result);
+        }
+        else {
+          tableIndex++;
+          tableOffset = -1;
+        }
+        callback(queue, result.length || 0);
+      });
+    }
+    else{
+      callback(queue, 0);
+    }
+  }
+
   function emitProgress(){
     var progress = completed/meta.totalRows; //Math.round((completed/meta.totalRows)*100)/100;
 
-    c.io.emit('uforia', {mapping: mapping.name, progres: progress});
+    for(var i=0; i<num; i++){
+      console.log('Queue ' + i + ': ' + queues[i].length());
+    }
+
+    c.io.emit('uforia', {mapping: mapping.name, progress: progress, completed: completed, total: meta.totalRows, started: start});
+
+    var queuesFinished = 0;
+    for(var i=0; i<num; i++){
+      if(queues[i].idle())
+        queuesFinished++;
+    }
+    if(queuesFinished == num){
+      var now = new Date();
+      console.log('Filling took ' + (now-start)/1000 + ' seconds.');
+      clearTimeout(emitInterval);
+    }
   }
+});
+
+/*
+* Delete's a mapping from elasticsearch
+* url: /api/delete_mapping
+* takes params:
+* type - string
+*/
+router.post('/delete_mapping', function(req, res){
+  c.elasticsearch.indices.deleteMapping({
+    index: INDEX,
+    type: req.body.type
+  }, function (error, response) {
+    res.send({error: error, response: response});
+  });
 });
 
 
