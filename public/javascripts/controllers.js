@@ -19,6 +19,7 @@ angular.module('uforia')
   $timeout(function(){
     $scope.$watch('searchType', function(newVal, oldVal){
       changeType(newVal);
+      console.log(newVal);
     });
 
     $scope.$watch('viewType', function(newVal, oldVal){

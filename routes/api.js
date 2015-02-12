@@ -92,7 +92,7 @@ router.post("/search", function(req, res) {
   }
 
   search_request['body'] = query_skeleton;
-
+console.log(search_request);
   c.elasticsearch.count(search_request).then(function(resp){
     try {
       search_request['size'] = resp.count;
@@ -502,7 +502,7 @@ router.post("/create_mapping", function(req, res){
           // ...
           completed++;
           // Check if queue length is below 10, if so get new results from the database
-          if(queues[queue] && queues[queue].length() < 10){
+          if(queues[queue] && queues[queue].length() < maxItems){
             fillQueue(queue, function(queue, results){
               console.log('filled queue ' + queue + ' with ' + results + ' results.');
               callback();
@@ -610,7 +610,7 @@ router.post("/create_mapping", function(req, res){
 router.post('/delete_mapping', function(req, res){
   c.elasticsearch.indices.deleteMapping({
     index: INDEX,
-    type: req.body.type
+    type: [req.body.type, req.body.type + '_fields']
   }, function (error, response) {
     res.send({error: error, response: response});
   });
