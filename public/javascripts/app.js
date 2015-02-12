@@ -4,7 +4,7 @@ angular.module('uforia',
   
   .run(function($rootScope) {
     $rootScope.mappings = {};
-    var socket = io();
+    var socket = io('http://www.uforia.nl/elasticsearch/');
     socket.on('uforia', function(info){
       console.log(info);
       $rootScope.mappings[info.mapping] = info;
