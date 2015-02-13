@@ -376,8 +376,10 @@ router.post("/get_modules", function(req, res){
       // modules[mime.extension(result.mime_type)].meme_types = result.modules;
 
       var tables = [];
-      for(var mime_type in result.modules)
-        tables.push(result.modules[mime_type]);
+      for(var mime_type in result.modules){
+        if(result.modules[mime_type].length > 0)
+          tables.push(result.modules[mime_type]);
+      }
 
       async.each(tables, function(table, callback){
         c.mysql_db.query('SHOW COLUMNS FROM ??', [table], function(err, fields){
