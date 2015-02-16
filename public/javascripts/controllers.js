@@ -91,6 +91,7 @@ angular.module('uforia')
     $http
       .post("api/mapping_info", {type: type})
       .success(function(data){
+        console.log(data);
         $scope.memeTypes = data;
       });
 
@@ -239,7 +240,7 @@ angular.module('uforia')
 .controller('adminCtrl', function($rootScope, $scope, $http, types){
   $scope.types = types;
 
-  var socket = io();
+  // var socket = io();
 
   $scope.deleteMapping = function(type, index){
     if(confirm("Are you sure you want to delete the mapping '" + type + "'?")){
@@ -251,9 +252,9 @@ angular.module('uforia')
     }
   }
 
-  $scope.pauseFilling = function(type){
-    socket.emit('pauseFilling', {type: type});
-  }
+  // $scope.pauseFilling = function(type){
+  //   socket.emit('pauseFilling', {type: type});
+  // }
 })
 
 .controller('mappingCtrl', function($scope, $http, $stateParams, $state, mapping, modules, types){
@@ -274,12 +275,14 @@ angular.module('uforia')
 
   if(mapping){
     mapping.forEach(function(field){
-      var types = field._source.types.split(',');
-      types.forEach(function(type){
-        if($scope.selectedModules.indexOf(type) == -1)
-          $scope.selectedModules.push(type);
-      });
-      $scope.models.lists.selectedFields.push({field: field._source.field, modules: types});
+      if(field._source.field != 'hashid'){
+        var types = field._source.types.split(',');
+        types.forEach(function(type){
+          if($scope.selectedModules.indexOf(type) == -1)
+            $scope.selectedModules.push(type);
+        });
+        $scope.models.lists.selectedFields.push({field: field._source.field, modules: types});
+      }
     });
   }
 

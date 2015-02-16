@@ -5,7 +5,8 @@ var express   = require('express'),
     util      = require('../lib/mimetype_modules/util'),
     fs        = require('fs'), 
     mime      = require('mime'),
-    async     = require('async');
+    async     = require('async'),
+    _         = require('lodash');
 
 //** FOR TESTING
 var testdata = require('./testdata/documents');
@@ -260,14 +261,21 @@ router.post("/get_types", function(req, res){
     index: INDEX
   }).then(function(resp){
     var mappings = [];
-    for(var mapping in resp[INDEX].mappings){
-      var last = mapping.split('_');
-      last = last[last.length-1];
+    if(resp[INDEX]){
+      for(var mapping in resp[INDEX].mappings){
+        var last = mapping.split('_');
+        last = last[last.length-1];
 
-      var exclude = ['fields', 'visualizations'];
+        var exclude = ['fields', 'visualizations'];
 
-      if(exclude.indexOf(last) == -1)
-        mappings.push(mapping);
+        if(mappings.indexOf(mapping) == -1 && exclude.indexOf(last) == -1){
+          mappings.push(mapping);
+        }
+        // If there are empty mappings, show the mapping in the UI anyways
+        else if(exclude.indexOf(last) != -1 && mappings.indexOf(mapping.slice(0, mapping.indexOf('_' + last))) == -1){
+          mappings.push(mapping.slice(0, mapping.indexOf('_' + last)));
+        }
+      }
     }
 
     res.send(mappings);
@@ -289,7 +297,11 @@ router.post("/mapping_info", function(req, res){
   }).then(function(resp){
     console.log(resp);
     try{
-      res.send(resp[INDEX].mappings[type].properties); 
+      var data = resp[INDEX].mappings[type].properties;
+      if(data['_table']);
+        delete data['_table'];
+
+      res.send(data); 
     } catch(err){
       console.trace(err);
       res.send();
@@ -378,7 +390,7 @@ router.post("/get_modules", function(req, res){
       var tables = [];
       for(var mime_type in result.modules){
         if(result.modules[mime_type].length > 0)
-          tables.push(result.modules[mime_type]);
+        tables.push(result.modules[mime_type]);
       }
 
       async.each(tables, function(table, callback){
@@ -461,18 +473,16 @@ router.post("/create_mapping", function(req, res){
     return res.send({error: 'Please define a mapping name.'});
   }
 
-  async.series([deleteOldMapping, setupWorkers, getMetaData, setFieldInfo], function(err){
-    if(err) throw err;
+  res.send({error: false, message: "Elasticsearch is now filling " + meta.totalRows + " rows into the mapping with index '" + mapping.name + "'."})
 
-    res.send({error: false, message: "Elasticsearch is now filling " + meta.totalRows + " rows into the mapping with index '" + mapping.name + "'."})
+  async.series([deleteOldMapping, getMetaData, setupWorkers, setFieldInfo], function(err){
+    if(err) throw err;
 
     emitInterval = setInterval(emitProgress, 1000);
 
-    console.log(c.io);
-
-    c.io.on('pauseFilling', function(data){
-      console.log(data);
-    });
+    // c.io.on('pauseFilling', function(data){
+    //   console.log(data);
+    // });
 
   });
 
@@ -504,7 +514,7 @@ router.post("/create_mapping", function(req, res){
           if(error) throw error;
           // ...
           completed++;
-          // Check if queue length is below 10, if so get new results from the database
+          // Check if queue length is below maxItems, if so get new results from the database
           if(queues[queue] && queues[queue].length() < maxItems){
             fillQueue(queue, function(queue, results){
               console.log('filled queue ' + queue + ' with ' + results + ' results.');
@@ -521,10 +531,10 @@ router.post("/create_mapping", function(req, res){
       // Fill initial rows into queue
       fillQueue(i, function(queue, results){
         console.log('filled queue ' + queue + ' with ' + results + ' results.');
+        if(queue == (num-1) )
+          callback();
       });
     }
-
-    callback();
   }
 
   function getMetaData(callback){
@@ -564,17 +574,26 @@ router.post("/create_mapping", function(req, res){
     tableOffset++;
     if(meta.tables[tableIndex]){
       console.log('results from ' + meta.tables[tableIndex]);
-      c.mysql_db.query('SELECT ? AS _table, ? AS queue, ?? FROM ?? LIMIT ? OFFSET ? ', [meta.tables[tableIndex], queue, mapping.tables[meta.tables[tableIndex]], meta.tables[tableIndex], maxItems, maxItems*tableOffset], function(err, result){
+      c.mysql_db.query('SELECT * FROM ?? LIMIT ? OFFSET ?', [meta.tables[tableIndex], maxItems, maxItems*tableOffset], function(err, results){
         if(err) throw err;
         // Divide results over queues
-        if(result && result.length > 0){
-          queues[queue].push(result);
+        if(results && results.length > 0){
+          var item = {};
+          results.forEach(function(result){
+            var item = _.pick(result, mapping.tables[meta.tables[tableIndex]], null);
+            item.queue = queue;
+            item._table = meta.tables[tableIndex];
+            queues[queue].push(item);
+          })
         }
         else {
           tableIndex++;
           tableOffset = -1;
+          if(meta.tables[tableIndex]){
+            return fillQueue(queue, callback);
+          }
         }
-        callback(queue, result.length || 0);
+        callback(queue, results.length || 0);
       });
     }
     else{
