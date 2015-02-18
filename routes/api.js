@@ -94,7 +94,7 @@ router.post("/search", function(req, res) {
   }
 
   search_request['body'] = query_skeleton;
-console.log(search_request);
+// console.log(search_request);
   c.elasticsearch.count(search_request).then(function(resp){
     try {
       search_request['size'] = resp.count;
@@ -598,7 +598,7 @@ router.post("/create_mapping", function(req, res){
         if(results && results.length > 0){
           var item = {};
           results.forEach(function(result){
-            var item = _.pick(result, mapping.tables[meta.tables[tableIndex]], null);
+            var item = _.pick(result, mapping.tables[meta.tables[tableIndex]].fields, null);
             item.queue = queue;
             item._table = meta.tables[tableIndex];
             queues[queue].push(item);
