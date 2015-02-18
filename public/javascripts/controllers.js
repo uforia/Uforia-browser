@@ -259,6 +259,7 @@ angular.module('uforia')
 
 .controller('mappingCtrl', function($scope, $http, $stateParams, $state, mapping, modules, types){
   console.log(mapping);
+  console.log(modules);
   $scope.modules = modules;
   $scope.types = types;
   $scope.mapping = {name: $stateParams.type};
@@ -274,15 +275,30 @@ angular.module('uforia')
   };
 
   if(mapping){
-    mapping.forEach(function(field){
-      if(field._source.field != 'hashid'){
-        var types = field._source.types.split(',');
-        types.forEach(function(type){
-          if($scope.selectedModules.indexOf(type) == -1)
-            $scope.selectedModules.push(type);
-        });
-        $scope.models.lists.selectedFields.push({field: field._source.field, modules: types});
-      }
+    mapping.forEach(function(table){
+      table = table._source;
+
+      var mime_type = table.mime_type;
+
+      if($scope.selectedModules.indexOf(mime_type) == -1)
+        $scope.selectedModules.push(mime_type);
+
+      table.fields.split(',').forEach(function(field){
+        if(field != 'hashid'){
+          var found = false;
+          for(var key in $scope.models.lists.selectedFields){
+            if($scope.models.lists.selectedFields.field == field){
+              found = true;
+              if($scope.models.lists.selectedFields.modules.indexOf(mime_type) == -1){
+                $scope.models.lists.selectedFields.modules.push(mime_type);
+              }
+            }
+          }
+          if(!found){
+            $scope.models.lists.selectedFields.push({field: field, modules: [mime_type]});
+          }         
+        }
+      });
     });
   }
 
@@ -444,10 +460,14 @@ angular.module('uforia')
       mapping.fields[field.field] = field.modules;
       mapping.fields.hashid = (mapping.fields.hashid || []).concat(field.modules);
       field.modules.forEach(function(mime_type){
-        mapping.tables[modules[mime_type].table] = mapping.tables[modules[mime_type].table] || ['hashid'];
-        mapping.tables[modules[mime_type].table].push(field.field);
-        // for(var type in modules[mime_type].meme_types)
-          // mapping.tables[mime_type].push(modules[mime_type].meme_types[type]);
+
+        for(var table in modules[mime_type].tables){
+          if(modules[mime_type].tables[table].indexOf(field.field) != -1){
+            mapping.tables[table] = mapping.tables[table] || {mime_type: mime_type, fields: ['hashid']};
+            mapping.tables[table].fields.push(field.field);
+          }
+        }
+
       });
     });
 

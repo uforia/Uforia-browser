@@ -297,11 +297,17 @@ router.post("/mapping_info", function(req, res){
   }).then(function(resp){
     console.log(resp);
     try{
-      var data = resp[INDEX].mappings[type].properties;
-      if(data['_table']);
-        delete data['_table'];
+      // If the mapping exists
+      if(resp[INDEX].mappings[type]){
+        var data = resp[INDEX].mappings[type].properties;
+        if(data['_table']);
+          delete data['_table'];
 
-      res.send(data); 
+        res.send(data); 
+      }
+      else { // Else send empty data, could be that the mapping isn't filled yet
+        res.send([]);
+      }
     } catch(err){
       console.trace(err);
       res.send();
@@ -377,8 +383,10 @@ router.post("/get_modules", function(req, res){
     var mime_types = {};
 
     async.each(results, function(result, callback){
-      modules[result.mime_type] = {
-        table: undefined,
+      var mime_type = result.mime_type;
+
+      modules[mime_type] = {
+        tables: {},
         fields: []
       };
 
@@ -387,21 +395,23 @@ router.post("/get_modules", function(req, res){
       // for(var key in result.modules)
       // modules[mime.extension(result.mime_type)].meme_types = result.modules;
 
-      var tables = [];
-      for(var mime_type in result.modules){
-        if(result.modules[mime_type].length > 0)
-        tables.push(result.modules[mime_type]);
+      for(var module in result.modules){
+        if(result.modules[module].length > 0)
+          modules[mime_type].tables[result.modules[module]] = [];
       }
 
-      async.each(tables, function(table, callback){
+      async.each(Object.keys(modules[mime_type].tables), function(table, callback){
         c.mysql_db.query('SHOW COLUMNS FROM ??', [table], function(err, fields){
           if(err) throw err;
 
           fields.forEach(function(field){
-            modules[result.mime_type].fields.push(field.Field);
+            modules[mime_type].tables[table].push(field.Field);
+
+            if(modules[mime_type].fields.indexOf(field.Field) == -1)
+              modules[mime_type].fields.push(field.Field);
           });
 
-          modules[result.mime_type].table = table;
+          // modules[mime_type].table = table;
 
           callback();
         });
@@ -459,9 +469,11 @@ router.post("/create_mapping", function(req, res){
   var mapping = req.body;
   var num = 4;
   var queues = [];
+  var fillingQueue = new Array(num);
   var completed = 0;
   var tableIndex = 0;
   var tableOffset = -1;
+  var lastQueueTableOffset = -1;
   var start = new Date();
   var maxItems = 10000;
   var mysqlIterateVar = start.getTime();
@@ -515,15 +527,18 @@ router.post("/create_mapping", function(req, res){
           // ...
           completed++;
           // Check if queue length is below maxItems, if so get new results from the database
-          if(queues[queue] && queues[queue].length() < maxItems){
+          if(queues[queue] && queues[queue].length() < maxItems && !fillingQueue[queue]){
+            fillingQueue[queue] = true;
+
             fillQueue(queue, function(queue, results){
+              fillingQueue[queue] = false;
               console.log('filled queue ' + queue + ' with ' + results + ' results.');
-              callback();
+              
+              if(lastQueueTableOffset == queue) 
+                lastQueueTableOffset = -1;
             });
           }
-          else {
-            callback();
-          }
+          callback();
 
         });
       }, 1));
@@ -533,6 +548,9 @@ router.post("/create_mapping", function(req, res){
         console.log('filled queue ' + queue + ' with ' + results + ' results.');
         if(queue == (num-1) )
           callback();
+
+        if(lastQueueTableOffset == queue) 
+          lastQueueTableOffset = -1;
       });
     }
   }
@@ -557,11 +575,11 @@ router.post("/create_mapping", function(req, res){
   }
 
   function setFieldInfo(callback){
-    for(var field in mapping.fields){
+    for(var table in mapping.tables){
         c.elasticsearch.create({
         index: INDEX,
         type: mapping.name + '_fields',
-        body: {field: field, types: mapping.fields[field].join(',')}
+        body: {table: table, fields: mapping.tables[table].fields.join(','), mime_type: mapping.tables[table].mime_type}
       }, function (error, response) {
         if(error) throw error;
       });
@@ -572,8 +590,8 @@ router.post("/create_mapping", function(req, res){
 
   function fillQueue(queue, callback){
     tableOffset++;
+    console.log('results from ' + meta.tables[tableIndex]);
     if(meta.tables[tableIndex]){
-      console.log('results from ' + meta.tables[tableIndex]);
       c.mysql_db.query('SELECT * FROM ?? LIMIT ? OFFSET ?', [meta.tables[tableIndex], maxItems, maxItems*tableOffset], function(err, results){
         if(err) throw err;
         // Divide results over queues
@@ -586,7 +604,7 @@ router.post("/create_mapping", function(req, res){
             queues[queue].push(item);
           })
         }
-        else {
+        else if(lastQueueTableOffset == -1) {
           tableIndex++;
           tableOffset = -1;
           if(meta.tables[tableIndex]){
@@ -595,9 +613,6 @@ router.post("/create_mapping", function(req, res){
         }
         callback(queue, results.length || 0);
       });
-    }
-    else{
-      callback(queue, 0);
     }
   }
 
@@ -610,12 +625,12 @@ router.post("/create_mapping", function(req, res){
 
     c.io.emit('uforia', {mapping: mapping.name, progress: progress, completed: completed, total: meta.totalRows, started: start});
 
-    var queuesFinished = 0;
-    for(var i=0; i<num; i++){
-      if(queues[i].idle())
-        queuesFinished++;
-    }
-    if(queuesFinished == num){
+    // var queuesFinished = 0;
+    // for(var i=0; i<num; i++){
+    //   if(queues[i].idle())
+    //     queuesFinished++;
+    // }
+    if(completed == meta.totalRows){
       var now = new Date();
       console.log('Filling took ' + (now-start)/1000 + ' seconds.');
       clearTimeout(emitInterval);
