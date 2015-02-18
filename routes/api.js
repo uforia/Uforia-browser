@@ -498,7 +498,7 @@ router.post("/create_mapping", function(req, res){
       }
     }
     else {
-      completed();
+      finishFilling();
     }
 
     callback();
@@ -666,7 +666,7 @@ router.post("/create_mapping", function(req, res){
     // }
   }
 
-  function completed() {
+  function finishFilling() {
     var now = new Date();
     console.log('Filling took ' + (now-start)/1000 + ' seconds.');
     clearTimeout(emitInterval);
