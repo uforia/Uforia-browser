@@ -472,8 +472,6 @@ router.post("/create_mapping", function(req, res){
   var fillingQueue = new Array(num);
   var completed = 0;
   var tableIndex = 0;
-  var tableOffset = -1;
-  var lastQueueTableOffset = -1;
   var start = new Date();
   var maxItems = 10000;
   var mysqlIterateVar = start.getTime();
@@ -481,13 +479,40 @@ router.post("/create_mapping", function(req, res){
     tables: Object.keys(mapping.tables)
   };
 
+  var loadDivider = async.queue(function(queue, callback){
+
+    if(meta.hashids[meta.tables[tableIndex]]){
+
+      if(meta.hashids[meta.tables[tableIndex]].length > 0){
+        
+        var hashids = meta.hashids[meta.tables[tableIndex]].slice(0, maxItems);
+        meta.hashids[meta.tables[tableIndex]] = meta.hashids[meta.tables[tableIndex]].slice(maxItems);
+
+        fillQueue(queue, hashids, function(queue, results){
+          console.log('filled queue ' + queue + ' with ' + results + ' results.');
+        });
+      }
+      else{
+        tableIndex++;
+        loadDivider.push(queue);
+      }
+    }
+    else {
+      completed();
+    }
+
+    callback();
+  }, 1);
+
+  //queue for index
+
   if(!mapping.name){
     return res.send({error: 'Please define a mapping name.'});
   }
 
   res.send({error: false, message: "Elasticsearch is now filling " + meta.totalRows + " rows into the mapping with index '" + mapping.name + "'."})
 
-  async.series([deleteOldMapping, getMetaData, setupWorkers, setFieldInfo], function(err){
+  async.series([deleteOldMapping, getMetaData, getHashIds, setupWorkers, setFieldInfo], function(err){
     if(err) throw err;
 
     emitInterval = setInterval(emitProgress, 1000);
@@ -527,30 +552,42 @@ router.post("/create_mapping", function(req, res){
           // ...
           completed++;
           // Check if queue length is below maxItems, if so get new results from the database
-          if(queues[queue] && queues[queue].length() < maxItems && !fillingQueue[queue]){
-
-            fillQueue(queue, function(queue, results){
-              console.log('filled queue ' + queue + ' with ' + results + ' results.');
-              
-              if(lastQueueTableOffset == queue) 
-                lastQueueTableOffset = -1;
-            });
+          if(queues[queue].length() < maxItems && !fillingQueue[queue]){
+            console.log('push queue ' + queue);
+            loadDivider.push(queue);
           }
           callback();
 
         });
       }, 1));
 
-      // Fill initial rows into queue
-      fillQueue(i, function(queue, results){
-        console.log('filled queue ' + queue + ' with ' + results + ' results.');
-        if(queue == (num-1) )
-          callback();
-
-        if(lastQueueTableOffset == queue) 
-          lastQueueTableOffset = -1;
-      });
+      loadDivider.push(i);
     }
+    callback();
+  }
+
+  function getHashIds(callback){
+    var queries = [];
+    var tables = Object.keys(mapping.tables);
+
+    meta.hashids = {};
+
+    for(var table in mapping.tables){
+      queries.push('SELECT hashid FROM ??');
+    }
+
+    c.mysql_db.query(queries.join(';'), Object.keys(mapping.tables), function(err, results){
+      if(err) throw err;
+
+      for(var i=0; i< tables.length; i++){
+        meta.hashids[tables[i]] = [];
+        results[i].forEach(function(result){
+          meta.hashids[tables[i]].push(result.hashid);
+        });
+      }
+
+      callback();
+    });
   }
 
   function getMetaData(callback){
@@ -586,13 +623,12 @@ router.post("/create_mapping", function(req, res){
     callback();
   }
 
-  function fillQueue(queue, callback){
-    fillingQueue[queue] = true;
-    tableOffset++;
+  function fillQueue(queue, hashids, callback){
     var table = meta.tables[tableIndex];
+    fillingQueue[queue] = true;
     console.log('results from ' + table);
     if(table){
-      c.mysql_db.query('SELECT * FROM ?? LIMIT ? OFFSET ?', [table, maxItems, maxItems*tableOffset], function(err, results){
+      c.mysql_db.query('SELECT * FROM ?? WHERE hashid IN (?)', [table, hashids], function(err, results){
         if(err) throw err;
         // Divide results over queues
         if(results && results.length > 0){
@@ -607,17 +643,6 @@ router.post("/create_mapping", function(req, res){
             queues[queue].push(item);
           });
         }
-        else if(lastQueueTableOffset == -1) {
-          lastQueueTableOffset = queue;
-          tableIndex++;
-          tableOffset = -1;
-          if(meta.tables[tableIndex]){
-            return fillQueue(queue, callback);
-          }
-        }
-        else if(meta.tables[tableIndex]){
-          return fillQueue(queue, callback);
-        }
         fillingQueue[queue] = false;
         callback(queue, results.length || 0);
       });
@@ -630,7 +655,7 @@ router.post("/create_mapping", function(req, res){
     for(var i=0; i<num; i++){
       console.log('Queue ' + i + ': ' + queues[i].length());
     }
-    console.log('Progress: ' + completed + '/' + meta.totalRows + ' (' + completed/meta.totalRows + ' %)');
+    console.log('Progress: ' + completed + '/' + meta.totalRows + ' (' + (completed/meta.totalRows)*100 + ' %)');
 
     c.io.emit('uforia', {mapping: mapping.name, progress: progress, completed: completed, total: meta.totalRows, started: start});
 
@@ -639,11 +664,12 @@ router.post("/create_mapping", function(req, res){
     //   if(queues[i].idle())
     //     queuesFinished++;
     // }
-    if(completed == meta.totalRows){
-      var now = new Date();
-      console.log('Filling took ' + (now-start)/1000 + ' seconds.');
-      clearTimeout(emitInterval);
-    }
+  }
+
+  function completed() {
+    var now = new Date();
+    console.log('Filling took ' + (now-start)/1000 + ' seconds.');
+    clearTimeout(emitInterval);
   }
 });
 

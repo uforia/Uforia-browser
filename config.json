@@ -10,7 +10,7 @@
     "user": "uforia",
     "password": "uforia",
     "database": "uforia",
-    "multipleStatements": false
+    "multipleStatements": true
   },
   "workers": {
     "maxCallTime": 10000
