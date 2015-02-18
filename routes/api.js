@@ -528,10 +528,8 @@ router.post("/create_mapping", function(req, res){
           completed++;
           // Check if queue length is below maxItems, if so get new results from the database
           if(queues[queue] && queues[queue].length() < maxItems && !fillingQueue[queue]){
-            fillingQueue[queue] = true;
 
             fillQueue(queue, function(queue, results){
-              fillingQueue[queue] = false;
               console.log('filled queue ' + queue + ' with ' + results + ' results.');
               
               if(lastQueueTableOffset == queue) 
@@ -589,28 +587,38 @@ router.post("/create_mapping", function(req, res){
   }
 
   function fillQueue(queue, callback){
+    fillingQueue[queue] = true;
     tableOffset++;
-    console.log('results from ' + meta.tables[tableIndex]);
-    if(meta.tables[tableIndex]){
-      c.mysql_db.query('SELECT * FROM ?? LIMIT ? OFFSET ?', [meta.tables[tableIndex], maxItems, maxItems*tableOffset], function(err, results){
+    var table = meta.tables[tableIndex];
+    console.log('results from ' + table);
+    if(table){
+      c.mysql_db.query('SELECT * FROM ?? LIMIT ? OFFSET ?', [table, maxItems, maxItems*tableOffset], function(err, results){
         if(err) throw err;
         // Divide results over queues
         if(results && results.length > 0){
           var item = {};
           results.forEach(function(result){
-            var item = _.pick(result, mapping.tables[meta.tables[tableIndex]].fields, null);
+            // console.log(mapping.tables);
+            // console.log(mapping.tables[meta.tables[tmpIndex]]);
+            // console.log(mapping.tables[meta.tables[tmpIndex]].fields);
+            var item = _.pick(result, mapping.tables[table].fields, null);
             item.queue = queue;
-            item._table = meta.tables[tableIndex];
+            item._table = table;
             queues[queue].push(item);
-          })
+          });
         }
         else if(lastQueueTableOffset == -1) {
+          lastQueueTableOffset = queue;
           tableIndex++;
           tableOffset = -1;
           if(meta.tables[tableIndex]){
             return fillQueue(queue, callback);
           }
         }
+        else if(meta.tables[tableIndex]){
+          return fillQueue(queue, callback);
+        }
+        fillingQueue[queue] = false;
         callback(queue, results.length || 0);
       });
     }
