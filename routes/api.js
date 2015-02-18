@@ -490,6 +490,7 @@ router.post("/create_mapping", function(req, res){
 
         fillQueue(queue, hashids, function(queue, results){
           console.log('filled queue ' + queue + ' with ' + results + ' results.');
+          fillingQueue[queue] = false;
         });
       }
       else{
@@ -553,6 +554,7 @@ router.post("/create_mapping", function(req, res){
           completed++;
           // Check if queue length is below maxItems, if so get new results from the database
           if(queues[queue].length() < maxItems && !fillingQueue[queue]){
+            fillingQueue[queue] = true;
             console.log('push queue ' + queue);
             loadDivider.push(queue);
           }
@@ -625,7 +627,6 @@ router.post("/create_mapping", function(req, res){
 
   function fillQueue(queue, hashids, callback){
     var table = meta.tables[tableIndex];
-    fillingQueue[queue] = true;
     console.log('results from ' + table);
     if(table){
       c.mysql_db.query('SELECT * FROM ?? WHERE hashid IN (?)', [table, hashids], function(err, results){
@@ -643,7 +644,6 @@ router.post("/create_mapping", function(req, res){
             queues[queue].push(item);
           });
         }
-        fillingQueue[queue] = false;
         callback(queue, results.length || 0);
       });
     }
