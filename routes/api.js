@@ -555,16 +555,16 @@ router.post("/create_mapping", function(req, res){
 
   function getMetaData(callback){
     var query = 'SELECT ';
-    var data = Object.keys(mapping.tables);
+    var tables = Object.keys(mapping.tables);
 
-    for(var i=0; i < data.length; i++){
+    for(var i=0; i < tables.length; i++){
       query += '(SELECT COUNT(*) FROM ??)';
-      if(i<data.length-1)
+      if(i<tables.length-1)
         query += ' + ';
     }
     query+=' AS count;';
 
-    c.mysql_db.query(query, data, function(err, result){
+    c.mysql_db.query(query, tables, function(err, result){
       if(err) throw err;
 
       meta.totalRows = result[0].count;
@@ -630,6 +630,7 @@ router.post("/create_mapping", function(req, res){
     for(var i=0; i<num; i++){
       console.log('Queue ' + i + ': ' + queues[i].length());
     }
+    console.log('Progress: ' + completed + '/' + meta.totalRows + ' (' + completed/meta.totalRows + ' %)');
 
     c.io.emit('uforia', {mapping: mapping.name, progress: progress, completed: completed, total: meta.totalRows, started: start});
 
