@@ -42,15 +42,16 @@ function render(data, options, openDetails, cb){
 
   var indexByName = d3.map(),
       nameByIndex = d3.map(),
+      tablesByIndex = d3.map(),
       matrix = data.matrix,
       n = 0;
 
   // create a unique index for each package name.
   data.names.forEach(function(d) {
-    d = d.name;
-    if (!indexByName.has(d)) {
-      nameByIndex.set(n, d);
-      indexByName.set(d, n++);
+    if (!indexByName.has(d.name)) {
+      nameByIndex.set(n, d.name);
+      tablesByIndex.set(n, d.tables);
+      indexByName.set(d.name, n++);
     }
   });
 
@@ -136,7 +137,11 @@ function render(data, options, openDetails, cb){
 
   // Click on a chord
   function mouseclick(d){
-    openDetails({hashids: data.hashids[d.source.index][d.target.index], adressses:[nameByIndex.get(d.source.index), nameByIndex.get(d.target.index)]});
+    console.log(d);
+    var tables = {};
+    tables[Object.keys(tablesByIndex.get(d.source.index))[0]] = tablesByIndex.get(d.source.index)[Object.keys(tablesByIndex.get(d.source.index))[0]];
+    tables[Object.keys(tablesByIndex.get(d.target.index))[0]] = tablesByIndex.get(d.target.index)[Object.keys(tablesByIndex.get(d.target.index))[0]];
+    openDetails({hashids: data.hashids[d.source.index][d.target.index], adressses:[nameByIndex.get(d.source.index), nameByIndex.get(d.target.index)], tables: tables});
   }
 
   //Show the tooltip for a chord group
@@ -148,7 +153,8 @@ function render(data, options, openDetails, cb){
 
   //Open a window on the click of a chord group
   function groupClick(d){
-    openDetails({hashids: data.names[d.index].hashids, adressses:[data.names[d.index].name]});
+    console.log(d);
+    openDetails({tables: data.names[d.index].tables, hashids: data.names[d.index].hashids, adressses:[data.names[d.index].name]});
   }
 
   //Show the tooltip for a chord on mouseover

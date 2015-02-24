@@ -7,12 +7,12 @@
           option(ng-repeat="item in searchTypes", value="{{item}}", ng-bind="item", ng-selected="{{searchType == item}}", required)
     .col-lg-9.form-group
       .row.col-lg-12(ng-repeat="parameter in parameters")
-        label.control-label.col-lg-2.center(ng-if="$index == 0") and
+        label.control-label.col-lg-2.center(ng-if="$index == 0")
         .col-lg-2(ng-if="$index > 0")
           //- This select is disabled because it doesn't work yet.
-          select.form-control(ng-model="parameter.andOr", required, disabled)
-            option And
-            option Or
+          select.form-control(ng-model="parameter.andOr", required)
+            option(value="and") And
+            option(value="or") Or
         .col-lg-2
           select.form-control(ng-model="parameter.memeType", required)
             option(ng-repeat="(key, item) in memeTypes", value="{{key}}", ng-bind="key")

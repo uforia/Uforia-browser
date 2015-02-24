@@ -46,14 +46,14 @@ router.post("/search", function(req, res) {
   console.log(req.body);
   var search_request = {};
   var query_skeleton = { "query": { "filtered": { "query": { "bool": { "must": [], "must_not": [] } }, "filter": { "bool": { "must": [], "must_not": [] } } } } };
-  var view = util.defaultFor(data.view, DEFAULT_VIEW);
-  var visualizationParams = util.defaultFor(data.visualization, DEFAULT_VISUALIZATION);
+  var view = data.view || DEFAULT_VIEW;
+  var visualizationParams = data.visualization || DEFAULT_VISUALIZATION;
 
   search_request['index'] = INDEX;
   search_request['type'] = data.type;
 
-  var parameters = util.defaultFor(data.parameters, {});
-  var filters = util.defaultFor(data.filters, {});
+  var parameters = data.parameters || {};
+  var filters = data.filters || {};
 
   if(parameters.must){
     parameters.must.forEach(function(param){
@@ -193,50 +193,97 @@ var search = function(search_request, res, view, parameters){
 router.post("/count", function(req, res){
   var data = req.body;
   var search_request = {};
-  var query_skeleton = { "query": { "filtered": { "query": { "bool": { "must": [], "must_not": [] } }, "filter": { "bool": { "must": [], "must_not": [] } } } } };
+  // var query_skeleton = { "query": { "filtered": { "query": { "bool": { "must": [], "must_not": [] } }, "filter": { "bool": { "must": [], "must_not": [] } } } } };
+  var query_skeleton = { "query": {} };
 
   search_request['index'] = INDEX;
   search_request['type'] = data.type;
   var parameters = util.defaultFor(data.parameters, {});
   var filters = util.defaultFor(data.filters, {});
 
-  if(parameters.must){
-    parameters.must.forEach(function(param){
-      var query = {};
-      util.createNestedObject(query, ['wildcard', param.field], param.query);
-      query_skeleton.query.filtered.query.bool.must.push(query);
-    });
-  }
+  query_skeleton.query.filtered = {query: { wildcard: {} } };
+  query_skeleton.query.filtered.query.wildcard[parameters.must[0].field] = parameters.must[0].query;
+  delete parameters.must[0];
 
-  if(parameters.must_not){
-    parameters.must_not.forEach(function(param){
-      var query = {};
-      util.createNestedObject(query, ['wildcard', param.field], param.query);
-      query_skeleton.query.filtered.query.bool.must_not.push(query);
-    }); 
-  }
+  query_skeleton.query.filtered.filter = { or: [], and: [] };
 
-  if(filters.must){
-    filters.must.forEach(function(filter){
-      var query = {};
-      var startDate = new Date(+filter.start_date);
-      var endDate = new Date(+filter.end_date);
-      util.createNestedObject(query, ['range', filter.field, 'gte'], startDate.toISOString());
-      query.range[filter.field].lte = endDate.toISOString();
-      query_skeleton.query.filtered.filter.bool.must.push(query);
-    }); 
-  }
+  // Loop through all must parameters and add them to the filters
+  parameters.must.forEach(function(param){
+    if(param.andOr == 'and'){
+      q = { query: {bool: { must: { wildcard: {  } } } } };
+      q.query.bool.must.wildcard[param.field] = param.query;
+      query_skeleton.query.filtered.filter.and.push(q);
+    }
+    else {
+      q = { query: {bool: { must: { wildcard: {  } } } } };
+      q.query.bool.must.wildcard[param.field] = param.query;
+      query_skeleton.query.filtered.filter.or.push(q);
+    }
+  });
 
-  if(filters.must_not){
-    filters.must_not.forEach(function(filter){
-      var query = {};
-      var startDate = new Date(+filter.start_date);
-      var endDate = new Date(+filter.end_date);
-      util.createNestedObject(query, ['range', filter.field, 'gte'], startDate.toISOString());
-      query.range[filter.field].lte = endDate.toISOString();
-      query_skeleton.query.filtered.filter.bool.must_not.push(query);
-    }); 
-  }
+  // Loop through all must_not parameters and add them to the filters
+  parameters.must_not.forEach(function(param){
+    if(param.andOr == 'and'){
+      q = { query: {bool: { must_not: { wildcard: {  } } } } };
+      q.query.bool.must_not.wildcard[param.field] = param.query;
+      query_skeleton.query.filtered.filter.and.push(q);
+    }
+    else {
+      q = { query: {bool: { must_not: { wildcard: {  } } } } };
+      q.query.bool.must_not.wildcard[param.field] = param.query;
+      query_skeleton.query.filtered.filter.or.push(q);
+    }
+  });
+
+  // if there are no AND operators, delete the empty array (otherwhise bad request)
+  if(query_skeleton.query.filtered.filter.and.length == 0)
+    delete query_skeleton.query.filtered.filter.and;
+  
+  // if there are no OR operators, delete the empty array (otherwhise bad request)
+  if(query_skeleton.query.filtered.filter.or.length == 0)
+    delete query_skeleton.query.filtered.filter.or;
+
+  
+  console.dir(query_skeleton, {depth: 999});
+  // return;
+
+  // if(parameters.must){
+  //   parameters.must.forEach(function(param){
+  //     var query = {};
+  //     util.createNestedObject(query, ['wildcard', param.field], param.query);
+  //     query_skeleton.query.filtered.query.bool.must.push(query);
+  //   });
+  // }
+
+  // if(parameters.must_not){
+  //   parameters.must_not.forEach(function(param){
+  //     var query = {};
+  //     util.createNestedObject(query, ['wildcard', param.field], param.query);
+  //     query_skeleton.query.filtered.query.bool.must_not.push(query);
+  //   }); 
+  // }
+
+  // if(filters.must){
+  //   filters.must.forEach(function(filter){
+  //     var query = {};
+  //     var startDate = new Date(+filter.start_date);
+  //     var endDate = new Date(+filter.end_date);
+  //     util.createNestedObject(query, ['range', filter.field, 'gte'], startDate.toISOString());
+  //     query.range[filter.field].lte = endDate.toISOString();
+  //     query_skeleton.query.filtered.filter.bool.must.push(query);
+  //   }); 
+  // }
+
+  // if(filters.must_not){
+  //   filters.must_not.forEach(function(filter){
+  //     var query = {};
+  //     var startDate = new Date(+filter.start_date);
+  //     var endDate = new Date(+filter.end_date);
+  //     util.createNestedObject(query, ['range', filter.field, 'gte'], startDate.toISOString());
+  //     query.range[filter.field].lte = endDate.toISOString();
+  //     query_skeleton.query.filtered.filter.bool.must_not.push(query);
+  //   }); 
+  // }
   search_request['body'] = query_skeleton;
   c.elasticsearch.count(search_request).then(function(resp){
     try {
@@ -337,36 +384,24 @@ router.post("/view_info", function(req, res){
 */
 router.post("/get_file_details", function(req, res){
   var type = req.body.type;
-  var hashids = util.defaultFor(req.body.hashids, []);
-  var filesTable = 'files';
-  var tableName = '63c5e0bd853105c84a2184539eb245'; //temp for demonstration
+  var hashids = req.body.hashids || [];
+  var tables = Object.keys(req.body.tables);
 
-  //Remove duplicates from the hashids
-  hashids = hashids.filter (function (v, i, a) { return a.indexOf (v) == i });
+  var filesTable = 'files'; // Todo: get this from config
+  
+  var data = [];
 
-  //Escape the values for safety
-  hashids.forEach(function(hashid, index){
-    hashids[index] = c.mysql_db.escape(hashid);
-  });
+  async.each(tables, function(table, callback){
+    var hashids = _.uniq(req.body.tables[table]);
+    c.mysql_db.query('SELECT ??.*, ??.fullpath FROM ?? LEFT JOIN ?? ON ??.hashid = ??.hashid WHERE ??.hashid IN (?)', 
+      [table, filesTable, table, filesTable, table, filesTable, table, hashids], function(err, results){
+      if(err) throw err;
 
-  c.mysql_db.getConnection(function(err, connection){
-    if(err){
-      console.log("Couldn't establish db connection: " + err.stack());
-      res.send();
-      return;
-    } else {
-      //Create the query and execute it
-      var query = "SELECT ??.*, ??.fullpath FROM ?? LEFT JOIN ?? ON ??.hashid = ??.hashid WHERE ??.hashid IN (" + hashids.toString() + ")";
-      connection.query(query, [tableName, filesTable, tableName, filesTable, tableName, filesTable, tableName], function(err, results){
-        if(err){
-          console.log("Error executing query: " + err.stack());
-          res.send();
-        } else {
-          res.send(results);
-        }
-        connection.release(); //back to the conn pool
-      });
-    }
+      data = data.concat(results);
+      callback();
+    });
+  }, function(err){
+    res.send(data);
   });
 });
 
@@ -474,7 +509,7 @@ router.post("/create_mapping", function(req, res){
   var tableIndex = 0;
   var start = new Date();
   var maxItems = 10000;
-  var mysqlIterateVar = start.getTime();
+
   var meta = {
     tables: Object.keys(mapping.tables)
   };
@@ -498,7 +533,7 @@ router.post("/create_mapping", function(req, res){
         loadDivider.push(queue);
       }
     }
-    else {
+    else if(loadDivider.length() == 0) {
       finishFilling();
     }
 

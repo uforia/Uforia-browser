@@ -32,6 +32,7 @@ angular.module('uforia')
       var api_params = {};
       if($scope.searchForm.$valid){
         $scope.loading = true;
+        console.log(formatParams());
         $http
           .post('api/count', formatParams())
           .success(function(data){
@@ -116,6 +117,7 @@ angular.module('uforia')
     
     getData(formatParams(), function(data){
       $('#d3_visualization').empty();
+      // console.log(data);
       if(data.total > 0){
         render(data, {height: window.innerHeight-65}, openDetails, function(error){
           if(error)
@@ -136,13 +138,14 @@ angular.module('uforia')
 
   //click on a item
   function openDetails(data){
+    // console.log(data);
     $scope.loading = true;
     var modalInstance = $modal.open({
       templateUrl: 'views/modals/details',
       controller: 'detailsModalCtrl',
       size: 'lg',
       resolve: {
-        files: model.getFileDetails({hashids: data.hashids, type:$scope.searchType}),
+        files: model.getFileDetails({hashids: data.hashids, type:$scope.searchType, tables: data.tables}),
         addresses: function(){ return data.adressses; }
       }
     });
@@ -193,7 +196,7 @@ angular.module('uforia')
         api_params.filters[parameter.operator].push({'field' : parameter.memeType, 'start_date' : parameter.startDate.getTime(), 'end_date' :  parameter.endDate.getTime()});
       }
       else if(parameter.query && parameter.query.length > 0){
-        api_params.parameters[parameter.operator].push({'field' : parameter.memeType, 'query' : parameter.query});
+        api_params.parameters[parameter.operator].push({'field' : parameter.memeType, 'query' : parameter.query, 'andOr': parameter.andOr});
       }
     });
     return api_params;
@@ -224,6 +227,7 @@ angular.module('uforia')
 .controller('detailsModalCtrl', function($scope, $modalInstance, files, addresses){
   $scope.addresses = addresses;
   $scope.files = files;
+  // console.log(files);
   $scope.modalInstance = $modalInstance;
   $scope.selectedFile = files[0].hashid;
 
@@ -246,7 +250,6 @@ angular.module('uforia')
     if(confirm("Are you sure you want to delete the mapping '" + type + "'?")){
       $http.post('./api/delete_mapping', {type: type})
       .success(function(data){
-        console.log(data);
         $scope.types.splice(index, 1);
       })
     }
@@ -258,8 +261,8 @@ angular.module('uforia')
 })
 
 .controller('mappingCtrl', function($scope, $http, $stateParams, $state, mapping, modules, types){
-  console.log(mapping);
-  console.log(modules);
+  // console.log(mapping);
+  // console.log(modules);
   $scope.modules = modules;
   $scope.types = types;
   $scope.mapping = {name: $stateParams.type};
