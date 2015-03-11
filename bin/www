@@ -2,7 +2,8 @@
 var debug = require('debug')('Uforia-browser-new');
 var app = require('../app');
 var config = require('../config.json');
-var c = require('../lib/common');
+var c = require('../lib/common'),
+	io = require('socket.io');
 
 app.set('port', process.env.PORT || config.service_port);
 
@@ -10,5 +11,4 @@ var server = app.listen(app.get('port'), function() {
   console.log('Express server listening on port ' + server.address().port);
 });
 
-
-c.io = c.io(server);
+global.io = io(server);

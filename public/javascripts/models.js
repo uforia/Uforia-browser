@@ -6,6 +6,7 @@ var model = {
     $http
       .post('api/get_types')
       .success(function(data) {
+        console.log(data);
         defer.resolve(data);
       });
   
@@ -45,6 +46,32 @@ var model = {
       });
   
     return defer.promise;
-  }]
+  }],
+  getMappingFields: function(type) { 
+    return ['$http', '$q', '$stateParams', function($http, $q, $stateParams) {
+      var defer = $q.defer();
+    
+      $http
+        .post('api/mapping_info', {type: type})
+        .success(function(data) {
+          defer.resolve(data);
+        });
+    
+      return defer.promise;
+    }] 
+  },
+  getVisualizations: function(type) { 
+    return ['$http', '$q', '$stateParams', function($http, $q, $stateParams) {
+      var defer = $q.defer();
+    
+      $http
+        .post('api/view_info?type=' + type)
+        .success(function(data) {
+          defer.resolve(data);
+        });
+    
+      return defer.promise;
+    }] 
+  }
 
 };

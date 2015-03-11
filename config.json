@@ -3,7 +3,8 @@
   "assets": "",
   "elasticsearch": {
     "host": "localhost",
-    "port": 9200
+    "port": 9200,
+    "index": "uforia"
   },
   "mysql": {
     "host": "127.0.0.1",

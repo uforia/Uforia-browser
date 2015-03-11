@@ -9,8 +9,7 @@ var debug = require('debug')('Uforia-browser-new');
 var cors = require('cors');
 
 var routes      = require('./routes/index');
-var users       = require('./routes/users'),
-    api         = require('./routes/api'),
+var api         = require('./routes/api'),
     m           = require('./lib/middleware.js');
 
 

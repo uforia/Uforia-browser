@@ -11,8 +11,8 @@
         .col-lg-2(ng-if="$index > 0")
           //- This select is disabled because it doesn't work yet.
           select.form-control(ng-model="parameter.andOr", required)
-            option(value="and") And
-            option(value="or") Or
+            option(value="AND") And
+            option(value="OR") Or
         .col-lg-2
           select.form-control(ng-model="parameter.memeType", required)
             option(ng-repeat="(key, item) in memeTypes", value="{{key}}", ng-bind="key")
@@ -46,7 +46,7 @@
       label.control-label.col-lg-6(for="viewType") Visualization type
       .col-lg-6
         select.form-control#viewType(ng-model="viewType")
-          option(ng-repeat="(key, item) in viewTypes", value="{{key}}", ng-bind="item", ng-selected="{{viewType == key}}")
+          option(ng-repeat="(key, item) in viewTypes", value="{{key}}", ng-bind="item.name", ng-selected="{{viewType == key}}")
     .col-lg-9.form-group
       .row.col-lg-12
         .col-lg-10.control-text.text-center

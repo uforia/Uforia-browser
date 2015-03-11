@@ -1,0 +1,31 @@
+#d3_visualization {
+  font: 10px sans-serif;
+}
+
+#tooltip {
+  color: white;
+  opacity: .9;
+  background: #333;
+  padding: 5px;
+  border: 1px solid lightgrey;
+  border-radius: 5px;
+  position: absolute;
+  z-index: 10;
+  visibility: hidden;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+#d3_visualization #circle circle {
+  fill: none;
+  pointer-events: all;
+}
+
+#d3_visualization .chord {
+  fill-opacity: .67;
+  fill: none;
+}
+
+#d3_visualization #circle:hover .chord--fade {
+	display: none;
+}

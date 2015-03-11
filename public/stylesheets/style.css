@@ -186,3 +186,15 @@ ul[dnd-list], ul[dnd-list] > li {
 .available:not([selected]):before {
   content: '>';
 }
+
+.ui-select-toggle {
+  text-align: left;
+}
+
+.ui-select-multiple.ui-select-bootstrap {
+  padding: 4.5px 0px 1.5px 12px;
+}
+
+.text-muted {
+  color: #BABABA;
+}

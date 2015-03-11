@@ -1,0 +1,53 @@
+.modal-header
+  button.close(ng-click="modalInstance.dismiss()", type='button', aria-hidden="true") &times;
+  h2.h3.modal-title Visualizations for {{mapping.name}}
+
+.modal-body
+  table.table
+    thead
+      tr
+        th Type
+        th Name
+        th Field1
+        th Field2
+        th Options
+    tbody
+      tr(ng-repeat="item in visualizations")
+        td.col-lg-2
+          select.form-control(ng-model="item.type", required, ng-change="item.field1 = undefined; item.field2 = undefined")
+            //- option(value="", disabled, selected) Type
+            option(ng-repeat="(type, item) in types", value="{{type}}") {{type}}
+        td.col-lg-2
+          input.form-control(ng-model="item.name")
+        td.col-lg-3
+          ui-select(ng-model="item.field1")
+            ui-select-match(placeholder="{{types[item.type].field1}}") {{$select.selected}}
+            ui-select-choices(repeat="field in fields | filter: $select.search", group-by="groupFind")
+              div(ng-bind-html="field | highlight: $select.search")
+          //- select.form-control(ng-model="item.field1", required, multiple)
+            option(value="", disabled, selected, ng-bind="types[item.type].field1")
+            optgroup(label="Fields")
+              option(ng-repeat="(k,v) in fields", value="{{k}}", ng-bind="k")
+            optgroup(label="Metadata")
+              option(ng-repeat="(k,v) in types[item.type].extra_fields", value="{{k}}", ng-bind="v")
+        td.col-lg-3
+          ui-select(ng-if="!types[item.type].multiple", ng-model="item.field2")
+            ui-select-match(placeholder="{{types[item.type].field2}}") {{$select.selected}}
+            ui-select-choices(repeat="field in fields | filter: $select.search", group-by="groupFind")
+              div(ng-bind-html="field | highlight: $select.search")
+          ui-select(ng-if="types[item.type].multiple", ng-model="item.field2", multiple)
+            ui-select-match(placeholder="{{types[item.type].field2}}") {{$item}}
+            ui-select-choices(repeat="field in fields | filter: $select.search", group-by="groupFind")
+              div(ng-bind-html="field | highlight: $select.search")
+          //- select.form-control(ng-model="item.field2", required)
+            option(value="", disabled, selected, ng-bind="types[item.type].field2")
+            optgroup(label="Fields")
+              option(ng-repeat="(k,v) in fields", value="{{k}}", ng-bind="k")
+            optgroup(label="Metadata")
+              option(ng-repeat="(k,v) in types[item.type].extra_fields", value="{{k}}", ng-bind="v")
+        td.col-lg-2
+          button.btn.btn-sm.btn-primary(type="button", ng-click="visualizations.splice($index+1, 0, {})") +
+          button.btn.btn-sm.btn-danger(type="button", ng-click="visualizations.splice($index, 1)", ng-if="visualizations.length > 1") x
+
+.modal-footer
+  button.btn.btn-sm.btn-default(ng-click="save()") Save

@@ -20,3 +20,9 @@ angular.module('uforia')
       return (Math.round(input * Math.pow(10, decimals + 2))/Math.pow(10, decimals)).toFixed(decimals) + suffix
   };
 })
+
+.filter('capitalizeFirst', function() {
+  return function(txt) {
+    return txt ? txt.charAt(0).toUpperCase() + txt.slice(1).toLowerCase() : '';
+  }
+})

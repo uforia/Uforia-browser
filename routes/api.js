@@ -1,6 +1,6 @@
 var express   = require('express'),
     c         = require('../lib/common'),
-    workers   = require('../lib/workers'),
+    // workers   = require('../lib/workers'),
     router    = express.Router(),
     util      = require('../lib/mimetype_modules/util'),
     fs        = require('fs'), 
@@ -19,13 +19,13 @@ var TYPES = {
 };
 var VIEWS = {
     files : {bubble : 'Bubble'},
-    documents : {bar_chart : 'Bar Chart'},
-    email : {chord : 'Chord diagram', graph :'Graph', bar_chart : 'Bar Chart'}
+    documents : {bar : 'Bar Chart'},
+    email : {chord : 'Chord diagram', graph :'Graph', bar : 'Bar Chart'}
 };
-var INDEX = 'uforia';
+var INDEX = c.config.elasticsearch.index;
 var DEFAULT_TYPE = 'files';
 var DEFAULT_VIEW = 'bubble';
-var DEFAULT_VISUALIZATION = 'bar_chart';
+var DEFAULT_VISUALIZATION = 'bar';
 
 /* Query elasticsearch
 * url: /api/search
@@ -98,7 +98,7 @@ router.post("/search", function(req, res) {
   c.elasticsearch.count(search_request).then(function(resp){
     try {
       search_request['size'] = resp.count;
-      search(search_request, res, view, visualizationParams);
+      search(search_request, res, data.type, view, visualizationParams);
     } catch(err){
       console.trace(err.message);
       res.send();
@@ -110,66 +110,91 @@ router.post("/search", function(req, res) {
 });
 
 //Search and return the result
-var search = function(search_request, res, view, parameters){
+var search = function(search_request, res, type, view, parameters){
     c.elasticsearch.search(search_request).then(function(resp){
-    switch(search_request.type){
-      case TYPES.files.mappings.toString():
-        try {
-          workers.files.createFilesBubble(resp.hits.hits, function(data){
-            res.send(data);
-          });
-        }catch(err){
-          res.send();
-        }
-      break;
-      case TYPES.email.mappings.toString():
-          if(view == 'chord'){
-              try {
-                workers.email.createEmailChordDiagram(resp.hits.hits, function(data){
-                  res.send(data);
-                });
-              }catch(err){
-                  res.send(err.message);
-              }
-          } else if (view == 'graph') {
-              try {
-                workers.email.createEmailGraph(resp.hits.hits, function(data){
-                  res.send(data);
-                });
-              }catch(err){
-                  res.send();
-              }
-          } else if(view == 'bar_chart'){
-              try {
-                workers.email.createBarChart(resp.hits.hits, function(data){
-                  res.send(data);
-                });
-              } catch(err){
-                  res.send();
-              }
-          }
-          break;
-      case TYPES.documents.mappings.toString():
-        if(view == 'bar_chart'){
-          try{
-            //TEST DATA REMOVE THIS
-            var resp = testdata;
+      var vis = require('../lib/visualizations/' + view);
 
-            workers.barChart.barChart(resp.hits.hits, parameters, function(data){
-              res.send(data);
-            });
-          } catch(err){
-            console.log(err.message);
-            res.send();
-          }
-        }
-        break;
-      default: // default is files
-        workers.files.createFilesBubble(resp.hits.hits, function(data){
+      c.elasticsearch.search({
+        index: INDEX,
+        type: type + '_visualizations',
+        body: { query: { match: {type: view} } }
+      }).then(function(vismapping){
+        // if(resp[INDEX].mappings[req.body.type])
+        //   res.send({fields: Object.keys(resp[INDEX].mappings[req.body.type].properties)});
+        // else
+        //   res.send({});
+
+        console.log(vismapping);
+
+        vismapping = vismapping.hits.hits[0]._source;
+
+        parameters.field1 = vismapping.field1;
+        parameters.field2 = vismapping.field2;
+        
+
+        vis.generateJSON(resp.hits.hits, parameters, function(data){
           res.send(data);
         });
-      break;
-    }
+      });
+
+    // switch(search_request.type){
+    //   case TYPES.files.mappings.toString():
+    //     try {
+    //       workers.files.createFilesBubble(resp.hits.hits, function(data){
+    //         res.send(data);
+    //       });
+    //     }catch(err){
+    //       res.send();
+    //     }
+    //   break;
+    //   case TYPES.email.mappings.toString():
+    //       if(view == 'chord'){
+    //           try {
+    //             workers.email.createEmailChordDiagram(resp.hits.hits, function(data){
+    //               res.send(data);
+    //             });
+    //           }catch(err){
+    //               res.send(err.message);
+    //           }
+    //       } else if (view == 'graph') {
+    //           try {
+    //             workers.email.createEmailGraph(resp.hits.hits, function(data){
+    //               res.send(data);
+    //             });
+    //           }catch(err){
+    //               res.send();
+    //           }
+    //       } else if(view == 'bar_chart'){
+    //           try {
+    //             workers.email.createBarChart(resp.hits.hits, function(data){
+    //               res.send(data);
+    //             });
+    //           } catch(err){
+    //               res.send();
+    //           }
+    //       }
+    //       break;
+    //   case TYPES.documents.mappings.toString():
+    //     if(view == 'bar_chart'){
+    //       try{
+    //         //TEST DATA REMOVE THIS
+    //         var resp = testdata;
+
+    //         workers.barChart.barChart(resp.hits.hits, parameters, function(data){
+    //           res.send(data);
+    //         });
+    //       } catch(err){
+    //         console.log(err.message);
+    //         res.send();
+    //       }
+    //     }
+    //     break;
+    //   default: // default is files
+    //     workers.files.createFilesBubble(resp.hits.hits, function(data){
+    //       res.send(data);
+    //     });
+    //   break;
+    // }
   }, function(err){
     res.send();
     console.trace(err.message);
@@ -194,97 +219,24 @@ router.post("/count", function(req, res){
   var data = req.body;
   var search_request = {};
   // var query_skeleton = { "query": { "filtered": { "query": { "bool": { "must": [], "must_not": [] } }, "filter": { "bool": { "must": [], "must_not": [] } } } } };
-  var query_skeleton = { "query": {} };
+  
 
   search_request['index'] = INDEX;
   search_request['type'] = data.type;
-  var parameters = util.defaultFor(data.parameters, {});
-  var filters = util.defaultFor(data.filters, {});
 
-  query_skeleton.query.filtered = {query: { wildcard: {} } };
-  query_skeleton.query.filtered.query.wildcard[parameters.must[0].field] = parameters.must[0].query;
-  delete parameters.must[0];
-
-  query_skeleton.query.filtered.filter = { or: [], and: [] };
-
-  // Loop through all must parameters and add them to the filters
-  parameters.must.forEach(function(param){
-    if(param.andOr == 'and'){
-      q = { query: {bool: { must: { wildcard: {  } } } } };
-      q.query.bool.must.wildcard[param.field] = param.query;
-      query_skeleton.query.filtered.filter.and.push(q);
+  var query_skeleton = {
+    "query": {
+      "query_string": {
+        "query": data.query
+      }
     }
-    else {
-      q = { query: {bool: { must: { wildcard: {  } } } } };
-      q.query.bool.must.wildcard[param.field] = param.query;
-      query_skeleton.query.filtered.filter.or.push(q);
-    }
-  });
+  };
 
-  // Loop through all must_not parameters and add them to the filters
-  parameters.must_not.forEach(function(param){
-    if(param.andOr == 'and'){
-      q = { query: {bool: { must_not: { wildcard: {  } } } } };
-      q.query.bool.must_not.wildcard[param.field] = param.query;
-      query_skeleton.query.filtered.filter.and.push(q);
-    }
-    else {
-      q = { query: {bool: { must_not: { wildcard: {  } } } } };
-      q.query.bool.must_not.wildcard[param.field] = param.query;
-      query_skeleton.query.filtered.filter.or.push(q);
-    }
-  });
-
-  // if there are no AND operators, delete the empty array (otherwhise bad request)
-  if(query_skeleton.query.filtered.filter.and.length == 0)
-    delete query_skeleton.query.filtered.filter.and;
-  
-  // if there are no OR operators, delete the empty array (otherwhise bad request)
-  if(query_skeleton.query.filtered.filter.or.length == 0)
-    delete query_skeleton.query.filtered.filter.or;
-
-  
+  console.log(JSON.stringify(query_skeleton));
   console.dir(query_skeleton, {depth: 999});
-  // return;
 
-  // if(parameters.must){
-  //   parameters.must.forEach(function(param){
-  //     var query = {};
-  //     util.createNestedObject(query, ['wildcard', param.field], param.query);
-  //     query_skeleton.query.filtered.query.bool.must.push(query);
-  //   });
-  // }
-
-  // if(parameters.must_not){
-  //   parameters.must_not.forEach(function(param){
-  //     var query = {};
-  //     util.createNestedObject(query, ['wildcard', param.field], param.query);
-  //     query_skeleton.query.filtered.query.bool.must_not.push(query);
-  //   }); 
-  // }
-
-  // if(filters.must){
-  //   filters.must.forEach(function(filter){
-  //     var query = {};
-  //     var startDate = new Date(+filter.start_date);
-  //     var endDate = new Date(+filter.end_date);
-  //     util.createNestedObject(query, ['range', filter.field, 'gte'], startDate.toISOString());
-  //     query.range[filter.field].lte = endDate.toISOString();
-  //     query_skeleton.query.filtered.filter.bool.must.push(query);
-  //   }); 
-  // }
-
-  // if(filters.must_not){
-  //   filters.must_not.forEach(function(filter){
-  //     var query = {};
-  //     var startDate = new Date(+filter.start_date);
-  //     var endDate = new Date(+filter.end_date);
-  //     util.createNestedObject(query, ['range', filter.field, 'gte'], startDate.toISOString());
-  //     query.range[filter.field].lte = endDate.toISOString();
-  //     query_skeleton.query.filtered.filter.bool.must_not.push(query);
-  //   }); 
-  // }
   search_request['body'] = query_skeleton;
+  
   c.elasticsearch.count(search_request).then(function(resp){
     try {
       res.send(resp);
@@ -307,9 +259,11 @@ router.post("/get_types", function(req, res){
   c.elasticsearch.indices.getMapping({
     index: INDEX
   }).then(function(resp){
+
     var mappings = [];
+    var visualization_types = [];
     if(resp[INDEX]){
-      for(var mapping in resp[INDEX].mappings){
+      async.each(Object.keys(resp[INDEX].mappings), function(mapping, cb){
         var last = mapping.split('_');
         last = last[last.length-1];
 
@@ -322,10 +276,22 @@ router.post("/get_types", function(req, res){
         else if(exclude.indexOf(last) != -1 && mappings.indexOf(mapping.slice(0, mapping.indexOf('_' + last))) == -1){
           mappings.push(mapping.slice(0, mapping.indexOf('_' + last)));
         }
-      }
-    }
 
-    res.send(mappings);
+        var mapping = exclude.indexOf(last) != -1 ? mapping.slice(0, mapping.indexOf('_' + last)) : mapping;
+
+        if(visualization_types.indexOf(mapping + '_visualizations') == -1){
+          visualization_types.push(mapping + '_visualizations');
+        }
+        cb();
+      }, function(err){
+
+        res.send(mappings);
+      });
+
+    }
+    else {
+      res.send({error: true, message: "Elasticsearch INDEX not available. Please check your config file or create the index " + (INDEX) + "."});
+    }
   });
 });
 
@@ -340,7 +306,8 @@ router.post("/mapping_info", function(req, res){
   console.log(type);
 
   c.elasticsearch.indices.getMapping({ 
-    index : INDEX
+    index : INDEX,
+    type: type
   }).then(function(resp){
     console.log(resp);
     try{
@@ -372,7 +339,23 @@ router.post("/mapping_info", function(req, res){
 */
 router.post("/view_info", function(req, res){
   type = util.defaultFor(req.param('type'), DEFAULT_TYPE);
-  res.send(VIEWS[type]);
+
+  c.elasticsearch.search({
+    index: INDEX,
+    type: type + '_visualizations',
+    body: { query: { match_all: {} } },
+    size: 999 // all
+  }).then(function(resp){
+    console.log(resp.hits.hits);
+
+    var types = {};
+
+    resp.hits.hits.forEach(function(type){
+      types[type._source.type] = type._source;
+    });
+
+    res.send(types);
+  });
 });
 
 /* Queries database and return the full path of a file
@@ -553,16 +536,25 @@ router.post("/create_mapping", function(req, res){
 
     emitInterval = setInterval(emitProgress, 1000);
 
-    // c.io.on('pauseFilling', function(data){
-    //   console.log(data);
-    // });
+    io.on('connection', function(socket){
+      socket.on('pauseFilling', function(data){
+        if(queues[0].paused){
+          for(var i=0; i<num; i++)
+            queues[i].resume();
+        }
+        else{
+          for(var i=0; i<num; i++)
+            queues[i].pause();
+        }
+      });
+    });
 
   });
 
   function deleteOldMapping(callback){
     c.elasticsearch.indices.deleteMapping({
       index: INDEX,
-      type: [mapping.name, mapping.name + '_fields'],
+      type: [mapping.name, mapping.name + '_fields', req.body.type + '_visualizations'],
       ignore: [404] // Ignore not found error
     }, function (error, response) {
       if(error)
@@ -577,11 +569,13 @@ router.post("/create_mapping", function(req, res){
     for(var i=0; i<num; i++){
       queues.push(async.queue(function (data, callback) {
         var queue = data.queue;
+        var type = data._type;
         delete data.queue;
+        delete data._type;
 
         c.elasticsearch.create({
           index: INDEX,
-          type: mapping.name,
+          type: type,
           body: data
         }, function (error, response) {
           if(error) throw error;
@@ -613,7 +607,7 @@ router.post("/create_mapping", function(req, res){
       queries.push('SELECT hashid FROM ??');
     }
 
-    c.mysql_db.query(queries.join(';'), Object.keys(mapping.tables), function(err, results){
+    c.mysql_db.query(queries.join(';') + '; SELECT null AS empty', Object.keys(mapping.tables), function(err, results){
       if(err) throw err;
 
       for(var i=0; i< tables.length; i++){
@@ -676,6 +670,7 @@ router.post("/create_mapping", function(req, res){
             var item = _.pick(result, mapping.tables[table].fields, null);
             item.queue = queue;
             item._table = table;
+            item._type = mapping.name;
             queues[queue].push(item);
           });
         }
@@ -692,7 +687,7 @@ router.post("/create_mapping", function(req, res){
     }
     console.log('Progress: ' + completed + '/' + meta.totalRows + ' (' + (completed/meta.totalRows)*100 + ' %)');
 
-    c.io.emit('uforia', {mapping: mapping.name, progress: progress, completed: completed, total: meta.totalRows, started: start});
+    io.emit('uforia', {mapping: mapping.name, progress: progress, completed: completed, total: meta.totalRows, started: start});
 
     // var queuesFinished = 0;
     // for(var i=0; i<num; i++){
@@ -717,10 +712,42 @@ router.post("/create_mapping", function(req, res){
 router.post('/delete_mapping', function(req, res){
   c.elasticsearch.indices.deleteMapping({
     index: INDEX,
-    type: [req.body.type, req.body.type + '_fields']
+    type: [req.body.type, req.body.type + '_fields', req.body.type + '_visualizations']
   }, function (error, response) {
     res.send({error: error, response: response});
   });
+});
+
+/*
+* Save visualizations for a mapping
+* url: /api/visualizations/save
+* takes body params:
+* type - string
+* visualizations - object containing visualizations
+*/
+router.post('/visualizations/save', function(req, res){
+  var type = req.body.type;
+  var visualizations = req.body.visualizations;
+
+  c.elasticsearch.indices.deleteMapping({
+    index: INDEX,
+    type: type + '_visualizations',
+    ignore: [404] // Ignore not found error
+  }, function (error, response) {
+    async.each(visualizations, function(vis, callback){
+      c.elasticsearch.create({
+        index: INDEX,
+        type: type + '_visualizations',
+        body: vis
+      }, function (error, response) {
+        if(error) throw error;
+        callback();
+      });
+    }, function(err){
+      res.send({err: err});
+    });
+  });
+
 });
 
 

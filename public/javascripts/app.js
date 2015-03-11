@@ -1,18 +1,18 @@
 
 angular.module('uforia',
-    ['ui.router', 'ui.bootstrap.modal', 'ui.bootstrap.datepicker', 'dndLists', 'ui'])
+    ['ui.router', 'ui.bootstrap.modal', 'ui.bootstrap.datepicker', 'dndLists', 'ui', 'ui.select'])
   
   .run(function($rootScope) {
     $rootScope.mappings = {};
-    // var socket = io.connect('http://www.uforia.nl/');
-    // socket.on('connect', function(){
-    //   console.log(socket);
-    // });
-    // socket.on('uforia', function(info){
-    //   console.log(info);
-    //   $rootScope.mappings[info.mapping] = info;
-    //   $rootScope.$apply();
-    // });
+    socket = io.connect();
+    socket.on('connect', function(){
+      console.log(socket);
+    });
+    socket.on('uforia', function(info){
+      console.log(info);
+      $rootScope.mappings[info.mapping] = info;
+      $rootScope.$apply();
+    });
 
     $rootScope.$on('$stateChangeStart', function(event, toState){ 
         console.log(toState);

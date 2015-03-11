@@ -92,13 +92,14 @@ angular.module('uforia')
     $http
       .post("api/mapping_info", {type: type})
       .success(function(data){
-        console.log(data);
+        // console.log(data);
         $scope.memeTypes = data;
       });
 
     $http
       .post("api/view_info?type=" + type, '')
       .success(function(data){
+        // console.log(data);
         $scope.viewTypes = data;
       });
 
@@ -117,7 +118,7 @@ angular.module('uforia')
     
     getData(formatParams(), function(data){
       $('#d3_visualization').empty();
-      // console.log(data);
+      console.log(data);
       if(data.total > 0){
         render(data, {height: window.innerHeight-65}, openDetails, function(error){
           if(error)
@@ -180,23 +181,22 @@ angular.module('uforia')
         'type' : $scope.searchType,
         'view' : $scope.viewType,
         'visualization' : visualization,
-        'parameters' : {
-            'must' : [],
-            'must_not' : []
-        },
-        'filters' : {
-            'must' : [],
-            'must_not' : []
-        }
+        'query': ""
     };
 
     //Get all the search parameters and add them to the query object.
     $scope.parameters.forEach(function(parameter){
       if(parameter.memeType && parameter.memeType.toLowerCase() == 'date' && parameter.startDate && parameter.endDate){
-        api_params.filters[parameter.operator].push({'field' : parameter.memeType, 'start_date' : parameter.startDate.getTime(), 'end_date' :  parameter.endDate.getTime()});
+        // api_params.filters[parameter.operator].push({'field' : parameter.memeType, 'start_date' : parameter.startDate.getTime(), 'end_date' :  parameter.endDate.getTime()});
       }
       else if(parameter.query && parameter.query.length > 0){
-        api_params.parameters[parameter.operator].push({'field' : parameter.memeType, 'query' : parameter.query, 'andOr': parameter.andOr});
+        if(api_params.query.length > 0)
+          api_params.query += ' ' + parameter.andOr + ' ';
+
+        if(parameter.operator == 'must_not')
+          api_params.query += ' NOT ';
+
+        api_params.query += parameter.memeType + ':' + parameter.query;
       }
     });
     return api_params;
@@ -218,8 +218,8 @@ angular.module('uforia')
   }
 
   function changeScripts(){
-    $('#d3_script').replaceWith("<script src=\"javascripts/mimetypes/" + $scope.searchType + "_" + $scope.viewType + ".js\" type=\"text/javascript\" id=\"d3_script\"></script>");
-    $('#d3_style').replaceWith("<link href=\"stylesheets/mimetypes/" + $scope.searchType + "_" + $scope.viewType +  ".css\" rel=\"stylesheet\" type=\"text/css\" id=\"d3_style\">");
+    $('#d3_script').replaceWith("<script src=\"javascripts/visualizations/" + $scope.viewType + ".js\" type=\"text/javascript\" id=\"d3_script\"></script>");
+    $('#d3_style').replaceWith("<link href=\"stylesheets/visualizations/" + $scope.viewType + ".css\" rel=\"stylesheet\" type=\"text/css\" id=\"d3_style\">");
   }
 
 })
@@ -241,10 +241,10 @@ angular.module('uforia')
 
 })
 
-.controller('adminCtrl', function($rootScope, $scope, $http, types){
+.controller('adminCtrl', function($rootScope, $scope, $http, $modal, types){
   $scope.types = types;
-
-  // var socket = io();
+  $scope.test = [];
+  $scope.fields = ['test', 'blaa'];
 
   $scope.deleteMapping = function(type, index){
     if(confirm("Are you sure you want to delete the mapping '" + type + "'?")){
@@ -255,9 +255,35 @@ angular.module('uforia')
     }
   }
 
-  // $scope.pauseFilling = function(type){
-  //   socket.emit('pauseFilling', {type: type});
-  // }
+  $scope.openVisualizations = function(type){
+    var modalInstance = $modal.open({
+      templateUrl: 'views/modals/visualizations',
+      controller: 'visualizationModalCtrl',
+      size: 'lg',
+      scope: $scope,
+      resolve: {
+        type: function() { return type; },
+        visualizations: model.getVisualizations(type),
+        fields: model.getMappingFields(type)
+        // files: model.getFileDetails({hashids: data.hashids, type:$scope.searchType, tables: data.tables}),
+        // addresses: function(){ return data.adressses; }
+      }
+    });
+
+    modalInstance.opened.then(function(){
+      $scope.loading = false;
+    });
+
+    modalInstance.result.then(function () {
+      //closed
+    }, function () {
+      
+    });
+  }
+
+  $scope.pauseFilling = function(type){
+    socket.emit('pauseFilling', {type: type});
+  }
 })
 
 .controller('mappingCtrl', function($scope, $http, $stateParams, $state, mapping, modules, types){
@@ -479,6 +505,54 @@ angular.module('uforia')
     .success(function(res){
       console.log(res);
       $state.go('admin.overview');
+    });
+  }
+})
+
+.controller('visualizationModalCtrl', function($scope, $modalInstance, $http, type, fields, visualizations){
+  $scope.mapping = {name: type};
+  $scope.modalInstance = $modalInstance;
+  $scope.fields = Object.keys(fields);
+
+  $scope.fields.push('Count');
+
+  $scope.visualizations = [];
+
+  for(var key in visualizations){
+    $scope.visualizations.push(visualizations[key]);
+  }
+  console.log($scope.visualizations);
+
+  $scope.groupFind = function(item){
+    return Object.keys(fields).indexOf(item) > -1 ? "Fields" : "Metadata";
+  };
+
+  $scope.types = { 
+    'Chord': {
+      type: 'chord',
+      field1: 'from',
+      field2: 'to',
+      multiple: true
+    },
+    'Bar': {
+      type: 'bar',
+      field1: 'x-Axis',
+      field2: 'y-Axis',
+      extra_fields: {'SUM': 'Count'}
+    },
+    'Graph': {
+      type: 'graph',
+      field1: '',
+      multiple: true
+    }
+  };
+
+  $scope.save = function(){
+    $http.post('/api/visualizations/save', {type: type, visualizations: $scope.visualizations})
+    .success(function(data){
+      if(!data.error){
+        $modalInstance.close('saved');
+      }
     });
   }
 });

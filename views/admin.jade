@@ -10,6 +10,7 @@ table.table
       td(ng-bind="type")
       td(ng-bind="mappings[type].progress | percentage:2")
       td
-        //- button.btn.btn-default(ng-if="mappings[type].progress", ng-click="pauseFilling(type)") Pause
+        button.btn.btn-default(ng-if="mappings[type].progress", ng-click="pauseFilling(type)") Pause
         button.btn.btn-default(ui-sref="admin.mapping({type:type})") Edit
+        button.btn.btn-default(ng-click="openVisualizations(type)") Visualizations
         button.btn.btn-danger(ng-click="deleteMapping(type, $index)") Delete
