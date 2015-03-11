@@ -728,7 +728,7 @@ function render(data, options, openDetails, cb){
 
 
 	function draw_chart(name, safe_name, tie_breaker, center_sort, collapse) {
-		var margin = {top: 20, right: 25, bottom: 20, left: 1};
+		var margin = {top: 20, right: 25, bottom: 100, left: 100};
 		var width = raw_chart_width - margin.left - margin.right;
 
 		var jscenes = data.scenes;
