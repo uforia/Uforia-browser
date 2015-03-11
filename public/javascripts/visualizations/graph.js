@@ -155,12 +155,12 @@ function render(data, options, openDetails, cb){
   //click on a node
   function mouseclick(d){
     if (d3.event.defaultPrevented) return; //prevent a click event when a node is dragged
-    openDetails({hashids: d.hashids, adressses:[d.name]});
+    openDetails({hashids: d.hashids, adressses:[d.name], tables: d.tables});
   }
 
   //For clicks on a link
   function mouseclickLink(d){
-    openDetails({hashids: d.hashids, adressses:[d.name]});
+    openDetails({hashids: d.hashids, adressses:[d.name], tables: d.tables});
   }
   cb(); // send callback, no errors
 }

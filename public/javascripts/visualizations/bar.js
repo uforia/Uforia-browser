@@ -89,7 +89,7 @@ function render(data, options, openDetails, cb){
 
   //click on a bar
   function mouseclick(d){
-    openDetails({hashids: d.hashids, adressses:[d.x]});
+    openDetails({hashids: d.hashids, adressses:[d.x], tables: d.tables});
   }
 
   function isDate(val) {

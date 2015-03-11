@@ -218,8 +218,8 @@ angular.module('uforia')
   }
 
   function changeScripts(){
-    $('#d3_script').replaceWith("<script src=\"javascripts/visualizations/" + $scope.viewType + ".js\" type=\"text/javascript\" id=\"d3_script\"></script>");
-    $('#d3_style').replaceWith("<link href=\"stylesheets/visualizations/" + $scope.viewType + ".css\" rel=\"stylesheet\" type=\"text/css\" id=\"d3_style\">");
+    $('#d3_script').replaceWith("<script src=\"javascripts/visualizations/" + $scope.viewType.toLowerCase() + ".js\" type=\"text/javascript\" id=\"d3_script\"></script>");
+    $('#d3_style').replaceWith("<link href=\"stylesheets/visualizations/" + $scope.viewType.toLowerCase() + ".css\" rel=\"stylesheet\" type=\"text/css\" id=\"d3_style\">");
   }
 
 })
@@ -528,19 +528,19 @@ angular.module('uforia')
   };
 
   $scope.types = { 
-    'Chord': {
+    'chord': {
       type: 'chord',
       field1: 'from',
       field2: 'to',
       multiple: true
     },
-    'Bar': {
+    'bar': {
       type: 'bar',
       field1: 'x-Axis',
       field2: 'y-Axis',
       extra_fields: {'SUM': 'Count'}
     },
-    'Graph': {
+    'graph': {
       type: 'graph',
       field1: '',
       multiple: true
