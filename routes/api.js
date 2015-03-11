@@ -45,54 +45,19 @@ router.post("/search", function(req, res) {
   var data = req.body;
   console.log(req.body);
   var search_request = {};
-  var query_skeleton = { "query": { "filtered": { "query": { "bool": { "must": [], "must_not": [] } }, "filter": { "bool": { "must": [], "must_not": [] } } } } };
   var view = data.view || DEFAULT_VIEW;
   var visualizationParams = data.visualization || DEFAULT_VISUALIZATION;
 
+  var query_skeleton = {
+    "query": {
+      "query_string": {
+        "query": data.query
+      }
+    }
+  };
+
   search_request['index'] = INDEX;
   search_request['type'] = data.type;
-
-  var parameters = data.parameters || {};
-  var filters = data.filters || {};
-
-  if(parameters.must){
-    parameters.must.forEach(function(param){
-      var query = {};
-      util.createNestedObject(query, ['wildcard', param.field], param.query);
-      query_skeleton.query.filtered.query.bool.must.push(query);
-    });
-  }
-
-  if(parameters.must_not){
-    parameters.must_not.forEach(function(param){
-      var query = {};
-      util.createNestedObject(query, ['wildcard', param.field], param.query);
-      query_skeleton.query.filtered.query.bool.must_not.push(query);
-    }); 
-  }
-
-  if(filters.must){
-    filters.must.forEach(function(filter){
-      var query = {};
-      var startDate = new Date(+filter.start_date);
-      var endDate = new Date(+filter.end_date);
-      util.createNestedObject(query, ['range', filter.field, 'gte'], startDate.toISOString());
-      query.range[filter.field].lte = endDate.toISOString();
-      query_skeleton.query.filtered.filter.bool.must.push(query);
-    }); 
-  }
-
-  if(filters.must_not){
-    filters.must_not.forEach(function(filter){
-      var query = {};
-      var startDate = new Date(+filter.start_date);
-      var endDate = new Date(+filter.end_date);
-      util.createNestedObject(query, ['range', filter.field, 'gte'], startDate.toISOString());
-      query.range[filter.field].lte = endDate.toISOString();
-      query_skeleton.query.filtered.filter.bool.must_not.push(query);
-    }); 
-  }
-
   search_request['body'] = query_skeleton;
 // console.log(search_request);
   c.elasticsearch.count(search_request).then(function(resp){
@@ -112,7 +77,7 @@ router.post("/search", function(req, res) {
 //Search and return the result
 var search = function(search_request, res, type, view, parameters){
     c.elasticsearch.search(search_request).then(function(resp){
-      var vis = require('../lib/visualizations/' + view);
+      var vis = require('../lib/visualizations/' + view.toLowerCase());
 
       c.elasticsearch.search({
         index: INDEX,
@@ -136,65 +101,6 @@ var search = function(search_request, res, type, view, parameters){
           res.send(data);
         });
       });
-
-    // switch(search_request.type){
-    //   case TYPES.files.mappings.toString():
-    //     try {
-    //       workers.files.createFilesBubble(resp.hits.hits, function(data){
-    //         res.send(data);
-    //       });
-    //     }catch(err){
-    //       res.send();
-    //     }
-    //   break;
-    //   case TYPES.email.mappings.toString():
-    //       if(view == 'chord'){
-    //           try {
-    //             workers.email.createEmailChordDiagram(resp.hits.hits, function(data){
-    //               res.send(data);
-    //             });
-    //           }catch(err){
-    //               res.send(err.message);
-    //           }
-    //       } else if (view == 'graph') {
-    //           try {
-    //             workers.email.createEmailGraph(resp.hits.hits, function(data){
-    //               res.send(data);
-    //             });
-    //           }catch(err){
-    //               res.send();
-    //           }
-    //       } else if(view == 'bar_chart'){
-    //           try {
-    //             workers.email.createBarChart(resp.hits.hits, function(data){
-    //               res.send(data);
-    //             });
-    //           } catch(err){
-    //               res.send();
-    //           }
-    //       }
-    //       break;
-    //   case TYPES.documents.mappings.toString():
-    //     if(view == 'bar_chart'){
-    //       try{
-    //         //TEST DATA REMOVE THIS
-    //         var resp = testdata;
-
-    //         workers.barChart.barChart(resp.hits.hits, parameters, function(data){
-    //           res.send(data);
-    //         });
-    //       } catch(err){
-    //         console.log(err.message);
-    //         res.send();
-    //       }
-    //     }
-    //     break;
-    //   default: // default is files
-    //     workers.files.createFilesBubble(resp.hits.hits, function(data){
-    //       res.send(data);
-    //     });
-    //   break;
-    // }
   }, function(err){
     res.send();
     console.trace(err.message);
@@ -217,9 +123,7 @@ var search = function(search_request, res, type, view, parameters){
 */
 router.post("/count", function(req, res){
   var data = req.body;
-  var search_request = {};
-  // var query_skeleton = { "query": { "filtered": { "query": { "bool": { "must": [], "must_not": [] } }, "filter": { "bool": { "must": [], "must_not": [] } } } } };
-  
+  var search_request = {};  
 
   search_request['index'] = INDEX;
   search_request['type'] = data.type;
@@ -232,11 +136,11 @@ router.post("/count", function(req, res){
     }
   };
 
-  console.log(JSON.stringify(query_skeleton));
-  console.dir(query_skeleton, {depth: 999});
+  // console.log(JSON.stringify(query_skeleton));
+  // console.dir(query_skeleton, {depth: 999});
 
   search_request['body'] = query_skeleton;
-  
+
   c.elasticsearch.count(search_request).then(function(resp){
     try {
       res.send(resp);
