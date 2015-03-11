@@ -530,19 +530,26 @@ angular.module('uforia')
   $scope.types = { 
     'chord': {
       type: 'chord',
-      field1: 'from',
-      field2: 'to',
+      field1: 'From',
+      field2: 'To',
       multiple: true
     },
     'bar': {
       type: 'bar',
-      field1: 'x-Axis',
-      field2: 'y-Axis',
+      field1: 'X-Axis',
+      field2: 'Y-Axis',
       extra_fields: {'SUM': 'Count'}
     },
     'graph': {
       type: 'graph',
-      field1: '',
+      field1: 'From',
+      field2: 'To',
+      multiple: true
+    },
+    'narratives': {
+      type: 'narratives',
+      field1: 'Date',
+      field2: 'People',
       multiple: true
     }
   };
