@@ -914,6 +914,8 @@ function render(data, options, openDetails, cb){
 	    */
 	    draw_links(links, svg);
 	    draw_nodes(scenes, svg, width, height, raw_chart_height, safe_name);
+
+	    d3.select('#d3_visualization > svg').attr('height', d3.select('#d3_visualization > svg > g').node().getBBox().height);
 	}
 
 	draw_chart("Test", "test", true, false, false);
