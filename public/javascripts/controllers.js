@@ -521,7 +521,9 @@ angular.module('uforia')
   for(var key in visualizations){
     $scope.visualizations.push(visualizations[key]);
   }
-  console.log($scope.visualizations);
+  
+  if($scope.visualizations.length == 0)
+    $scope.visualizations.push({});
 
   $scope.groupFind = function(item){
     return Object.keys(fields).indexOf(item) > -1 ? "Fields" : "Metadata";
