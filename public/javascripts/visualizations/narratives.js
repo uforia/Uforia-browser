@@ -71,7 +71,7 @@ function render(data, options, openDetails, cb){
 	} // get_path
 
 
-	function Character_(name, id, group) {
+	function Character_(name, id, group, tables) {
 	    this.name = name;
 	    this.id = id;
 	    this.group = group;
@@ -79,6 +79,7 @@ function render(data, options, openDetails, cb){
 	    this.first_scene = null;
 	    this.group_positions = {};
 	    this.group_name_positions = {};
+	    this.tables = tables;
 	} // Character_
 
 
@@ -96,11 +97,13 @@ function render(data, options, openDetails, cb){
 	} // Link
 
 
-	function SceneNode(chars, start, duration, id) {
+	function SceneNode(chars, start, duration, id, hashids, tables) {
 	    this.chars = chars; // List of characters in the Scene (ids)
 	    this.start = start; // Scene starts after this many panels
 	    this.duration = duration; // Scene lasts for this many panels
 	    this.id = id;
+	    this.hashids = hashids;
+	    this.tables = tables;
 
 	    this.char_ptrs = [];
 	    // Determined later
@@ -384,29 +387,31 @@ function render(data, options, openDetails, cb){
 	    });
 
 	    for (var i = 0; i < chars.length; i++) {
-		var s = new SceneNode([chars[i].id], [0], [1]);
-		s.char_node = true;
-		s.y = i*text_height;
-		s.x = 0;
-		s.width = 5;
-		s.height = link_width;
-		s.name = chars[i].name;
-		s.chars[s.chars.length] = chars[i].id;
-		s.id = scenes.length;
-		s.comic_name = comic_name;
-		if (chars[i].first_scene != null) {
-		    var l = new Link(s, chars[i].first_scene, chars[i].group, chars[i].id);
-		    l.char_ptr = chars[i];
+			var s = new SceneNode([chars[i].id], [0], [1]);
+			s.char_node = true;
+			s.y = i*text_height;
+			s.x = 0;
+			s.width = 5;
+			s.height = link_width;
+			s.name = chars[i].name;
+			s.chars[s.chars.length] = chars[i].id;
+			s.id = scenes.length;
+			s.tables = chars[i].tables;
+			s.hashids = chars[i].hashids;
+			s.comic_name = comic_name;
+			if (chars[i].first_scene != null) {
+			    var l = new Link(s, chars[i].first_scene, chars[i].group, chars[i].id);
+			    l.char_ptr = chars[i];
 
-		    s.out_links[s.out_links.length] = l;
-		    chars[i].first_scene.in_links[chars[i].first_scene.in_links.length] = l;
-		    links[links.length] = l;
-		    s.first_scene = chars[i].first_scene;
+			    s.out_links[s.out_links.length] = l;
+			    chars[i].first_scene.in_links[chars[i].first_scene.in_links.length] = l;
+			    links[links.length] = l;
+			    s.first_scene = chars[i].first_scene;
 
-		    scenes[scenes.length] = s;
-		    char_scenes[char_scenes.length] = s;
-		    s.median_group = chars[i].first_scene.median_group;
-		} // if
+			    scenes[scenes.length] = s;
+			    char_scenes[char_scenes.length] = s;
+			    s.median_group = chars[i].first_scene.median_group;
+			} // if
 	    } // for
 	    return char_scenes;
 	} // add_char_scenes
@@ -566,6 +571,7 @@ function render(data, options, openDetails, cb){
 	      .attr("scene_id", function(d) { return d.id; })
 	      .on("mouseover", mouseover)
 	      .on("mouseout", mouseout)
+	      .on("click", mouseclick)
 	    .call(d3.behavior.drag()
 	      .origin(function(d) { return d; })
 	      .on("dragstart", function() { this.parentNode.appendChild(this); })
@@ -678,6 +684,12 @@ function render(data, options, openDetails, cb){
 		// d3.selectAll("[class=\"scene-image\"]").remove();
 	    }
 
+	    //click on a node
+		function mouseclick(d){
+			if (d3.event.defaultPrevented) return; //prevent a click event when a node is dragged
+				openDetails({hashids: d.hashids, adressses:[d.name], tables: d.tables});
+		}
+
 	    function dragmove(d) {
 		var newy = Math.max(0, Math.min(chart_height - d.height, d3.event.y));
 		var ydisp = d.y - newy;
@@ -713,6 +725,12 @@ function render(data, options, openDetails, cb){
 	          .style("stroke-linecap", "round")
 	          .on("mouseover", mouseover_cb)
 	          .on("mouseout", mouseout_cb)
+	          .on("click", mouseclickLink)
+
+	    //For clicks on a link
+		function mouseclickLink(d){
+			openDetails({hashids: d.to.hashids, adressses:[d.to.name], tables: d.to.tables});
+		}
 
 	    function mouseover_cb(d) {
 		d3.selectAll("[charid=\"" + d.from.comic_name + "_" + d.char_id + "\"]")
@@ -749,7 +767,7 @@ function render(data, options, openDetails, cb){
 		    //if (chars.length == 0) continue;
 		    scenes[scenes.length] = new SceneNode(jscenes[i]['chars'], 
 							  start, duration, 
-							  parseInt(jscenes[i]['id']));
+							  parseInt(jscenes[i]['id']), jscenes[i]['hashids'], jscenes[i]['tables']);
 		    scenes[scenes.length-1].comic_name = safe_name;
 		    total_panels += duration;
 		} // for
@@ -828,7 +846,7 @@ function render(data, options, openDetails, cb){
 	    var chars = [];
 	    var char_map = []; // maps id to pointer
 	    for (var i = 0; i < xchars.length; i++) {
-		chars[chars.length] = new Character_(xchars[i].name, xchars[i].id, xchars[i].group);
+		chars[chars.length] = new Character_(xchars[i].name, xchars[i].id, xchars[i].group, xchars[i].tables);
 		char_map[xchars[i].id] = chars[chars.length-1];
 	    }
 
@@ -915,7 +933,8 @@ function render(data, options, openDetails, cb){
 	    draw_links(links, svg);
 	    draw_nodes(scenes, svg, width, height, raw_chart_height, safe_name);
 
-	    d3.select('#d3_visualization > svg').attr('height', d3.select('#d3_visualization > svg > g').node().getBBox().height + margin.bottom);
+	    d3.select('#d3_visualization > svg').attr('height', d3.select('#d3_visualization > svg > g').node().getBBox().height + margin.bottom + margin.top);
+	    d3.select('#d3_visualization > svg').style('height', d3.select('#d3_visualization > svg > g').node().getBBox().height + margin.bottom + margin.top);
 	}
 
 	draw_chart("Test", "test", true, false, false);

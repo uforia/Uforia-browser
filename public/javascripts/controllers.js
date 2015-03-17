@@ -176,6 +176,11 @@ angular.module('uforia')
       });
   }
 
+  function formatDate(date){
+    var dateParts = date.split('-');
+    return dateParts[2] + '-' + dateParts[1] + '-' + dateParts[0];
+  }
+
   function formatParams(cb){
     var api_params = {
         'type' : $scope.searchType,
@@ -186,8 +191,14 @@ angular.module('uforia')
 
     //Get all the search parameters and add them to the query object.
     $scope.parameters.forEach(function(parameter){
-      if(parameter.memeType && parameter.memeType.toLowerCase() == 'date' && parameter.startDate && parameter.endDate){
-        // api_params.filters[parameter.operator].push({'field' : parameter.memeType, 'start_date' : parameter.startDate.getTime(), 'end_date' :  parameter.endDate.getTime()});
+      if(parameter.memeType && parameter.memeType.toLowerCase() == 'date' && !isNaN(parameter.startDate.getTime()) && !isNaN(parameter.endDate.getTime())){
+        if(api_params.query.length > 0)
+          api_params.query += ' ' + parameter.andOr + ' ';
+
+        if(parameter.operator == 'must_not')
+          api_params.query += ' NOT ';
+
+        api_params.query += parameter.memeType + ':[' + formatDate(parameter.startDate.toLocaleDateString()) + ' TO ' + formatDate(parameter.endDate.toLocaleDateString()) + ']';
       }
       else if(parameter.query && parameter.query.length > 0){
         if(api_params.query.length > 0)
