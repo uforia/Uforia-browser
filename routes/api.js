@@ -43,7 +43,6 @@ var DEFAULT_VISUALIZATION = 'bar';
 */
 router.post("/search", function(req, res) {
   var data = req.body;
-  console.log(req.body);
   var search_request = {};
   var view = data.view || DEFAULT_VIEW;
   var visualizationParams = data.visualization || DEFAULT_VISUALIZATION;
@@ -89,7 +88,7 @@ var search = function(search_request, res, type, view, parameters){
         // else
         //   res.send({});
 
-        console.log(vismapping);
+        // console.log(vismapping);
 
         vismapping = vismapping.hits.hits[0]._source;
 
@@ -145,7 +144,7 @@ router.post("/count", function(req, res){
     try {
       res.send(resp);
     } catch(err){
-      console.log(err.message);
+      console.error(err.message);
       res.send({count : "Invalid query" });
     }
   }, function(err){
@@ -207,13 +206,13 @@ router.post("/get_types", function(req, res){
 */
 router.post("/mapping_info", function(req, res){
   var type = req.body.type;
-  console.log(type);
+  // console.log(type);
 
   c.elasticsearch.indices.getMapping({ 
     index : INDEX,
     type: type
   }).then(function(resp){
-    console.log(resp);
+    // console.log(resp);
     try{
       // If the mapping exists
       if(resp[INDEX].mappings[type]){
@@ -231,7 +230,7 @@ router.post("/mapping_info", function(req, res){
       res.send();
     }
   }, function(err){
-    console.log(err.message);
+    console.error(err.message);
   });
 });
 
@@ -250,7 +249,7 @@ router.post("/view_info", function(req, res){
     body: { query: { match_all: {} } },
     size: 999 // all
   }).then(function(resp){
-    console.log(resp.hits.hits);
+    // console.log(resp.hits.hits);
 
     var types = {};
 
@@ -413,7 +412,7 @@ router.post("/create_mapping", function(req, res){
         meta.hashids[meta.tables[tableIndex]] = meta.hashids[meta.tables[tableIndex]].slice(maxItems);
 
         fillQueue(queue, hashids, function(queue, results){
-          console.log('filled queue ' + queue + ' with ' + results + ' results.');
+          // console.log('filled queue ' + queue + ' with ' + results + ' results.');
           fillingQueue[queue] = false;
         });
       }
@@ -490,7 +489,7 @@ router.post("/create_mapping", function(req, res){
           // Check if queue length is below maxItems, if so get new results from the database
           if(queues[queue].length() < maxItems && !fillingQueue[queue]){
             fillingQueue[queue] = true;
-            console.log('push queue ' + queue);
+            // console.log('push queue ' + queue);
             loadDivider.push(queue);
           }
           callback();
@@ -562,7 +561,7 @@ router.post("/create_mapping", function(req, res){
 
   function fillQueue(queue, hashids, callback){
     var table = meta.tables[tableIndex];
-    console.log('results from ' + table);
+    // console.log('results from ' + table);
     if(table){
       c.mysql_db.query('SELECT * FROM ?? WHERE hashid IN (?)', [table, hashids], function(err, results){
         if(err) throw err;
@@ -588,10 +587,10 @@ router.post("/create_mapping", function(req, res){
   function emitProgress(){
     var progress = completed/meta.totalRows; //Math.round((completed/meta.totalRows)*100)/100;
 
-    for(var i=0; i<num; i++){
-      console.log('Queue ' + i + ': ' + queues[i].length());
-    }
-    console.log('Progress: ' + completed + '/' + meta.totalRows + ' (' + (completed/meta.totalRows)*100 + ' %)');
+    // for(var i=0; i<num; i++){
+    //   console.log('Queue ' + i + ': ' + queues[i].length());
+    // }
+    // console.log('Progress: ' + completed + '/' + meta.totalRows + ' (' + (completed/meta.totalRows)*100 + ' %)');
 
     io.emit('uforia', {mapping: mapping.name, progress: progress, completed: completed, total: meta.totalRows, started: start});
 
