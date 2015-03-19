@@ -812,27 +812,27 @@ function render(data, options, openDetails, cb){
 	        .attr("class", "comic-title")
 		.attr("transform", null)
 	        .attr("id", safe_name)
-		.text(" - " + name)
-	        .data([{name: " - " + name, safe_name: safe_name}])
-	        .style("display", "block")
-	        .on("click", function(d) {
-		    var nodes = d3.selectAll(".chart").selectAll("[id=\"" + d.safe_name + "\"]");
-		    var node;
-		    for (var i = 0; i < nodes.length; i++) {
-			if (nodes[i].parentNode.id == d.safe_name) {
-			    node = nodes[i].parentNode;
-			    break;
-			}
-		    }
-		    if (d.name[1] == '-') {
-			node.style.display = "none";
-			d.name = d.name.replace("-", "+");
-		    } else {
-			node.style.display = "inherit";
-			d.name = d.name.replace("+", "-");
-		    }
-		    d3.select(this).text(d.name);
-	        });
+		// // .text(" - " + name)
+	 //        .data([{name: " - " + name, safe_name: safe_name}])
+	 //        .style("display", "block")
+	 //        .on("click", function(d) {
+		//     var nodes = d3.selectAll(".chart").selectAll("[id=\"" + d.safe_name + "\"]");
+		//     var node;
+		//     for (var i = 0; i < nodes.length; i++) {
+		// 	if (nodes[i].parentNode.id == d.safe_name) {
+		// 	    node = nodes[i].parentNode;
+		// 	    break;
+		// 	}
+		//     }
+		//     if (d.name[1] == '-') {
+		// 	node.style.display = "none";
+		// 	d.name = d.name.replace("-", "+");
+		//     } else {
+		// 	node.style.display = "inherit";
+		// 	d.name = d.name.replace("+", "-");
+		//     }
+		//     d3.select(this).text(d.name);
+	 //        });
 
 	    var svg = d3.select("#d3_visualization").append("svg")
 		.attr("width", width + margin.left + margin.right)

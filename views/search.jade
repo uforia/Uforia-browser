@@ -6,7 +6,7 @@
         select.form-control#searchType(ng-model='searchType')
           option(ng-repeat="item in searchTypes", value="{{item}}", ng-bind="item", ng-selected="{{searchType == item}}", required)
     .col-lg-9.form-group
-      .row.col-lg-12(ng-repeat="parameter in parameters")
+      .row.col-lg-12.less-padding(ng-repeat="parameter in parameters")
         label.control-label.col-lg-2.center(ng-if="$index == 0")
         .col-lg-2(ng-if="$index > 0")
           //- This select is disabled because it doesn't work yet.
@@ -41,13 +41,13 @@
           button.btn.btn-sm.btn-danger(type="button", ng-click="remove($index)", ng-if="parameters.length > 1") Remove
 
 .row.border-top
-  form.form-horizontal
+  form.form-horizontal.less-padding
     .col-lg-3.form-group
       label.control-label.col-lg-6(for="viewType") Visualization type
       .col-lg-6
         select.form-control#viewType(ng-model="viewType")
           option(ng-repeat="item in viewTypes", value="{{item.type}}", ng-bind="item.name", ng-selected="{{viewType == item.type}}")
-    .col-lg-9.form-group
+    .col-lg-7.form-group
       .row.col-lg-12
         .col-lg-10.control-text.text-center
           p -- 
@@ -56,10 +56,10 @@
               |  evidence items match
             span(ng-if="errorMessage", ng-bind="errorMessage").text-danger
             |  --
-        .col-lg-2
-          button.btn.btn-sm.btn-primary(ng-disabled="searchForm.$invalid", type="button", ng-click="search()", ng-class="{'btn-danger': queryMatchesCount > 200}") Visualize
       .row.col-lg-12(ng-if="queryMatchesCount > 200")
         .col-lg-10.control-text.text-center.text-danger Warning: high document counts (more than 200 matches or so) might slow or crash your browser!
+    .col-lg-2.form-group
+      button.btn.btn-sm.btn-primary(ng-disabled="searchForm.$invalid", type="button", ng-click="search()", ng-class="{'btn-danger': queryMatchesCount > 200}") Visualize
 
 .row
   .col-lg-12#d3_visualization
