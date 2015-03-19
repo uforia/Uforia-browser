@@ -58,13 +58,13 @@ angular.module('uforia')
   $scope.add = function($index){
     $scope.parameters.splice($index+1, 0, {
       operator: "must",
-      andOr: "And"
+      andOr: "AND"
     });
   }
 
   $scope.remove = function($index){
     $scope.parameters.splice($index,1);
-    $scope.parameters[0].andOr = 'And';
+    $scope.parameters[0].andOr = 'AND';
   }
 
   //Load the right css for the right D3 visualization
