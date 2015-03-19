@@ -326,11 +326,11 @@ angular.module('uforia')
       table.fields.split(',').forEach(function(field){
         if(field != 'hashid'){
           var found = false;
-          for(var key in $scope.models.lists.selectedFields){
-            if($scope.models.lists.selectedFields.field == field){
+          for(var i in $scope.models.lists.selectedFields){
+            if($scope.models.lists.selectedFields[i].field == field){
               found = true;
-              if($scope.models.lists.selectedFields.modules.indexOf(mime_type) == -1){
-                $scope.models.lists.selectedFields.modules.push(mime_type);
+              if($scope.models.lists.selectedFields[i].modules.indexOf(mime_type) == -1){
+                $scope.models.lists.selectedFields[i].modules.push(mime_type);
               }
             }
           }
