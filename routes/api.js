@@ -301,6 +301,8 @@ router.post("/get_modules", function(req, res){
   c.mysql_db.query('SELECT * FROM supported_mimetypes', function(err, results){
     if(err) throw err;    
 
+    results.push({mime_type: 'files', modules: '{"files":"files"}'});
+
     var modules = {};
     var mime_types = {};
 
