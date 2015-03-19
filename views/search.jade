@@ -18,8 +18,8 @@
             option(ng-repeat="(key, item) in memeTypes", value="{{key}}", ng-bind="key")
         .col-lg-2
           select.form-control(ng-model="parameter.operator")
-            option(value="must") Must match
-            option(value="must_not") Must not match
+            option(value="must") contains
+            option(value="must_not") omits
         .col-lg-4(ng-if="parameter.memeType != 'Date'")
           input.form-control(type="text", ng-model="parameter.query", required)
         .col-lg-4(ng-if="parameter.memeType == 'Date'")

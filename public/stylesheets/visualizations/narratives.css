@@ -1,11 +1,3 @@
-@import url(http://fonts.googleapis.com/css?family=PT+Serif|PT+Serif:b|PT+Serif:i|PT+Sans|PT+Sans:b|Cutive+Mono|Source+Code+Pro);
-@import url(http://fonts.googleapis.com/css?family=Patrick+Hand+SC);
-@import url(http://fonts.googleapis.com/css?family=Walter+Turncoat);
-@import url(http://fonts.googleapis.com/css?family=Cabin+Sketch);
-@import url(http://fonts.googleapis.com/css?family=Short+Stack);
-
-
-
 textarea {
   font-size: 100%;
 }
@@ -94,8 +86,7 @@ blockquote:after {
 .node text {
   pointer-events: none;
   text-shadow: 1px 1px #fff;
-  font-family: "Walter Turncoat", sans-serif;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .link {
@@ -109,7 +100,6 @@ blockquote:after {
 .comic-title {
   cursor: pointer;
   pointer-events: all;
-  font-family: "Cutive Mono", sans-serif;
   font-size: 18px;
   font-weight: normal;
   line-height: 1em;
