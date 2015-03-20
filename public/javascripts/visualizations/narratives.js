@@ -2,6 +2,10 @@ function render(data, options, openDetails, cb){
   var width = $('#d3_visualization').width(),
     height = options.height || window.innerHeight;
 
+    var margin = {top: 20, right: 150, bottom: 100, left: 100};
+
+    var dateFormat = d3.time.format('%d-%m-%Y');
+
 	// Link dimensions
 	var link_width = 1.8;
 	var link_gap = 2;
@@ -44,7 +48,18 @@ function render(data, options, openDetails, cb){
 
 	// Longest name in pixels to make space at the beginning 
 	// of the chart. Can calculate but this works okay.
-	var longest_name = 115;
+	var longest_name = 150;
+
+	var x = d3.scale.ordinal()
+      .rangeRoundBands([longest_name-margin.left, width-margin.right], .1)
+      .domain([data.scenes[0].date, data.scenes[data.scenes.length-1].date]);
+
+  	x.domain(data.scenes.map(function(d) { return d.date; }));
+
+	var xAxis = d3.svg.axis()
+      .scale(x)
+      .orient("bottom")
+      .tickFormat(function(d) { return isDate(d) ? dateFormat(new Date(d)) : d; });
 
 	// True: When deciding on which group to put a scene in,
 	// if there's a tie, break the tie based on which
@@ -457,7 +472,7 @@ function render(data, options, openDetails, cb){
 	    scenes.forEach(function(scene) {
 		if (!scene.char_node) {
 		    scene.height = Math.max(0, scene.chars.length*link_width + (scene.chars.length - 1)*link_gap);
-		    scene.width = panel_width*3;
+		    scene.width = Math.min(panel_width*3, 20);
 		    	    
 		    // Average of chars meeting at the scene _in group_
 		    var sum1 = 0;
@@ -746,7 +761,6 @@ function render(data, options, openDetails, cb){
 
 
 	function draw_chart(name, safe_name, tie_breaker, center_sort, collapse) {
-		var margin = {top: 20, right: 25, bottom: 100, left: 100};
 		var width = raw_chart_width - margin.left - margin.right;
 
 		var jscenes = data.scenes;
@@ -779,13 +793,16 @@ function render(data, options, openDetails, cb){
 
 		// Make space at the leftmost end of the chart for character names
 		//var total_panels = parseInt(j['panels']);
+
+		//Uforia fix
+		total_panels = data.scenes[data.scenes.length-1].start;
+
 		var panel_width = Math.min((width-longest_name)/total_panels, 15);
 		var panel_shift = Math.round(longest_name/panel_width);
 		total_panels += panel_shift;
 		panel_width = Math.min(width/total_panels, 15);
 
 	    var xchars = data.names;
-	    console.log(xchars);
 
 	    // Calculate chart height based on the number of characters
 	    // TODO: Redo this calculation
@@ -933,6 +950,14 @@ function render(data, options, openDetails, cb){
 	    draw_links(links, svg);
 	    draw_nodes(scenes, svg, width, height, raw_chart_height, safe_name);
 
+	    //add the X axis
+	  	svg.append("g")
+			.attr("class", "x axis")
+			.attr("transform", "translate(0," + height + ")")
+			.call(xAxis)
+	    .selectAll("text")
+  			.attr("transform", "translate(-20, 20) rotate(-45)");
+
 	    d3.select('#d3_visualization > svg').attr('height', d3.select('#d3_visualization > svg > g').node().getBBox().height + margin.bottom + margin.top);
 	    d3.select('#d3_visualization > svg').style('height', d3.select('#d3_visualization > svg > g').node().getBBox().height + margin.bottom + margin.top);
 	}
@@ -944,3 +969,8 @@ function render(data, options, openDetails, cb){
 	//draw_chart("Bone #28", "bone28", "bone28_narrative", true, false);
 	//draw_chart("Chew #32", "chew32", "chew32_narrative", false, true);
 }
+
+function isDate(val) {
+    var d = new Date(val);
+    return !isNaN(d.valueOf());
+  }
