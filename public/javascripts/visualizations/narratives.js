@@ -593,7 +593,7 @@ function render(data, options, openDetails, cb){
 	    var node = svg.append("g").selectAll(".node")
 	      .data(scenes)
 	    .enter().append("g")
-	      .attr("class", function(d) { console.log(d); return "node"; })
+	      .attr("class", "node")
 	      .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
 	      .attr("scene_id", function(d) { return d.id; })
 	      .on("mouseover", mouseover)
