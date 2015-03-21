@@ -5,6 +5,7 @@ function render(data, options, openDetails, cb){
     var margin = {top: 20, right: 150, bottom: 100, left: 100};
 
     var dateFormat = d3.time.format('%d-%m-%Y');
+    var dateTimeFormat = d3.time.format('%d-%m-%Y %H:%M');
 
 	// Link dimensions
 	var link_width = 1.8;
@@ -61,6 +62,16 @@ function render(data, options, openDetails, cb){
       .orient("bottom")
       .tickFormat(function(d) { return isDate(d) ? dateFormat(new Date(d)) : d; });
 
+    //Tooltip
+	var tip = d3.tip()
+		.attr('class', 'd3-tip')
+		.offset([-10, 0])
+		.html(function(d) {
+		return "<strong>" + data.x_label + ": </strong>" + (isDate(d.date) ? dateTimeFormat(new Date(d.date)) : d.date)  + 
+		"<br /><strong>Count: </strong>" + d.chars.length;
+
+	});
+
 	// True: When deciding on which group to put a scene in,
 	// if there's a tie, break the tie based on which
 	// groups the scenes from which the links are incoming
@@ -112,13 +123,14 @@ function render(data, options, openDetails, cb){
 	} // Link
 
 
-	function SceneNode(chars, start, duration, id, hashids, tables) {
+	function SceneNode(chars, start, duration, id, hashids, tables, date) {
 	    this.chars = chars; // List of characters in the Scene (ids)
 	    this.start = start; // Scene starts after this many panels
 	    this.duration = duration; // Scene lasts for this many panels
 	    this.id = id;
 	    this.hashids = hashids;
 	    this.tables = tables;
+	    this.date = date;
 
 	    this.char_ptrs = [];
 	    // Determined later
@@ -586,6 +598,8 @@ function render(data, options, openDetails, cb){
 	      .attr("scene_id", function(d) { return d.id; })
 	      .on("mouseover", mouseover)
 	      .on("mouseout", mouseout)
+	      .on('mouseover', tip.show)
+      	  .on('mouseout', tip.hide)
 	      .on("click", mouseclick)
 	    .call(d3.behavior.drag()
 	      .origin(function(d) { return d; })
@@ -781,7 +795,7 @@ function render(data, options, openDetails, cb){
 		    //if (chars.length == 0) continue;
 		    scenes[scenes.length] = new SceneNode(jscenes[i]['chars'], 
 							  start, duration, 
-							  parseInt(jscenes[i]['id']), jscenes[i]['hashids'], jscenes[i]['tables']);
+							  parseInt(jscenes[i]['id']), jscenes[i]['hashids'], jscenes[i]['tables'], jscenes[i]['date']);
 		    scenes[scenes.length-1].comic_name = safe_name;
 		    total_panels += duration;
 		} // for
@@ -858,6 +872,8 @@ function render(data, options, openDetails, cb){
                 .attr("id", safe_name)
 		.append("g")
 		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+		svg.call(tip); // init tooltip
 
 
 	    var chars = [];
@@ -960,6 +976,13 @@ function render(data, options, openDetails, cb){
 
 	    d3.select('#d3_visualization > svg').attr('height', d3.select('#d3_visualization > svg > g').node().getBBox().height + margin.bottom + margin.top);
 	    d3.select('#d3_visualization > svg').style('height', d3.select('#d3_visualization > svg > g').node().getBBox().height + margin.bottom + margin.top);
+
+	    d3.select("#d3_visualization").append("text")
+	    	.text('Visualization based on ')
+	    	.append('a')
+	    	.text('Comic Book Narrative Charts')
+	    	.on("click", function() { window.open('http://csclub.uwaterloo.ca/~n2iskand/?page_id=13'); }); // when clicked, opens window with google.com.
+
 	}
 
 	draw_chart("Test", "test", true, false, false);
