@@ -464,8 +464,9 @@ router.post("/create_mapping", function(req, res){
           type: type,
           body: data
         }, function (error, response) {
-          if(error){ throw error;
+          if(error){ 
             console.log(data, response);
+            throw error;
           }
 
           // ...
