@@ -464,7 +464,10 @@ router.post("/create_mapping", function(req, res){
           type: type,
           body: data
         }, function (error, response) {
-          if(error) throw error;
+          if(error){ throw error;
+            console.log(data, response);
+          }
+
           // ...
           completed++;
           // Check if queue length is below maxItems, if so get new results from the database
