@@ -1,31 +1,12 @@
 var express   = require('express'),
     c         = require('../lib/common'),
-    // workers   = require('../lib/workers'),
     router    = express.Router(),
-    util      = require('../lib/mimetype_modules/util'),
     fs        = require('fs'), 
     mime      = require('mime'),
     async     = require('async'),
     _         = require('lodash');
 
-//** FOR TESTING
-var testdata = require('./testdata/documents');
-
-// ***** move this *****
-var TYPES = {
-    email: {name : 'email', mappings : ["email"]},
-    documents: { name : 'Documents', mappings : ["documents"]}, 
-    files: { name : 'Files', mappings : ["files"]}
-};
-var VIEWS = {
-    files : {bubble : 'Bubble'},
-    documents : {bar : 'Bar Chart'},
-    email : {chord : 'Chord diagram', graph :'Graph', bar : 'Bar Chart'}
-};
 var INDEX = c.config.elasticsearch.index;
-var DEFAULT_TYPE = 'files';
-var DEFAULT_VIEW = 'bubble';
-var DEFAULT_VISUALIZATION = 'bar';
 
 /* Query elasticsearch
 * url: /api/search
@@ -241,7 +222,7 @@ router.post("/mapping_info", function(req, res){
 *
 */
 router.post("/view_info", function(req, res){
-  type = util.defaultFor(req.param('type'), DEFAULT_TYPE);
+  type = req.param('type') || DEFAULT_TYPE;
 
   c.elasticsearch.search({
     index: INDEX,
@@ -412,7 +393,7 @@ router.post("/create_mapping", function(req, res){
         meta.hashids[meta.tables[tableIndex]] = meta.hashids[meta.tables[tableIndex]].slice(maxItems);
 
         fillQueue(queue, hashids, function(queue, results){
-          // console.log('filled queue ' + queue + ' with ' + results + ' results.');
+          // ©'filled queue ' + queue + ' with ' + results + ' results.');
           fillingQueue[queue] = false;
         });
       }
@@ -603,7 +584,9 @@ router.post("/create_mapping", function(req, res){
 
   function finishFilling() {
     var now = new Date();
+    console.log(completed + ' out of ' + meta.totalRows);
     console.log('Filling took ' + (now-start)/1000 + ' seconds.');
+    emitProgress();
     clearTimeout(emitInterval);
   }
 });

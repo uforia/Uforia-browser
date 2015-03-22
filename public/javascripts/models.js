@@ -6,7 +6,6 @@ var model = {
     $http
       .post('api/get_types')
       .success(function(data) {
-        console.log(data);
         defer.resolve(data);
       });
   

@@ -9,8 +9,6 @@ angular.module('uforia')
 .controller('searchCtrl', function($rootScope, $scope, $http, $modal, $timeout, types) {
   $scope.queryMatchesCount = 0;
 
-  console.log(types.length);
-
   $scope.searchTypes = types;
   $scope.searchType = $scope.searchTypes[0];
   $scope.parameters = [{operator: "must", andOr: "And"}];
@@ -32,7 +30,6 @@ angular.module('uforia')
       var api_params = {};
       if($scope.searchForm.$valid){
         $scope.loading = true;
-        console.log(formatParams());
         $http
           .post('api/count', formatParams())
           .success(function(data){

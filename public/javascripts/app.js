@@ -6,17 +6,14 @@ angular.module('uforia',
     $rootScope.mappings = {};
     socket = io.connect();
     socket.on('connect', function(){
-      console.log(socket);
+
     });
     socket.on('uforia', function(info){
-      console.log(info);
       $rootScope.mappings[info.mapping] = info;
       $rootScope.$apply();
     });
 
     $rootScope.$on('$stateChangeStart', function(event, toState){ 
-        console.log(toState);
-
         // Would print "Hello World!" when 'parent' is activated
         // Would print "Hello UI-Router!" when 'parent.child' is activated
     })

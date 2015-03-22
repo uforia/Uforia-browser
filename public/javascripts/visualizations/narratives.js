@@ -5,7 +5,7 @@ function render(data, options, openDetails, cb){
     var margin = {top: 20, right: 150, bottom: 100, left: 100};
 
     var dateFormat = d3.time.format('%d-%m-%Y');
-    var dateTimeFormat = d3.time.format('%d-%m-%Y %H:%M');
+    var dateTimeFormat = d3.time.format('%d-%m-%Y %H:%M:%S (UTC)');
 
 	// Link dimensions
 	var link_width = 1.8;
@@ -68,7 +68,8 @@ function render(data, options, openDetails, cb){
 		.offset([-10, 0])
 		.html(function(d) {
 		return "<strong>" + data.x_label + ": </strong>" + (isDate(d.date) ? dateTimeFormat(new Date(d.date)) : d.date)  + 
-		"<br /><strong>Count: </strong>" + d.chars.length;
+		"<br /><strong>Identities: </strong>" + d.chars.length + 
+		"<br /><strong>Number of e-mails: </strong>" + d.hashids.length;
 
 	});
 
@@ -723,7 +724,7 @@ function render(data, options, openDetails, cb){
 		var newy = Math.max(0, Math.min(chart_height - d.height, d3.event.y));
 		var ydisp = d.y - newy;
 		d3.select(this).attr("transform", "translate(" 
-				     + (d.x = Math.max(0, Math.min(chart_width - d.width, d3.event.x))) + "," 
+				     + (d.x = d.x) + "," 
 				     + (d.y = Math.max(0, Math.min(chart_height - d.height, d3.event.y))) + ")");
 		reposition_node_links(d.id, d.x, d.y, d.width, d.height, svg, ydisp, d.comic_name);
 	    }
