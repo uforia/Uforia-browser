@@ -115,7 +115,6 @@ angular.module('uforia')
     
     getData(formatParams(), function(data){
       $('#d3_visualization').empty();
-      console.log(data);
       if(data.total > 0){
         render(data, {height: window.innerHeight-65}, openDetails, function(error){
           if(error)
@@ -226,8 +225,13 @@ angular.module('uforia')
   }
 
   function changeScripts(){
+    if($('#d3_style').length == 0){
+      $('head').append("<link href=\"stylesheets/visualizations/" + $scope.viewType.toLowerCase() + ".css\" rel=\"stylesheet\" type=\"text/css\" id=\"d3_style\">");
+    }
+    else {
+      $('#d3_style').replaceWith("<link href=\"stylesheets/visualizations/" + $scope.viewType.toLowerCase() + ".css\" rel=\"stylesheet\" type=\"text/css\" id=\"d3_style\">");
+    }
     $('#d3_script').replaceWith("<script src=\"javascripts/visualizations/" + $scope.viewType.toLowerCase() + ".js\" type=\"text/javascript\" id=\"d3_script\"></script>");
-    $('#d3_style').replaceWith("<link href=\"stylesheets/visualizations/" + $scope.viewType.toLowerCase() + ".css\" rel=\"stylesheet\" type=\"text/css\" id=\"d3_style\">");
   }
 
 })
