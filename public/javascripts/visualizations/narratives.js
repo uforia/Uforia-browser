@@ -68,7 +68,7 @@ function render(data, options, openDetails, cb){
 		.offset([-10, 0])
 		.html(function(d) {
 		return "<strong>" + data.x_label + ": </strong>" + (isDate(d.date) ? dateTimeFormat(new Date(d.date)) : d.date)  + 
-		"<br /><strong>Identities: </strong>" + new Set(d.chars.length).size + 
+		"<br /><strong>Identities: </strong>" + new Set(d.chars).size + 
 		"<br /><strong>Number of e-mails: </strong>" + d.hashids.length;
 
 	});

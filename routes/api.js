@@ -587,11 +587,20 @@ router.post("/create_mapping", function(req, res){
   }
 
   function finishFilling() {
-    var now = new Date();
-    console.log(completed + ' out of ' + meta.totalRows);
-    console.log('Filling took ' + (now-start)/1000 + ' seconds.');
-    emitProgress();
-    clearTimeout(emitInterval);
+
+    var queuesFinished = 0;
+    for(var i=0; i<num; i++){
+      if(queues[i].idle())
+        queuesFinished++;
+    }
+
+    if(queuesFinished == num){
+      var now = new Date();
+      console.log(completed + ' out of ' + meta.totalRows);
+      console.log('Filling took ' + (now-start)/1000 + ' seconds.');
+      clearTimeout(emitInterval);
+      emitProgress();
+    }
   }
 });
 
