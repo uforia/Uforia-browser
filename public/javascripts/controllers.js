@@ -317,34 +317,6 @@ angular.module('uforia')
     }
   };
 
-  if(mapping){
-    mapping.forEach(function(table){
-      table = table._source;
-
-      var mime_type = table.mime_type;
-
-      if($scope.selectedMimetypes.indexOf(mime_type) == -1)
-        $scope.selectedMimetypes.push(mime_type);
-
-      table.fields.split(',').forEach(function(field){
-        if(field != 'hashid'){
-          var found = false;
-          for(var i in $scope.models.lists.selectedFields){
-            if($scope.models.lists.selectedFields[i].field == field){
-              found = true;
-              if($scope.models.lists.selectedFields[i].modules.indexOf(mime_type) == -1){
-                $scope.models.lists.selectedFields[i].modules.push(mime_type);
-              }
-            }
-          }
-          if(!found){
-            $scope.models.lists.selectedFields.push({field: field, modules: [mime_type]});
-          }         
-        }
-      });
-    });
-  }
-
   $scope.mimetypesList = {};
   var modules = {};
   for(var key in mime_types){
@@ -356,6 +328,46 @@ angular.module('uforia')
   }
   
   $scope.modules = modules;
+
+  function initMapping() {
+    // console.log(mapping);
+    mapping.forEach(function(table){
+      table = table._source;
+
+      var mime_types = table.mime_types;
+      var modules = table.modules;
+
+      mime_types.forEach(function(mime_type){
+        if($scope.selectedMimetypes.indexOf(mime_type) == -1)
+          $scope.selectedMimetypes.push(mime_type);
+      });
+        
+      table.modules.forEach(function(module){
+        if($scope.selectedModules.indexOf(module) == -1)
+          $scope.selectedModules.push(module);
+      });
+        
+      table.fields.forEach(function(field){
+        if(field != 'hashid'){
+          var found = false;
+          for(var i in $scope.models.lists.selectedFields){
+            if($scope.models.lists.selectedFields[i].field == field){
+              found = true;
+              mime_types.forEach(function(mime_type){
+                if($scope.models.lists.selectedFields[i].modules.indexOf(mime_type) == -1){
+                  $scope.models.lists.selectedFields[i].modules.push(mime_type);
+                }
+              });
+            }
+          }
+          if(!found){
+            $scope.models.lists.selectedFields.push({field: field, modules: modules, mime_types: mime_types});
+          }         
+        }
+      });
+    });
+    $scope.updateModulesList();
+  };
 
   $scope.reloadFields = function(){
     loadFields($scope.selectedModules);
@@ -427,7 +439,7 @@ angular.module('uforia')
     $scope.models.lists.selectedFields.forEach(function(field, index){
       if(field.field == item.field){
         field.modules = field.modules.concat(item.modules);
-        console.log(item);
+        // console.log(item);
         field.mime_types = field.mime_types.concat(item.mime_types);
         return exists = true;
       }
@@ -536,27 +548,32 @@ angular.module('uforia')
     }
 
     $scope.models.lists.selectedFields.forEach(function(field){
+      // console.log(field);
       mapping.fields[field.field] = field.modules;
       mapping.fields.hashid = (mapping.fields.hashid || []).concat(field.modules);
-      field.modules.forEach(function(mime_type){
+      field.modules.forEach(function(module){
 
-        for(var table in modules[mime_type].tables){
-          if(modules[mime_type].tables[table].indexOf(field.field) != -1){
-            mapping.tables[table] = mapping.tables[table] || {mime_type: mime_type, fields: ['hashid']};
+        for(var table in modules[module].tables){
+          if(modules[module].tables[table].indexOf(field.field) != -1){
+            mapping.tables[table] = mapping.tables[table] || {modules: field.modules, fields: ['hashid'], mime_types: field.mime_types};
             mapping.tables[table].fields.push(field.field);
           }
         }
 
       });
+
     });
 
-    console.log(mapping);
+    // console.log(mapping);
     $http.post('./api/create_mapping', mapping)
     .success(function(res){
       console.log(res);
       $state.go('admin.overview');
     });
   }
+
+  if(mapping)
+    initMapping();
 })
 
 .controller('visualizationModalCtrl', function($scope, $modalInstance, $http, type, fields, visualizations){

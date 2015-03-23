@@ -541,7 +541,7 @@ router.post("/create_mapping", function(req, res){
         c.elasticsearch.create({
         index: INDEX,
         type: mapping.name + '_fields',
-        body: {table: table, fields: mapping.tables[table].fields.join(','), mime_type: mapping.tables[table].mime_type}
+        body: {table: table, fields: mapping.tables[table].fields, mime_types: mapping.tables[table].mime_types, modules: mapping.tables[table].modules}
       }, function (error, response) {
         if(error) throw error;
       });
