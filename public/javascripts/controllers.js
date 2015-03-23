@@ -135,7 +135,7 @@ angular.module('uforia')
 
   //click on a item
   function openDetails(data){
-    // console.log(data);
+    console.log(data);
     $scope.loading = true;
     var modalInstance = $modal.open({
       templateUrl: 'views/modals/details',

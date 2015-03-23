@@ -1,8 +1,8 @@
 function render(data, options, openDetails, cb){
-  var width = $('#d3_visualization').width(),
+console.log(data);  var width = $('#d3_visualization').width(),
     height = options.height || window.innerHeight;
 
-    var margin = {top: 20, right: 150, bottom: 100, left: 100};
+    var margin = {top: 20, right: 150, bottom: 200, left: 100};
 
     var dateFormat = d3.time.format('%d-%m-%Y');
     var dateTimeFormat = d3.time.format('%d-%m-%Y %H:%M:%S (UTC)');
@@ -31,7 +31,7 @@ function render(data, options, openDetails, cb){
 
 	// The character's name appears before its first
 	// scene's x value by this many pixels
-	var name_shift = 10;
+	var name_shift = 20;
 
 	// True: Use a white background for names
 	var name_bg = true;
@@ -50,17 +50,6 @@ function render(data, options, openDetails, cb){
 	// Longest name in pixels to make space at the beginning 
 	// of the chart. Can calculate but this works okay.
 	var longest_name = 150;
-
-	var x = d3.scale.ordinal()
-      .rangeRoundBands([longest_name-margin.left, width-margin.right], .1)
-      .domain([data.scenes[0].date, data.scenes[data.scenes.length-1].date]);
-
-  	x.domain(data.scenes.map(function(d) { return d.date; }));
-
-	var xAxis = d3.svg.axis()
-      .scale(x)
-      .orient("bottom")
-      .tickFormat(function(d) { return isDate(d) ? dateFormat(new Date(d)) : d; });
 
     //Tooltip
 	var tip = d3.tip()
@@ -485,7 +474,7 @@ function render(data, options, openDetails, cb){
 	    scenes.forEach(function(scene) {
 		if (!scene.char_node) {
 		    scene.height = Math.max(0, scene.chars.length*link_width + (scene.chars.length - 1)*link_gap);
-		    scene.width = Math.min(panel_width*3, 20);
+		    scene.width = Math.min(panel_width*sw_panels, 20);
 		    	    
 		    // Average of chars meeting at the scene _in group_
 		    var sum1 = 0;
@@ -813,9 +802,10 @@ function render(data, options, openDetails, cb){
 		total_panels = data.scenes[data.scenes.length-1].start;
 
 		var panel_width = Math.min((width-longest_name)/total_panels, 15);
+		panel_width = 6;
 		var panel_shift = Math.round(longest_name/panel_width);
 		total_panels += panel_shift;
-		panel_width = Math.min(width/total_panels, 15);
+		// panel_width = Math.min(width/total_panels, 15);
 
 	    var xchars = data.names;
 
@@ -873,8 +863,6 @@ function render(data, options, openDetails, cb){
                 .attr("id", safe_name)
 		.append("g")
 		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-		svg.call(tip); // init tooltip
 
 
 	    var chars = [];
@@ -967,6 +955,23 @@ function render(data, options, openDetails, cb){
 	    draw_links(links, svg);
 	    draw_nodes(scenes, svg, width, height, raw_chart_height, safe_name);
 
+	    svg.call(tip); // init tooltip
+
+	    var graph_width = d3.select('#d3_visualization > svg > g').node().getBBox().width + margin.left + margin.right;
+
+	    var x = d3.time.scale()
+	      .rangeRound([longest_name, graph_width-margin.right-longest_name-panel_width], .1)
+	      .domain([data.scenes[0].date, data.scenes[data.scenes.length-1].date]);
+
+	  	// x.domain(data.scenes.map(function(d) { return d.date; }));
+
+		var xAxis = d3.svg.axis()
+	      .scale(x)
+	      .orient("bottom")
+	      .ticks(d3.time.months, 1)
+	      .tickSize(0)
+	      .tickFormat(function(d) { return isDate(d) ? dateFormat(new Date(d)) : d; });
+
 	    //add the X axis
 	  	svg.append("g")
 			.attr("class", "x axis")
@@ -976,6 +981,7 @@ function render(data, options, openDetails, cb){
   			.attr("transform", "translate(-20, 20) rotate(-45)");
 
 	    d3.select('#d3_visualization > svg').attr('height', d3.select('#d3_visualization > svg > g').node().getBBox().height + margin.bottom + margin.top);
+	    d3.select('#d3_visualization > svg').attr('width', graph_width);
 	    d3.select('#d3_visualization > svg').style('height', d3.select('#d3_visualization > svg > g').node().getBBox().height + margin.bottom + margin.top);
 
 	    d3.select("#d3_visualization").append("text")
