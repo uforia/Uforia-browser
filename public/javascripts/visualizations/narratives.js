@@ -1,5 +1,4 @@
 function render(data, options, openDetails, cb){
-	console.log(data); // debug
   var width = $('#d3_visualization').width(),
     height = options.height || window.innerHeight;
 
