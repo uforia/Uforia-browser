@@ -298,14 +298,16 @@ angular.module('uforia')
   }
 })
 
-.controller('mappingCtrl', function($scope, $http, $stateParams, $state, mapping, modules, types){
+.controller('mappingCtrl', function($scope, $http, $stateParams, $state, mapping, mime_types, types){
   // console.log(mapping);
   // console.log(modules);
-  $scope.modules = modules;
+  $scope.mime_types = mime_types;
   $scope.types = types;
   $scope.mapping = {name: $stateParams.type};
   $scope.mapping.selectedFields = {};
+  $scope.selectedMimetypes = [];
   $scope.selectedModules = [];
+  $scope.modulesList = {};
 
   $scope.models = {
     selected: null,
@@ -321,8 +323,8 @@ angular.module('uforia')
 
       var mime_type = table.mime_type;
 
-      if($scope.selectedModules.indexOf(mime_type) == -1)
-        $scope.selectedModules.push(mime_type);
+      if($scope.selectedMimetypes.indexOf(mime_type) == -1)
+        $scope.selectedMimetypes.push(mime_type);
 
       table.fields.split(',').forEach(function(field){
         if(field != 'hashid'){
@@ -343,11 +345,17 @@ angular.module('uforia')
     });
   }
 
-  $scope.modulesList = {};
-  for(var key in modules){
-    $scope.modulesList[key.split('/')[0]] = $scope.modulesList[key.split('/')[0]] || [];
-    $scope.modulesList[key.split('/')[0]].push(key);
+  $scope.mimetypesList = {};
+  var modules = {};
+  for(var key in mime_types){
+    $scope.mimetypesList[key.split('/')[0]] = $scope.mimetypesList[key.split('/')[0]] || [];
+    $scope.mimetypesList[key.split('/')[0]].push(key);
+    for(var module in mime_types[key].modules){
+      modules[module] = mime_types[key].modules[module];
+    }
   }
+  
+  $scope.modules = modules;
 
   $scope.reloadFields = function(){
     loadFields($scope.selectedModules);
@@ -355,28 +363,32 @@ angular.module('uforia')
 
   $scope.$watch('selectedModules', loadFields);
 
-  function loadFields(mime_types){
+  function loadFields(input){
     $scope.models.lists.fields = [];
-    if(mime_types && mime_types.length > 0){
-      mime_types.forEach(function(mime_type){
-        modules[mime_type].fields.forEach(function(field){
-          var exists, selected;
-          $scope.models.lists.selectedFields.forEach(function(item){
-            if(item.field == field && item.modules.indexOf(mime_type) != -1){
-              selected = true;
-              return;
-            }
-          });
-          $scope.models.lists.fields.forEach(function(item){
-            if(item.field == field && !selected){
-              item.modules.push(mime_type);
-              exists = true;
-              return;
-            }
-          });
-          if(!exists && !selected)
-            $scope.models.lists.fields.push({modules:[mime_type], field:field});
-        });
+    if(input && input.length > 0){
+      input.forEach(function(module){
+        for(var mime_type in mime_types){
+          if(mime_types[mime_type].modules[module]){
+            mime_types[mime_type].modules[module].fields.forEach(function(field){
+              var exists, selected;
+              $scope.models.lists.selectedFields.forEach(function(item){
+                if(item.field == field && item.modules.indexOf(module) != -1){
+                  selected = true;
+                  return;
+                }
+              });
+              $scope.models.lists.fields.forEach(function(item){
+                if(item.field == field && !selected){
+                  item.modules.push(module);
+                  exists = true;
+                  return;
+                }
+              });
+              if(!exists && !selected)
+                $scope.models.lists.fields.push({modules:[module], field:field, mime_types: [mime_type]});
+            });
+          }
+        }
       });
       $scope.models.lists.fields.forEach(function(item){
         // console.log(item.field + ':' + item.modules.length);
@@ -397,7 +409,6 @@ angular.module('uforia')
         ArrayMove($scope.models.lists.fields, index, 0);
       }
     });
-    console.log($scope.models.lists.fields);
     $scope.selectFields = undefined;
   }
 
@@ -416,6 +427,8 @@ angular.module('uforia')
     $scope.models.lists.selectedFields.forEach(function(field, index){
       if(field.field == item.field){
         field.modules = field.modules.concat(item.modules);
+        console.log(item);
+        field.mime_types = field.mime_types.concat(item.mime_types);
         return exists = true;
       }
     });
@@ -423,16 +436,25 @@ angular.module('uforia')
       $scope.models.lists.selectedFields.push(item);
   }
 
-  $scope.checkSelected = function(){
+  $scope.checkSelected = function(object, key){
     $scope.models.lists.selectedFields.forEach(function(field){
-      field.modules.forEach(function(field){
-        if($scope.selectedModules.indexOf(field) == -1)
-          $scope.selectedModules.push(field);
+      field[key].forEach(function(item){
+        if($scope[object].indexOf(item) == -1)
+          $scope[object].push(item);
       });
     }); 
   }
 
-  $scope.checkPresent = function(item){
+  $scope.updateModulesList = function(){
+    $scope.modulesList = {};
+    $scope.selectedMimetypes.forEach(function(mime_type){
+      $scope.modulesList[mime_type] = Object.keys(mime_types[mime_type].modules);
+    });
+    $scope.checkSelected('selectedMimetypes', 'mime_types');
+    $scope.checkSelected('selectedModules', 'modules');
+  }
+
+  $scope.checkPresent = function(item, key){
     var present = false;
     $scope.models.lists.selectedFields.forEach(function(field){
       if(field.field == item.field){
@@ -443,11 +465,27 @@ angular.module('uforia')
     return present;
   }
 
-  $scope.checkForFields = function(type){
-    for(var field in modules[type].fields){
-      var field = modules[type].fields[field];
-      if(field != 'hashid' && $scope.checkPresent({field: field})){
-        return true;
+  $scope.checkMimetypeForFields = function(type){
+    for(var module in mime_types[type].modules){
+      for(var field in mime_types[type].modules[module].fields){
+        var field = mime_types[type].modules[module].fields[field];
+        if(field != 'hashid' && $scope.checkPresent({field: field})){
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  $scope.checkModuleForFields = function(module){
+    for(var type in mime_types){
+      if(mime_types[type].modules[module]){
+        for(var field in mime_types[type].modules[module].fields){
+          var field = mime_types[type].modules[module].fields[field];
+          if(field != 'hashid' && $scope.checkPresent({field: field})){
+            return true;
+          }
+        }
       }
     }
     return false;

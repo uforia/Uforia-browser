@@ -26,3 +26,11 @@ angular.module('uforia')
     return txt ? txt.charAt(0).toUpperCase() + txt.slice(1).toLowerCase() : '';
   }
 })
+
+.filter('splitPop', function() {
+  return function(input, delimiter) {
+    var delimiter = delimiter || ',';
+console.log(input.split(delimiter).pop())
+    return input.split(delimiter).pop();
+  } 
+});

@@ -56,7 +56,7 @@ angular.module('uforia',
         controller: 'mappingCtrl',
         parent: 'admin',
         resolve: {
-          modules: model.getAvailableModules,
+          mime_types: model.getAvailableModules,
           types: model.getTypes,
           mapping: model.getMapping
         }

@@ -4,9 +4,14 @@
     input.form-control(ng-model="mapping.name")
   .col-lg-2
     label Mime-types
-    select.form-control.selectFields(ui-sortable, ng-model="selectedModules", ng-size="{{Utils.keys(modules).length+1}}", multiple, ng-change="checkSelected()", ng-click="checkSelected()")
-      optgroup(ng-repeat="(key, meme_types) in modulesList", label="{{key}}")
-        option(ng-repeat="type in meme_types", value="{{type}}", ng-selected="selectedModules.indexOf(type) != -1", ng-class="{available: checkForFields(type)}") {{type.split('/')[1] || type}}
+    select.form-control.selectFields(ui-sortable, ng-model="selectedMimetypes", ng-size="{{Utils.keys(mime_types).length+1}}", multiple, ng-change="updateModulesList()", ng-click="updateModulesList()")
+      optgroup(ng-repeat="(key, mime_types) in mimetypesList", label="{{key}}")
+        option(ng-repeat="type in mime_types", value="{{type}}", ng-selected="selectedMimetypes.indexOf(type) != -1", ng-class="{available: checkMimetypeForFields(type)}") {{type.split('/')[1] || type}}
+  .col-lg-2
+    label Modules
+    select.form-control(ui-sortable, ng-model="selectedModules", ng-size="{{Utils.keys(modules).length+1}}", multiple, ng-change="checkSelected('selectedModules', 'modules')", ng-click="checkSelected('selectedModules', 'modules')")
+      optgroup(ng-repeat="(key, modules) in modulesList", label="{{key}}")
+        option(ng-repeat="module in modules", value="{{module}}", ng-selected="selectedModules.indexOf(module) != -1", ng-class="{available: checkModuleForFields(module)}") {{module.split('_').pop() || module}}
   .col-lg-2.dnd
     label Fields
     ul(dnd-list='models.lists.fields')

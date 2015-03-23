@@ -289,9 +289,8 @@ router.post("/get_modules", function(req, res){
     async.each(results, function(result, callback){
       var mime_type = result.mime_type;
 
-      modules[mime_type] = {
-        tables: {},
-        fields: []
+      mime_types[mime_type] = {
+        modules: {}
       };
 
       result.modules = JSON.parse(result.modules);
@@ -300,23 +299,29 @@ router.post("/get_modules", function(req, res){
       // modules[mime.extension(result.mime_type)].meme_types = result.modules;
 
       for(var module in result.modules){
-        if(result.modules[module].length > 0)
-          modules[mime_type].tables[result.modules[module]] = [];
+        if(result.modules[module].length > 0){
+          mime_types[mime_type].modules[module] =  mime_types[mime_type].modules[module] || {tables: {}, fields: []};
+          mime_types[mime_type].modules[module].tables[result.modules[module]] = [];
+        }
       }
+      async.each(Object.keys(mime_types[mime_type].modules), function(module, callback){
+        async.each(Object.keys(mime_types[mime_type].modules[module].tables), function(table, callback){
+          c.mysql_db.query('SHOW COLUMNS FROM ??', [table], function(err, fields){
+            if(err) throw err;
 
-      async.each(Object.keys(modules[mime_type].tables), function(table, callback){
-        c.mysql_db.query('SHOW COLUMNS FROM ??', [table], function(err, fields){
-          if(err) throw err;
+            fields.forEach(function(field){
+              mime_types[mime_type].modules[module].tables[table].push(field.Field);
 
-          fields.forEach(function(field){
-            modules[mime_type].tables[table].push(field.Field);
+              if(mime_types[mime_type].modules[module].fields.indexOf(field.Field) == -1)
+                mime_types[mime_type].modules[module].fields.push(field.Field);
+            });
 
-            if(modules[mime_type].fields.indexOf(field.Field) == -1)
-              modules[mime_type].fields.push(field.Field);
+            // modules[mime_type].table = table;
+
+            callback();
           });
-
-          // modules[mime_type].table = table;
-
+        }, function(err){
+          if(err) throw err;
           callback();
         });
       }, function(err){
@@ -324,8 +329,9 @@ router.post("/get_modules", function(req, res){
         callback();
       });
     }, function(err){
-      if(err) throw err;
-      res.send(modules);
+      if(err) throw err; 
+console.log(mime_types);
+      res.send(mime_types);
     });
         
 

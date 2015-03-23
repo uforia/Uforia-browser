@@ -58,7 +58,7 @@ console.log(data);  var width = $('#d3_visualization').width(),
 		.html(function(d) {
 		return "<strong>" + data.x_label + ": </strong>" + (isDate(d.date) ? dateTimeFormat(new Date(d.date)) : d.date)  + 
 		"<br /><strong>Identities: </strong>" + new Set(d.chars).size + 
-		"<br /><strong>Number of e-mails: </strong>" + d.hashids.length;
+		"<br /><strong>Records: </strong>" + d.hashids.length;
 
 	});
 
