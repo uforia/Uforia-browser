@@ -143,7 +143,7 @@ angular.module('uforia')
     var modalInstance = $modal.open({
       templateUrl: 'views/modals/details',
       controller: 'detailsModalCtrl',
-      size: 'lg',
+      size: 'xl',
       resolve: {
         files: model.getFileDetails({hashids: data.hashids, type:$scope.searchType, tables: data.tables}),
         addresses: function(){ return data.adressses; }
@@ -282,7 +282,7 @@ angular.module('uforia')
     var modalInstance = $modal.open({
       templateUrl: 'views/modals/visualizations',
       controller: 'visualizationModalCtrl',
-      size: 'lg',
+      size: 'xl',
       scope: $scope,
       resolve: {
         type: function() { return type; },

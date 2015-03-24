@@ -12,8 +12,9 @@ a {
   padding-right: 5px;
 }
 
-.email_contents {
+.file_content {
 	white-space: pre-line;
+  overflow-x: auto;
 }
 
 .form-horizontal .control-label.center {
@@ -202,4 +203,8 @@ ul[dnd-list], ul[dnd-list] > li {
 
 .text-muted {
   color: #BABABA;
+}
+
+div[size="xl"] .modal-dialog {
+  width: 80%;
 }
