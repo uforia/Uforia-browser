@@ -334,8 +334,10 @@ router.get('/get_file_content/:hashid', function(req, res){
     var fullpath = result[0].fullpath;
 
     fs.readFile(fullpath, function (err, data) {
-      if (err) res.send('Content not available');
-      res.send(data);
+      if (err) 
+        res.send('Content not available');
+      else
+        res.send(data);
     });
   });
 });
