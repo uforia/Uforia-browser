@@ -14,16 +14,18 @@ angular.module('uforia')
   $scope.parameters = [{operator: "must", andOr: "And"}];
   var visualization = {};
 
+  $scope.$watch('viewType', function(newVal, oldVal){
+    if(newVal){
+      changeScripts();
+      if($scope.searchForm.$valid){
+        $scope.search();
+      }
+    }
+  });
+
   $timeout(function(){
     $scope.$watch('searchType', function(newVal, oldVal){
       changeType(newVal);
-    });
-
-    $scope.$watch('viewType', function(newVal, oldVal){
-      if($scope.searchForm.$valid){
-        changeScripts();
-        $scope.search();
-      }
     });
 
     $scope.$watch('parameters', function(newVal, oldVal){
@@ -98,6 +100,7 @@ angular.module('uforia')
       .success(function(data){
         // console.log(data);
         $scope.viewTypes = data;
+        $scope.viewType = Object.keys(data)[0];
       });
 
     //Clear the visualization and search parameters
@@ -226,23 +229,37 @@ angular.module('uforia')
   }
 
   function changeScripts(){
-    if($('#d3_style').length == 0){
-      $('head').append("<link href=\"stylesheets/visualizations/" + $scope.viewType.toLowerCase() + ".css\" rel=\"stylesheet\" type=\"text/css\" id=\"d3_style\">");
+    if($scope.viewType){
+      $timeout(function(){
+        if($('#d3_style').length == 0){
+          $('head').append("<link href=\"stylesheets/visualizations/" + $scope.viewType.toLowerCase() + ".css\" rel=\"stylesheet\" type=\"text/css\" id=\"d3_style\">");
+        }
+        else {
+          $('#d3_style').replaceWith("<link href=\"stylesheets/visualizations/" + $scope.viewType.toLowerCase() + ".css\" rel=\"stylesheet\" type=\"text/css\" id=\"d3_style\">");
+        }
+        $('#d3_script').replaceWith("<script src=\"javascripts/visualizations/" + $scope.viewType.toLowerCase() + ".js\" type=\"text/javascript\" id=\"d3_script\"></script>");
+      });
     }
-    else {
-      $('#d3_style').replaceWith("<link href=\"stylesheets/visualizations/" + $scope.viewType.toLowerCase() + ".css\" rel=\"stylesheet\" type=\"text/css\" id=\"d3_style\">");
-    }
-    $('#d3_script').replaceWith("<script src=\"javascripts/visualizations/" + $scope.viewType.toLowerCase() + ".js\" type=\"text/javascript\" id=\"d3_script\"></script>");
   }
 
 })
 
-.controller('detailsModalCtrl', function($scope, $modalInstance, files, addresses){
+.controller('detailsModalCtrl', function($scope, $http, $modalInstance, files, addresses){
   $scope.addresses = addresses;
   $scope.files = files;
-  // console.log(files);
+  console.log(files);
   $scope.modalInstance = $modalInstance;
   $scope.selectedFile = files[0].hashid;
+
+  $scope.$watch('selectedFile', function(value){
+    if(value){
+      $scope.showFile = JSON.parse(value);
+      $http.get('api/get_file_content/' + $scope.showFile.hashid)
+      .success(function(data){
+        $scope.showFile.content = data;
+      });
+    }
+  });
 
   $scope.openFile = function(hashid){
     files.forEach(function(file){

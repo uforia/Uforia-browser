@@ -5,13 +5,13 @@
 .modal-body
   .row
     .col-lg-3
-      select.form-control(ng-size='{{files.length}}', ng-model="selectedFile", ng-change="openFile(selectedFile)", required)
-        option(ng-repeat="item in files", value="{{item.hashid}}", ng-selected="selectedFile == item.hashid") {{item.Subject}}
+      select.form-control(ng-size='{{files.length}}', ng-model="selectedFile", required)
+        option(ng-repeat="item in files", value="{{item}}", ng-selected="showFile.hashid == item.hashid") {{item.label}}
     .col-lg-9
       div(ng-show="!showFile") Select a file from the list.
       div(ng-show="showFile")
         .panel.panel-default
-          .panel-heading(ng-bind="showFile.Subject")
+          .panel-heading(ng-bind="showFile.label")
           .panel-body
             .fullpath_header Original path of the evidence item
             .fullpath_contents "{{showFile.fullpath}}"

@@ -25,7 +25,7 @@ var INDEX = c.config.elasticsearch.index;
 router.post("/search", function(req, res) {
   var data = req.body;
   var search_request = {};
-  var view = data.view || DEFAULT_VIEW;
+  var view = data.view;
   var visualizationParams = data.visualization || DEFAULT_VISUALIZATION;
 
   var query_skeleton = {
@@ -258,17 +258,85 @@ router.post("/get_file_details", function(req, res){
   
   var data = [];
 
+  var labelFields = ['Subject', 'Date', 'From', 'Author', 'To'];
+
   async.each(tables, function(table, callback){
     var hashids = _.uniq(req.body.tables[table]);
-    c.mysql_db.query('SELECT ??.name, ??.fullpath FROM ?? WHERE ??.hashid IN (?)', 
-      [table, filesTable, table, filesTable, table, filesTable, table, hashids], function(err, results){
-      if(err) throw err;
+    console.log(table);
+    c.mysql_db.query('SHOW COLUMNS FROM ??', [table], function(err, fields){
+      for(var i=0; i < labelFields.length; i++){
+        if(_.findIndex(fields, {'Field': labelFields[i]}) != -1){
+          var test = c.mysql_db.query('SELECT COUNT(*) AS count, hashid FROM ?? WHERE hashid IN (?) GROUP BY hashid; \
+          SELECT ??.?? AS label, ??.hashid, ??.fullpath FROM ?? LEFT JOIN ?? ON ??.hashid = ??.hashid WHERE ??.hashid IN (?)',
+          [table, _.uniq(hashids),
+          table, labelFields[i], filesTable, filesTable, table, filesTable, table, filesTable, table, _.uniq(hashids)], function(err, results){
+            if(err) throw err;
 
-      data = data.concat(results);
-      callback();
+            var oneToMany = false;
+            _.each(results[0], function(record){
+              if(record.count > 1){
+                oneToMany = true;
+                return false;
+              }
+            });
+
+            if(oneToMany){
+              data.push({label: 'Multiple records from one file', fullpath: results[1][0].fullpath});
+            } else {
+              data = data.concat(results[1]);
+            }
+
+            callback();
+          });
+          break;
+        }
+        if(i == labelFields-1){
+          c.mysql_db.query('SELECT COUNT(*) AS count, hashid FROM ?? WHERE hashid IN (?) GROUP BY hashid; \
+          SELECT ??.name AS label, ??.hashid, ??.fullpath FROM ?? LEFT JOIN ?? ON ??.hashid = ??.hashid WHERE ??.hashid IN (?)',
+          [table, _.uniq(hashids),
+          filesTable, 'name', filesTable, filesTable, table, filesTable, table, filesTable, table, _.uniq(hashids)], function(err, results){
+            if(err) throw err;
+
+            var oneToMany = false;
+            _.each(results[0], function(record){
+              if(record.count > 1){
+                oneToMany = true;
+                return false;
+              }
+            });
+
+            if(oneToMany){
+              data.push({label: 'Multiple records from one file', fullpath: results[1][0].fullpath});
+            } else {
+              data = data.concat(results[1]);
+            }
+
+            callback();
+          });
+          break;
+        }
+      }
     });
   }, function(err){
     res.send(data);
+  });
+});
+
+/* Return the content from a evidence file
+* url: /api/get_file_content
+* takes params:
+* 
+*/
+router.get('/get_file_content/:hashid', function(req, res){
+  c.mysql_db.query('SELECT fullpath FROM files WHERE hashid=?', [req.params.hashid], function(err, result){
+    if(err) throw err;
+
+    var fullpath = result[0].fullpath;
+
+    fs.readFile(fullpath, function (err, data) {
+      if (err) throw err;
+      res.send(data);
+    });
   });
 });
 
