@@ -1,6 +1,6 @@
 .modal-header
   button.close(ng-click="modalInstance.dismiss()", type='button', aria-hidden="true") &times;
-  h3.modal-title E-mail details for: {{addresses.join(' - ')}}
+  h3.modal-title Details for: {{addresses.join(' - ')}}
 
 .modal-body
   .row
@@ -13,10 +13,10 @@
         .panel.panel-default
           .panel-heading(ng-bind="showFile.label")
           .panel-body
-            .fullpath_header Original path of the evidence item
+            .fullpath_header Original path of the evidence file
             .fullpath_contents "{{showFile.fullpath}}"
         .panel.panel-default
-          .panel-heading E-mail contents
+          .panel-heading Contents
           .panel-body
             .email_contents(ng-bind="showFile.content")
   
