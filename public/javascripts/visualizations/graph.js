@@ -44,17 +44,17 @@ function render(data, options, openDetails, cb){
       .links(data.links)
       .start();
 
-  //Creat the links between nodes
+  // Create the links between nodes
   link = svg.append("defs").selectAll("marker")
       .data(force.links())
-    .enter().append("marker")
+      .enter().append("marker")
       .attr("id", "marker")
       .attr("viewBox", "0 -5 10 10")
-      .attr("refX", 15)
+      .attr("refX", 3)
       .attr("markerWidth", 6)
       .attr("markerHeight", 6)
       .attr("orient", "auto")
-    .append("path")
+      .append("path")
       .attr("d", "M0,-5L10,0L0,5");
 
   var path = svg.append("g").selectAll("path")
