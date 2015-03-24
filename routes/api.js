@@ -281,7 +281,7 @@ router.post("/get_file_details", function(req, res){
             });
 
             if(oneToMany){
-              data.push({label: 'Multiple records from one file', fullpath: results[1][0].fullpath});
+              data.push({hashid: results[1][0].hashid, label: 'Multiple records from one file', fullpath: results[1][0].fullpath});
             } else {
               data = data.concat(results[1]);
             }
@@ -306,7 +306,7 @@ router.post("/get_file_details", function(req, res){
             });
 
             if(oneToMany){
-              data.push({label: 'Multiple records from one file', fullpath: results[1][0].fullpath});
+              data.push({hashid: results[1][0].hashid, label: 'Multiple records from one file', fullpath: results[1][0].fullpath});
             } else {
               data = data.concat(results[1]);
             }
@@ -334,7 +334,7 @@ router.get('/get_file_content/:hashid', function(req, res){
     var fullpath = result[0].fullpath;
 
     fs.readFile(fullpath, function (err, data) {
-      if (err) throw err;
+      if (err) res.send('Content not available');
       res.send(data);
     });
   });

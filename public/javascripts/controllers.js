@@ -247,13 +247,13 @@ angular.module('uforia')
 .controller('detailsModalCtrl', function($scope, $http, $modalInstance, files, addresses){
   $scope.addresses = addresses;
   $scope.files = files;
-  console.log(files);
+  // console.log(files);
   $scope.modalInstance = $modalInstance;
-  $scope.selectedFile = files[0];
 
   $scope.$watch('selectedFile', function(value){
     if(value){
       $scope.showFile = typeof value == 'string' ? JSON.parse(value) : value;
+      // console.log($scope.showFile);
       $http.get('api/get_file_content/' + $scope.showFile.hashid)
       .success(function(data){
         $scope.showFile.content = data;
@@ -261,14 +261,7 @@ angular.module('uforia')
     }
   });
 
-  $scope.openFile = function(hashid){
-    files.forEach(function(file){
-      if(file.hashid == hashid)
-        $scope.showFile = file;
-    })
-  }
-  $scope.openFile($scope.selectedFile);
-
+  $scope.selectedFile = JSON.stringify(files[0]);
 })
 
 .controller('adminCtrl', function($rootScope, $scope, $http, $modal, types){
