@@ -194,7 +194,7 @@ angular.module('uforia')
         if(parameter.operator == 'must_not')
           api_params.query += ' NOT ';
 
-        api_params.query += parameter.memeType + ':[' + formatDate(parameter.startDate.toLocaleDateString()) + ' TO ' + formatDate(parameter.endDate.toLocaleDateString()) + ']';
+        api_params.query += parameter.memeType + ':[' + parameter.startDate.getFullYear() + '-' + (parameter.startDate.getMonth()+1) + '-' + parameter.startDate.getDate() + ' TO ' + parameter.endDate.getFullYear() + '-' + (parameter.endDate.getMonth()+1) + '-' + parameter.endDate.getDate() + ']';
       }
       else if(parameter.query && parameter.query.length > 0){
         if(api_params.query.length > 0)
@@ -206,6 +206,7 @@ angular.module('uforia')
         api_params.query += parameter.memeType + ':' + parameter.query;
       }
     });
+    console.log(api_params);
     return api_params;
   }
 

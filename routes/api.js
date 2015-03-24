@@ -260,7 +260,7 @@ router.post("/get_file_details", function(req, res){
 
   async.each(tables, function(table, callback){
     var hashids = _.uniq(req.body.tables[table]);
-    c.mysql_db.query('SELECT ??.*, ??.fullpath FROM ?? LEFT JOIN ?? ON ??.hashid = ??.hashid WHERE ??.hashid IN (?)', 
+    c.mysql_db.query('SELECT ??.name, ??.fullpath FROM ?? WHERE ??.hashid IN (?)', 
       [table, filesTable, table, filesTable, table, filesTable, table, hashids], function(err, results){
       if(err) throw err;
 
