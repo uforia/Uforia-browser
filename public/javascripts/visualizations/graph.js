@@ -111,8 +111,8 @@ function render(data, options, openDetails, cb){
           dr = Math.sqrt(dx * dx + dy * dy);
 
     // used to say '/2' at the end
-      var endX = (d.target.x + d.source.x);
-      var endY = (d.target.y + d.source.y);
+      var endX = (d.target.x + d.source.x) / 2;
+      var endY = (d.target.y + d.source.y) / 2;
       var len = dr - ((dr/2) * Math.sqrt(3));
 
       endX = endX + (dy * len/dr);
