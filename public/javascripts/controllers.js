@@ -249,11 +249,11 @@ angular.module('uforia')
   $scope.files = files;
   console.log(files);
   $scope.modalInstance = $modalInstance;
-  $scope.showFile = files[0];
+  $scope.selectedFile = files[0];
 
   $scope.$watch('selectedFile', function(value){
     if(value){
-      $scope.showFile = JSON.parse(value);
+      $scope.showFile = typeof value == 'string' ? JSON.parse(value) : value;
       $http.get('api/get_file_content/' + $scope.showFile.hashid)
       .success(function(data){
         $scope.showFile.content = data;
