@@ -1,5 +1,5 @@
 body {
-  padding: 50px;
+  /*padding: 50px;*/
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
@@ -207,4 +207,8 @@ ul[dnd-list], ul[dnd-list] > li {
 
 div[size="xl"] .modal-dialog {
   width: 80%;
+}
+
+.margin-top {
+  margin-top: 15px;
 }

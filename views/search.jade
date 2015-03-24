@@ -1,28 +1,28 @@
 .row.border-top
   form.form-horizontal(name="searchForm")
-    .col-lg-3.form-group
+    .col-xs-12.col-lg-3.form-group
       label.control-label.col-lg-6(for="searchType") Use evidence type
       .col-lg-6
         select.form-control#searchType(ng-model='searchType')
           option(ng-repeat="item in searchTypes", value="{{item}}", ng-bind="item", ng-selected="{{searchType == item}}", required)
-    .col-lg-9.form-group
+    .col-xs-12.col-lg-9.form-group
       .row.col-lg-12.less-padding(ng-repeat="parameter in parameters")
-        label.control-label.col-lg-2.center(ng-if="$index == 0")
-        .col-xs-2(ng-if="$index > 0")
+        label.control-label.col-xs-4.col-md-2.col-lg-2.center(ng-if="$index == 0")
+        .col-xs-4.col-md-2(ng-if="$index > 0")
           //- This select is disabled because it doesn't work yet.
           select.form-control(ng-model="parameter.andOr", required)
             option(value="AND") And
             option(value="OR") Or
-        .col-xs-2
+        .col-xs-4.col-md-2
           select.form-control(ng-model="parameter.memeType", required)
             option(ng-repeat="(key, item) in memeTypes", value="{{key}}", ng-bind="key")
-        .col-xs-2
+        .col-xs-4.col-md-2
           select.form-control(ng-model="parameter.operator")
             option(value="must") contains
             option(value="must_not") omits
-        .col-xs-4(ng-if="parameter.memeType != 'Date'")
+        .col-xs-12.col-md-4(ng-if="parameter.memeType != 'Date'")
           input.form-control(type="text", ng-model="parameter.query", required)
-        .col-xs-4(ng-if="parameter.memeType == 'Date'")
+        .col-xs-12.col-md-4(ng-if="parameter.memeType == 'Date'")
           .row
             .col-lg-6
               .input-group
@@ -36,7 +36,7 @@
                 span.input-group-btn
                   button(type="button", class="btn btn-default", ng-click="openDatePicker($event, $index, 'endDateOpen')")
                     i.glyphicon.glyphicon-calendar
-        .col-xs-2
+        .col-xs-12.col-md-2
           button.btn.btn-sm.btn-primary(type="button", ng-click="add($index)") Refine
           button.btn.btn-sm.btn-danger(type="button", ng-click="remove($index)", ng-if="parameters.length > 1") Remove
 

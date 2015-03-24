@@ -1,35 +1,36 @@
 extends layout
 
 block content
-  header
-    p.logo
-      b U
-      | niversal 
-      b For
-      | ensic 
-      b I
-      | ndexer and 
-      b A
-      | nalyzer - Visualize Anything!
-    p(style='font-size: 10pt;')
-      ul
-        li
-          b Disclaimer 1: 
-          | sorry, we can't guarantee this website always works (correctly)! Please 
-          a(href='mailto:uforia@dhcp.net?Subject=Uforia Bug Report') report bugs 
-          | and/or 
-          a(href='https://github.com/uforia') submit a pull request 
-          | !
-        li
-          b Disclaimer 2: 
-          | Please enable (external) JavaScript, so this website and Google Analytics actually works :-)
-        li
-          b Usage tip 1: 
-          | Unless you are using the Bar Chart visualization, try to visualize up to +/- 200 items: more can make your browser slow!<br />
-          b Usage tip 2: 
-          | Try clicking on the various parts of the visualizations (nodes, lines, edges, etc.) to get a detailed view of the documents.
-        li
-          b Common issues: 
-          | Visualizing too many results can make your browser slow or not show anything at all (empty canvas).
+  .container-fluid.margin-top
+    header
+      p.logo
+        b U
+        | niversal 
+        b For
+        | ensic 
+        b I
+        | ndexer and 
+        b A
+        | nalyzer - Visualize Anything!
+      p(style='font-size: 10pt;')
+        ul
+          li
+            b Disclaimer 1: 
+            | sorry, we can't guarantee this website always works (correctly)! Please 
+            a(href='mailto:uforia@dhcp.net?Subject=Uforia Bug Report') report bugs 
+            | and/or 
+            a(href='https://github.com/uforia') submit a pull request 
+            | !
+          li
+            b Disclaimer 2: 
+            | Please enable (external) JavaScript, so this website and Google Analytics actually works :-)
+          li
+            b Usage tip 1: 
+            | Unless you are using the Bar Chart visualization, try to visualize up to +/- 200 items: more can make your browser slow!<br />
+            b Usage tip 2: 
+            | Try clicking on the various parts of the visualizations (nodes, lines, edges, etc.) to get a detailed view of the documents.
+          li
+            b Common issues: 
+            | Visualizing too many results can make your browser slow or not show anything at all (empty canvas).
 
-  .content(ui-view)
+    .container-fluid(ui-view)
