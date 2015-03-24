@@ -249,7 +249,7 @@ angular.module('uforia')
   $scope.files = files;
   console.log(files);
   $scope.modalInstance = $modalInstance;
-  $scope.selectedFile = files[0].hashid;
+  $scope.showFile = files[0];
 
   $scope.$watch('selectedFile', function(value){
     if(value){
