@@ -16,6 +16,7 @@ angular.module('uforia')
 
   $scope.$watch('viewType', function(newVal, oldVal){
     if(newVal){
+      removeSVG();
       changeScripts(function(){
         if($scope.searchForm.$valid){
           $scope.search();
@@ -37,7 +38,6 @@ angular.module('uforia')
           .post('api/count', formatParams())
           .success(function(data){
             $scope.loading = false;
-            $scope.loading=false;
             if(!data.error){
               $scope.queryMatchesCount = data.count;
               delete $scope.errorMessage;
@@ -100,7 +100,7 @@ angular.module('uforia')
     
     getData(formatParams(), function(data){
       $('#d3_visualization').empty();
-      if(data.total > 0){
+      if(data.total > 0 && data.total){
         render(data, {height: window.innerHeight-65}, openDetails, function(error){
           if(error)
             console.log(error); // TODO: show error to user
@@ -148,7 +148,7 @@ angular.module('uforia')
   }
 
   function getData(params, cb){
-    $scope.loading=true;
+    $scope.loading = true;
     $http
       .post('api/search', params)
       .success(function(data){
