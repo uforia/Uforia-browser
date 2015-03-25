@@ -9,7 +9,6 @@
       .row.col-lg-12.less-padding(ng-repeat="parameter in parameters")
         label.control-label.col-xs-4.col-md-2.col-lg-2.center(ng-if="$index == 0")
         .col-xs-4.col-md-2(ng-if="$index > 0")
-          //- This select is disabled because it doesn't work yet.
           select.form-control(ng-model="parameter.andOr", required)
             option(value="AND") And
             option(value="OR") Or
@@ -52,14 +51,13 @@
         .col-lg-10.control-text.text-center
           p -- 
             span(ng-if="!errorMessage")
-              span(ng-class="{'text-danger': queryMatchesCount > 200}", ng-bind="queryMatchesCount") 
+              span(ng-class="{'text-danger': queryMatchesCount > 1500}", ng-bind="queryMatchesCount") 
               |  evidence items match
             span(ng-if="errorMessage", ng-bind="errorMessage").text-danger
             |  --
         .col-lg-2
-          button.btn.btn-sm.btn-primary(ng-disabled="searchForm.$invalid", type="button", ng-click="search()", ng-class="{'btn-danger': queryMatchesCount > 200}") Visualize
-      .row.col-lg-12(ng-if="queryMatchesCount > 200")
-        
+          button.btn.btn-sm.btn-primary(ng-disabled="searchForm.$invalid || queryMatchesCount > 1500", type="button", ng-click="search()", ng-class="{'btn-danger': queryMatchesCount > 1500}") Visualize
+      .row.col-lg-12(ng-if="queryMatchesCount > 1500")
 
 .row
   .col-lg-12#d3_visualization

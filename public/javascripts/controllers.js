@@ -17,8 +17,11 @@ angular.module('uforia')
   $scope.$watch('viewType', function(newVal, oldVal){
     if(newVal){
       changeScripts();
+      removeSVG();
       if($scope.searchForm.$valid){
-        $scope.search();
+        if ($scope.queryMatchesCount < 1500) {
+            $scope.search();
+        }
       }
     }
   });
@@ -36,7 +39,6 @@ angular.module('uforia')
           .post('api/count', formatParams())
           .success(function(data){
             $scope.loading = false;
-            $scope.loading=false;
             if(!data.error){
               $scope.queryMatchesCount = data.count;
               delete $scope.errorMessage;
@@ -69,25 +71,6 @@ angular.module('uforia')
   //Load the right css for the right D3 visualization
   function changeType(type){
 
-    switch(type){
-      case "files":
-        $scope.viewType = 'bubble';
-      break;
-      case "email":
-        $scope.viewType = 'chord';
-      break; 
-      case "documents":
-        $scope.viewType = 'bar_chart';
-        //THIS should be moved to something seperate - bart 28-9-2014
-        visualization.x = prompt("Order X axis by");
-        visualization.y = prompt("Order Y axis by");
-
-      break;
-      default:
-        // $scope.searchType = 'email';
-        // $scope.viewType = 'chord';
-      break;
-    }
     $http
       .post("api/mapping_info", {type: type})
       .success(function(data){
@@ -118,7 +101,7 @@ angular.module('uforia')
     
     getData(formatParams(), function(data){
       $('#d3_visualization').empty();
-      if(data.total > 0){
+      if(data.total > 0 && data.total){
         render(data, {height: window.innerHeight-65}, openDetails, function(error){
           if(error)
             console.log(error); // TODO: show error to user
@@ -166,7 +149,7 @@ angular.module('uforia')
   }
 
   function getData(params, cb){
-    $scope.loading=true;
+    $scope.loading = true;
     $http
       .post('api/search', params)
       .success(function(data){
