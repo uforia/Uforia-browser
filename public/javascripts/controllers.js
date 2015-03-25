@@ -16,10 +16,11 @@ angular.module('uforia')
 
   $scope.$watch('viewType', function(newVal, oldVal){
     if(newVal){
-      changeScripts();
-      if($scope.searchForm.$valid){
-        $scope.search();
-      }
+      changeScripts(function(){
+        if($scope.searchForm.$valid){
+          $scope.search();
+        }
+      });
     }
   });
 
@@ -69,25 +70,6 @@ angular.module('uforia')
   //Load the right css for the right D3 visualization
   function changeType(type){
 
-    switch(type){
-      case "files":
-        $scope.viewType = 'bubble';
-      break;
-      case "email":
-        $scope.viewType = 'chord';
-      break; 
-      case "documents":
-        $scope.viewType = 'bar_chart';
-        //THIS should be moved to something seperate - bart 28-9-2014
-        visualization.x = prompt("Order X axis by");
-        visualization.y = prompt("Order Y axis by");
-
-      break;
-      default:
-        // $scope.searchType = 'email';
-        // $scope.viewType = 'chord';
-      break;
-    }
     $http
       .post("api/mapping_info", {type: type})
       .success(function(data){
@@ -228,7 +210,7 @@ angular.module('uforia')
     $("#message").attr("style", "visibility: hidden")
   }
 
-  function changeScripts(){
+  function changeScripts(cb){
     if($scope.viewType){
       $timeout(function(){
         if($('#d3_style').length == 0){
@@ -238,6 +220,7 @@ angular.module('uforia')
           $('#d3_style').replaceWith("<link href=\"stylesheets/visualizations/" + $scope.viewType.toLowerCase() + ".css\" rel=\"stylesheet\" type=\"text/css\" id=\"d3_style\">");
         }
         $('#d3_script').replaceWith("<script src=\"javascripts/visualizations/" + $scope.viewType.toLowerCase() + ".js\" type=\"text/javascript\" id=\"d3_script\"></script>");
+        cb();
       });
     }
   }

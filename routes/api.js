@@ -262,7 +262,7 @@ router.post("/get_file_details", function(req, res){
 
   async.each(tables, function(table, callback){
     var hashids = _.uniq(req.body.tables[table]);
-    console.log(table);
+    // console.log(table);
     c.mysql_db.query('SHOW COLUMNS FROM ??', [table], function(err, fields){
       for(var i=0; i < labelFields.length; i++){
         if(_.findIndex(fields, {'Field': labelFields[i]}) != -1){
@@ -400,7 +400,7 @@ router.post("/get_modules", function(req, res){
       });
     }, function(err){
       if(err) throw err; 
-console.log(mime_types);
+// console.log(mime_types);
       res.send(mime_types);
     });
         
