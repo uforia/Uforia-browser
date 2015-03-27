@@ -12,14 +12,28 @@
       div(ng-show="!showFile") Select a file from the list.
       div(ng-show="showFile")
         .panel.panel-default
-          .panel-heading(ng-bind="showFile.label")
+          .panel-heading {{showFile.label}}
+            span.pull-right
+              .btn-group
+                a.btn.btn-sm.btn-default(href="/api/file/{{showFile.hashid}}") Download
+                button.btn.btn-sm.btn-default(type="button", ng-click="copyLink(showFile)") Copy link
           .panel-body
-            .fullpath_header Original path of the evidence file
-            .fullpath_contents "{{showFile.fullpath}}"
-        .panel.panel-default
-          .panel-heading Hash verification of file
-          .panel-body
-            .verify_contents(ng-bind="showFile.verification ? 'File remains unchanged' : 'File was changed since indexing'")
+            .col-lg-7
+              h3.h5 File details
+              table.col-lg-12
+                tbody
+                  tr
+                    td Original path:
+                    td "{{showFile.fullpath}}"
+            .col-lg-5
+              h3.h5 Change verification
+              p.small Checks to validate if the file has changed since indexing.
+              table.col-lg-12
+                tbody
+                  tr(ng-repeat="(hash, validated) in showFile.verification")
+                    td(ng-bind="hash + ' validated:'")
+                    td
+                      i.glyphicon(ng-class="{'glyphicon-ok': validated, 'text-success': validated, 'glyphicon-remove': !validated, 'text-danger': !validated}", label="{{hash + ' ' + (validated ? 'validated' : ' not validated')}}")
         .panel.panel-default
           .panel-heading Contents
           .panel-body

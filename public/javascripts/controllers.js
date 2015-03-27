@@ -18,7 +18,7 @@ angular.module('uforia')
     if(newVal){
       removeSVG();
       changeScripts(function(){
-        if($scope.searchForm.$valid){
+        if($scope.searchForm.$valid && $scope.queryMatchesCount < 1500){
           $scope.search();
         }
       });
@@ -237,15 +237,24 @@ angular.module('uforia')
     if(value){
       $scope.showFile = typeof value == 'string' ? JSON.parse(value) : value;
       // console.log($scope.showFile);
-      $http.get('api/get_file_content/' + $scope.showFile.hashid)
+      $http.get('api/file/' + $scope.showFile.hashid)
       .success(function(data){
         $scope.showFile.content = data;
-        $scope.showFile.verification = data.validated;
+      });
+
+      $http.get('api/file/' + $scope.showFile.hashid + '/validate')
+      .success(function(data){
+        $scope.showFile.verification = data;
       });
     }
   });
 
   $scope.selectedFile = JSON.stringify(files[0]);
+
+  $scope.copyLink = function(file){
+    var link = window.location.origin + window.location.pathname + 'api/file/' + file.hashid;
+    prompt('Copy the link below:', link);
+  }
 })
 
 .controller('adminCtrl', function($rootScope, $scope, $http, $modal, types){

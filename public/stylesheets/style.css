@@ -209,6 +209,14 @@ div[size="xl"] .modal-dialog {
   width: 80%;
 }
 
+.pull-right {
+  float: right;
+}
+
 .margin-top {
   margin-top: 15px;
+}
+
+.panel-heading .btn-group {
+  margin-top: -6.5px;
 }

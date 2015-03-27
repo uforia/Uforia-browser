@@ -4,7 +4,9 @@ var express   = require('express'),
     fs        = require('fs'), 
     mime      = require('mime'),
     async     = require('async'),
-    _         = require('lodash');
+    _         = require('lodash'),
+    crypto    = require('crypto'),
+    md5       = require('MD5');
 
 var INDEX = c.config.elasticsearch.index;
 
@@ -323,24 +325,73 @@ router.post("/get_file_details", function(req, res){
 });
 
 /* Return the content from a evidence file
-* url: /api/get_file_content
+* url: /api/file/:hashid
 * takes params:
-* 
+* hashid: hashid of the file
 */
-router.get('/get_file_content/:hashid', function(req, res){
+router.get('/file/:hashid', function(req, res){
   c.mysql_db.query('SELECT fullpath FROM files WHERE hashid=?', [req.params.hashid], function(err, result){
     if(err) throw err;
 
-    var fullpath = result[0].fullpath;
+    var result = result[0];
+    var fullpath = result.fullpath;
 
     fs.readFile(fullpath, function (err, data) {
       if (err) 
         res.send('Content not available');
-      else
+      else{
         res.send(data);
+      }
     });
   });
 });
+
+/* Return the content from a evidence file
+* url: /api/get_file_content
+* takes params:
+* 
+*/
+router.get('/file/:hashid/validate', function(req, res){
+  c.mysql_db.query('SELECT fullpath, md5, sha1, sha256 FROM files WHERE hashid=?', [req.params.hashid], function(err, result){
+    if(err) throw err;
+
+    var result = result[0];
+    var fullpath = result.fullpath;
+
+    fs.readFile(fullpath, function (err, data) {
+      if (err) 
+        res.send({md5: false, sha1: false, sha256: false});
+      else{
+        validateHashes(data, {md5: result.md5, sha1: result.sha1, sha256: result.sha256}, function(validated){
+          res.send(validated);
+        });
+      }
+    });
+  });
+});
+
+function validateHashes(file, hashes, cb){
+  async.parallel([
+    function(callback){
+      callback(null, {md5: md5(file) == hashes.md5});
+    }, function(callback){
+      var sha1 = crypto.createHash('sha1');
+      sha1.update(file);
+      callback(null, {sha1: sha1.digest('hex') == hashes.sha1});
+    }, function(callback){
+      var sha256 = crypto.createHash('sha256');
+      sha256.update(file);
+      callback(null, {sha256: sha256.digest('hex') == hashes.sha256});
+    }
+  ], function(err, results){
+    var validated = {md5: false, sha1: false, sha256: false};
+    for(var key in results){
+      for(var hash in results[key])
+        validated[hash] = results[key][hash];
+    }
+    cb(validated);
+  });
+}
 
 /* Return the indexed mappings for a type
 * url: /api/get_modules
