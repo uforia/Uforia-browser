@@ -395,8 +395,8 @@ function validateHashes(file, hashes, cb){
 }
 
 router.get('/files', function(req, res){
-  console.log(req.query.hashids);
-  c.mysql_db.query('SELECT fullpath, name FROM files WHERE hashid IN (?)', [req.query.hashids], function(err, results){
+  var hashids = req.query.hashids.split(',');
+  c.mysql_db.query('SELECT fullpath, name FROM files WHERE hashid IN (?)', [hashids], function(err, results){
     if(err) throw err;
 
     var archive = archiver('zip');
