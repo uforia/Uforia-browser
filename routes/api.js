@@ -7,7 +7,8 @@ var express   = require('express'),
     _         = require('lodash'),
     crypto    = require('crypto'),
     md5       = require('MD5'),
-    archiver  = require('archiver');
+    archiver  = require('archiver'),
+    moment    = require('moment');
 
 var INDEX = c.config.elasticsearch.index;
 
@@ -412,7 +413,7 @@ router.get('/files', function(req, res){
     });
 
     //set the archive name
-    res.attachment('uforia.zip');
+    res.attachment(moment().format('YYYYMMDDHHmmss')+'.zip');
 
     //this is the streaming magic
     archive.pipe(res);
