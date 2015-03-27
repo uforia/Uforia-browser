@@ -336,11 +336,11 @@ router.get('/file/:hashid', function(req, res){
     var result = result[0];
     var fullpath = result.fullpath;
 
-    fs.readFile(fullpath, function (err, data) {
-      if (err) 
+    fs.exists(fullpath, function (exists) {
+      if (!exists) 
         res.send('Content not available');
       else{
-        res.download(data, result.filename);
+        res.download(fullpath, result.filename);
       }
     });
   });
