@@ -6,7 +6,8 @@ var express   = require('express'),
     async     = require('async'),
     _         = require('lodash'),
     crypto    = require('crypto'),
-    md5       = require('MD5');
+    md5       = require('MD5'),
+    archiver  = require('archiver');
 
 var INDEX = c.config.elasticsearch.index;
 
@@ -392,6 +393,45 @@ function validateHashes(file, hashes, cb){
     cb(validated);
   });
 }
+
+router.get('/files', function(req, res){
+  console.log(req.query.hashids);
+  c.mysql_db.query('SELECT fullpath, name FROM files WHERE hashid IN (?)', [req.query.hashids], function(err, results){
+    if(err) throw err;
+
+    var archive = archiver('zip');
+
+    archive.on('error', function(err) {
+      res.status(500).send({error: err.message});
+    });
+
+    //on stream closed we can end the request
+    res.on('close', function() {
+      console.log('Archive wrote %d bytes', archive.pointer());
+      return res.status(200).send('OK').end();
+    });
+
+    //set the archive name
+    res.attachment('uforia.zip');
+
+    //this is the streaming magic
+    archive.pipe(res);
+
+    async.each(results, function(file, cb){
+      fs.exists(file.fullpath, function(exists){
+        if(exists){
+          archive.append(fs.createReadStream(file.fullpath), { name: file.name });
+        } else {
+          archive.append('Content not available, missing from source directory.', {name: file.name});
+          // We could add an empty file to the archive saying 'No content available'??
+        }
+        cb();
+      });
+    }, function(err){
+      archive.finalize();
+    });
+  });
+});
 
 /* Return the indexed mappings for a type
 * url: /api/get_modules

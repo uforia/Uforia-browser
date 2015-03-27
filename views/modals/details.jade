@@ -5,6 +5,10 @@
 .modal-body
   .row
     .col-lg-3
+      .btn-group
+        a.btn.btn-default.btn-sm(href="{{filesLink}}") Download all
+        button.btn.btn-default.btn-sm(type="button", ng-click="copyFilesLink()") Copy link to files
+
       select.form-control(ng-size='{{files.length}}', ng-model="selectedFile", required)
         option(ng-hide="true", value="?")
         option(ng-repeat="item in files", value="{{item}}", ng-selected="showFile.hashid == item.hashid") {{item.label}}
