@@ -17,6 +17,10 @@
             .fullpath_header Original path of the evidence file
             .fullpath_contents "{{showFile.fullpath}}"
         .panel.panel-default
+          .panel-heading Hash verification of file
+          .panel-body
+            .verify_contents(ng-bind="showFile.verification ? 'File remains unchanged' : 'File was changed since indexing'")
+        .panel.panel-default
           .panel-heading Contents
           .panel-body
             .file_content(ng-bind="showFile.content")

@@ -240,6 +240,7 @@ angular.module('uforia')
       $http.get('api/get_file_content/' + $scope.showFile.hashid)
       .success(function(data){
         $scope.showFile.content = data;
+        $scope.showFile.verification = data.validated;
       });
     }
   });
