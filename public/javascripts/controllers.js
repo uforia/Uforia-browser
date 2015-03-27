@@ -264,7 +264,7 @@ angular.module('uforia')
   }
 
   $scope.copyFilesLink = function(){
-    prompt($scope.filesLink);
+    prompt('Copy the link below:', $scope.filesLink);
   }
 })
 
