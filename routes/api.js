@@ -330,7 +330,7 @@ router.post("/get_file_details", function(req, res){
 * hashid: hashid of the file
 */
 router.get('/file/:hashid', function(req, res){
-  c.mysql_db.query('SELECT fullpath FROM files WHERE hashid=?', [req.params.hashid], function(err, result){
+  c.mysql_db.query('SELECT fullpath, name FROM files WHERE hashid=?', [req.params.hashid], function(err, result){
     if(err) throw err;
 
     var result = result[0];
@@ -340,7 +340,7 @@ router.get('/file/:hashid', function(req, res){
       if (err) 
         res.send('Content not available');
       else{
-        res.send(data);
+        res.download(data, result.filename);
       }
     });
   });
