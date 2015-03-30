@@ -18,7 +18,7 @@ angular.module('uforia')
     if(newVal){
       removeSVG();
       changeScripts(function(){
-        if($scope.searchForm.$valid && $scope.queryMatchesCount < 1500){
+        if($scope.searchForm.$valid && $scope.queryMatchesCount < 4000){
           $scope.search();
         }
       });

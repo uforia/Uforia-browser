@@ -51,13 +51,13 @@
         .col-lg-10.control-text.text-center
           p -- 
             span(ng-if="!errorMessage")
-              span(ng-class="{'text-danger': queryMatchesCount > 1500}", ng-bind="queryMatchesCount") 
+              span(ng-class="{'text-danger': queryMatchesCount > 4000}", ng-bind="queryMatchesCount") 
               |  evidence items match
             span(ng-if="errorMessage", ng-bind="errorMessage").text-danger
             |  --
         .col-lg-2
-          button.btn.btn-sm.btn-primary(ng-disabled="searchForm.$invalid || queryMatchesCount > 1500", type="button", ng-click="search()", ng-class="{'btn-danger': queryMatchesCount > 1500}") Visualize
-      .row.col-lg-12(ng-if="queryMatchesCount > 1500")
+          button.btn.btn-sm.btn-primary(ng-disabled="searchForm.$invalid || queryMatchesCount > 4000", type="button", ng-click="search()", ng-class="{'btn-danger': queryMatchesCount > 4000}") Visualize
+      .row.col-lg-12(ng-if="queryMatchesCount > 4000")
 
 .row
   .col-lg-12#d3_visualization
