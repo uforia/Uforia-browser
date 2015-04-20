@@ -8,6 +8,7 @@ angular.module('uforia')
 
 .controller('searchCtrl', function($rootScope, $scope, $http, $modal, $timeout, types) {
   $scope.queryMatchesCount = 0;
+  $scope.maxResultCount = 0;
 
   $scope.searchTypes = types;
   $scope.searchType = $scope.searchTypes[0];
@@ -18,7 +19,7 @@ angular.module('uforia')
     if(newVal){
       removeSVG();
       changeScripts(function(){
-        if($scope.searchForm.$valid && $scope.queryMatchesCount < 4000){
+        if($scope.searchForm.$valid && $scope.queryMatchesCount < $scope.maxResultCount){
           $scope.search();
         }
       });
@@ -67,22 +68,31 @@ angular.module('uforia')
     $scope.parameters[0].andOr = 'AND';
   }
 
+  $scope.selectType = function(){
+    $scope.maxResultCount = $scope.viewTypes[$scope.viewIndex].maxresults;
+    $scope.viewType = $scope.viewTypes[$scope.viewIndex].type;
+  }
+
   //Load the right css for the right D3 visualization
   function changeType(type){
 
     $http
       .post("api/mapping_info", {type: type})
       .success(function(data){
-        // console.log(data);
         $scope.memeTypes = data;
       });
 
     $http
       .post("api/view_info?type=" + type, '')
       .success(function(data){
-        // console.log(data);
-        $scope.viewTypes = data;
+        console.log(data);
+        $scope.viewTypes = [];
+        angular.forEach(data, function(data2){
+            $scope.viewTypes.push(data2);
+        });
+
         $scope.viewType = Object.keys(data)[0];
+        $scope.maxResultCount = (data[Object.keys(data)[0]].maxresults);
       });
 
     //Clear the visualization and search parameters

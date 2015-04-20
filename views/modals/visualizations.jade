@@ -10,6 +10,7 @@
         th Name
         th Field1
         th Field2
+        th Max results
         th Options
     tbody
       tr(ng-repeat="item in visualizations")
@@ -33,6 +34,8 @@
             ui-select-match(placeholder="{{types[item.type].field2}}") {{$item}}
             ui-select-choices(repeat="field in fields | filter: $select.search", group-by="groupFind")
               div(ng-bind-html="field | highlight: $select.search")
+        td.col-lg-2
+          input.form-control(ng-model="item.maxresults")
         td.col-lg-2
           button.btn.btn-sm.btn-primary(type="button", ng-click="visualizations.splice($index+1, 0, {})") +
           button.btn.btn-sm.btn-danger(type="button", ng-click="visualizations.splice($index, 1)", ng-if="visualizations.length > 1") x
