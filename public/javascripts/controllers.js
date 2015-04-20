@@ -648,7 +648,18 @@ angular.module('uforia')
     }
   };
 
+  function setDefaults(){
+    $scope.visualizations.forEach(function(item){
+      if(item.maxresults == undefined || item.maxresults == null || item.maxresults == ""){
+        item.maxresults = "250";
+      }
+    });
+  };
+
+
   $scope.save = function(){
+    setDefaults();
+
     $http.post('/api/visualizations/save', {type: type, visualizations: $scope.visualizations})
     .success(function(data){
       if(!data.error){
