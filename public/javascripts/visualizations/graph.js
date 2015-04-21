@@ -10,15 +10,9 @@ function render(data, options, openDetails, cb){
   var color = d3.scale.category20();
 
   force = d3.layout.force()
-      .linkDistance(100)
+      .linkDistance(50)
       .charge(-400)
       .size([width, height]);
-
-  // var drag = force.drag().on("dragstart", function(d) {d3.select(this).classed("fixed", d.fixed = true)});
-    var drag = force.drag()
-      .on("dragstart", dragstart)
-      // .on("drag", dragmove)
-      .on("dragend", dragend);
 
   //Add button to the layout
   var div = d3.select("#d3_visualization").append("div").attr("id", "d3_button_bar");
@@ -40,10 +34,9 @@ function render(data, options, openDetails, cb){
   }
 
   var total = data.total;
-    data.nodes.forEach(function(d, i) { d.x = d.y = width / total * i; });
 
   var tablesByIndex = d3.map();
-  var gravity = Math.sqrt(total) / 20 < 0.1 ? 0.1 : Math.sqrt(total) / 20;
+  var gravity = Math.sqrt(total) / 30 < 0.1 ? 0.1 : Math.sqrt(total) / 30;
 
   force
     .gravity(gravity)
@@ -85,7 +78,7 @@ function render(data, options, openDetails, cb){
       .on("mouseover", mouseover)
       .on("mouseout", mouseout)
       .on("click", mouseclick)
-      .call(drag);
+      .call(force.drag());
 
   //Give each node a circle
   circle = node.append("circle")
@@ -133,24 +126,6 @@ function render(data, options, openDetails, cb){
   force.on("end", function(d){
     data.nodes.forEach(function(d) { d.fixed = true; });
   });
-
-  function dragstart(d, i) {
-    force.stop() // stops the force auto positioning before you start dragging
-  }
-
-  function dragmove(d, i) {
-      d.px += d3.event.dx;
-      d.py += d3.event.dy;
-      d.x += d3.event.dx;
-      d.y += d3.event.dy; 
-      force.tick(); // this is the key to make it work together with updating both px,py,x,y on d !
-  }
-
-  function dragend(d, i) {
-      d.fixed = true; // of course set the node to fixed so the force doesn't include the node in its auto positioning stuff
-      force.tick();
-      force.stop();
-  }
 
   setInitialPositions();
 
@@ -201,7 +176,6 @@ function render(data, options, openDetails, cb){
 
     // Run the layout a fixed number of times.
     // The ideal number of times scales with graph complexity.
-    // Of course, don't run too long—you'll hang the page!
     force.start();
     for (var i = n; i > 0; --i) force.tick();
     force.stop();
@@ -212,7 +186,7 @@ function render(data, options, openDetails, cb){
     ox = ox / n - width / 2, oy = oy / n - height / 2;
     data.nodes.forEach(function(d) { d.x -= ox, d.y -= oy; });
 
-    force.alpha(-1)
+    force.resume();
   }
 
   cb(); // send callback, no errors
