@@ -10,11 +10,15 @@ function render(data, options, openDetails, cb){
   var color = d3.scale.category20();
 
   force = d3.layout.force()
-      .charge(-400)
       .linkDistance(100)
+      .charge(-400)
       .size([width, height]);
 
-  var drag = force.drag().on("dragstart", function(d){ d3.select(this).classed("fixed", d.fixed = true)});
+  // var drag = force.drag().on("dragstart", function(d) {d3.select(this).classed("fixed", d.fixed = true)});
+    var drag = force.drag()
+      .on("dragstart", dragstart)
+      // .on("drag", dragmove)
+      .on("dragend", dragend);
 
   //Add button to the layout
   var div = d3.select("#d3_visualization").append("div").attr("id", "d3_button_bar");
@@ -36,13 +40,15 @@ function render(data, options, openDetails, cb){
   }
 
   var total = data.total;
+    data.nodes.forEach(function(d, i) { d.x = d.y = width / total * i; });
 
   var tablesByIndex = d3.map();
+  var gravity = Math.sqrt(total) / 20 < 0.1 ? 0.1 : Math.sqrt(total) / 20;
 
-    force
-      .nodes(data.nodes)
-      .links(data.links)
-      .start();
+  force
+    .gravity(gravity)
+    .nodes(data.nodes)
+    .links(data.links);
 
   // Create the links between nodes
   link = svg.append("defs").selectAll("marker")
@@ -67,6 +73,7 @@ function render(data, options, openDetails, cb){
     .enter().append("path")
       .attr("class", "link")
       .attr("marker-end", "url(#marker)")
+      .attr("marker-start", "url(#marker)")
       .on("click", mouseclickLink);
 
   //Add the nodes
@@ -103,7 +110,6 @@ function render(data, options, openDetails, cb){
           dr = Math.sqrt(dx * dx + dy * dy);
       return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
     });
-
     //http://stackoverflow.com/a/15753121/1150302
     markerPath.attr("d", function(d) {
       var dx = d.target.x - d.source.x,
@@ -123,6 +129,30 @@ function render(data, options, openDetails, cb){
 
     node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
   });
+
+  force.on("end", function(d){
+    data.nodes.forEach(function(d) { d.fixed = true; });
+  });
+
+  function dragstart(d, i) {
+    force.stop() // stops the force auto positioning before you start dragging
+  }
+
+  function dragmove(d, i) {
+      d.px += d3.event.dx;
+      d.py += d3.event.dy;
+      d.x += d3.event.dx;
+      d.y += d3.event.dy; 
+      force.tick(); // this is the key to make it work together with updating both px,py,x,y on d !
+  }
+
+  function dragend(d, i) {
+      d.fixed = true; // of course set the node to fixed so the force doesn't include the node in its auto positioning stuff
+      force.tick();
+      force.stop();
+  }
+
+  setInitialPositions();
 
 //Show the tooltip on a node mouseover
   function mouseover(d, i) {
@@ -163,14 +193,33 @@ function render(data, options, openDetails, cb){
   function mouseclickLink(d){
     openDetails({hashids: d.hashids, adressses:[d.name], tables: d.tables});
   }
+
+  function setInitialPositions(){
+    var n = data.nodes.length
+    // Initialize the positions deterministically, for better results.
+    data.nodes.forEach(function(d, i) { d.x = d.y = width / n * i; });
+
+    // Run the layout a fixed number of times.
+    // The ideal number of times scales with graph complexity.
+    // Of course, don't run too long—you'll hang the page!
+    force.start();
+    for (var i = n; i > 0; --i) force.tick();
+    force.stop();
+
+    // Center the nodes in the middle.
+    var ox = 0, oy = 0;
+    data.nodes.forEach(function(d) { ox += d.x, oy += d.y; });
+    ox = ox / n - width / 2, oy = oy / n - height / 2;
+    data.nodes.forEach(function(d) { d.x -= ox, d.y -= oy; });
+
+    force.alpha(-1)
+  }
+
   cb(); // send callback, no errors
 }
 
 //Transition to the normal node size
 function normalRadius(){
-  force.linkDistance(100)
-    .start();
-
   circle.transition()
     .duration(750)
     .attr("r", 8);
@@ -185,9 +234,6 @@ function normalRadius(){
 
 //Transition the node radius to display the largest receivers
 function receivedRadius(){
-  force.linkDistance(200)
-    .start();
-
   circle.transition()
     .duration(750)
     .attr("r", function(d){
@@ -220,9 +266,6 @@ function receivedRadius(){
 
 //Transition the node radius to display the largest senders
 function sentRadius(){
-  force.linkDistance(200)
-    .start();
-
   circle.transition()
     .duration(750)
     .attr("r", function(d){
