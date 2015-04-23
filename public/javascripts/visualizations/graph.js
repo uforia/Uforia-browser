@@ -1,7 +1,6 @@
 var circle;
 var state = 0; // 0 is normal, 1 is radius size sent, 2 is radius size received;
 var force;
-var link;
 
 function render(data, options, openDetails, cb){
   var width = $('#d3_visualization').width(),
@@ -36,6 +35,8 @@ function render(data, options, openDetails, cb){
   var total = data.total;
 
   var tablesByIndex = d3.map();
+  //Calculate the gravity based on the number of results, more results should give a higher gravity 
+  //This is to ensure that all the nodes will remain within the view bounds
   var gravity = Math.sqrt(total) / 30 < 0.1 ? 0.1 : Math.sqrt(total) / 30;
 
   force
@@ -43,38 +44,35 @@ function render(data, options, openDetails, cb){
     .nodes(data.nodes)
     .links(data.links);
 
-  // Create the links between nodes
-  link = svg.append("defs").selectAll("marker")
-      .data(force.links())
-      .enter().append("marker")
-      .attr("id", "marker")
-      .attr("viewBox", "0 -5 10 10")
-      .attr("refX", 3)
-      .attr("markerWidth", 6)
-      .attr("markerHeight", 6)
-      .attr("orient", "auto")
-      .append("path")
-      .attr("d", "M0,-5L10,0L0,5");
-
-  var path = svg.append("g").selectAll("path")
+// build the arrow.
+svg.append("svg:defs").selectAll("marker")
     .data(force.links())
-  .enter().append("path")
-    .attr("class", "link");
+  .enter().append("svg:marker") // This section adds in the arrows
+    .attr("id", function(d){return "marker_" + d.source + "_" + d.target; })
+    .attr("viewBox", "0 -5 10 10")
+    .attr("refX", 10) //10 for marker size + 8 for initial circle radius
+    .attr("refY", 0)
+    .attr("markerWidth", 6)
+    .attr("markerHeight", 6)
+    .attr("orient", "auto")
+    .attr("class", "marker")
+  .append("svg:path")
+    .attr("d", "M0,-5L10,0L0,5");
 
-  var markerPath = svg.append("g").selectAll("path")
-      .data(force.links())
-    .enter().append("path")
-      .attr("class", "link")
-      .attr("marker-end", "url(#marker)")
-      .attr("marker-start", "url(#marker)")
-      .on("click", mouseclickLink);
+// add the links and the arrows
+var path = svg.append("svg:g").selectAll("path")
+    .data(force.links())
+  .enter().append("svg:path")
+    .attr("class", "link")
+    .attr("marker-end", function(d){return "url(#marker_" + d.source + "_" + d.target + ")"; })
+    .on("click", mouseclickLink);
 
   //Add the nodes
   var node = svg.selectAll(".node")
       .data(data.nodes)
     .enter().append("g")
       .attr("class", "node")
-      .attr("r", "15")
+      .attr("r", function(d){ return d.radius = 8;})
       .on("mouseover", mouseover)
       .on("mouseout", mouseout)
       .on("click", mouseclick)
@@ -92,33 +90,19 @@ function render(data, options, openDetails, cb){
       .text(function(d) { return d.name; });
 
   force.on("tick", function() {
-    link.attr("x1", function(d) { return d.source.x; })
-        .attr("y1", function(d) { return d.source.y; })
-        .attr("x2", function(d) { return d.target.x; })
-        .attr("y2", function(d) { return d.target.y; });
+       path.attr("d", function(d) {
+            // Total difference in x and y from source to target
+            diffX = d.target.x - d.source.x;
+            diffY = d.target.y - d.source.y;
 
-    path.attr("d", function(d) {
-      var dx = d.target.x - d.source.x,
-          dy = d.target.y - d.source.y,
-          dr = Math.sqrt(dx * dx + dy * dy);
-      return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
-    });
-    //http://stackoverflow.com/a/15753121/1150302
-    markerPath.attr("d", function(d) {
-      var dx = d.target.x - d.source.x,
-          dy = d.target.y - d.source.y,
-          dr = Math.sqrt(dx * dx + dy * dy);
+            // Length of path from center of source node to center of target node
+            pathLength = Math.sqrt((diffX * diffX) + (diffY * diffY));
 
-    // used to say '/2' at the end
-      var endX = (d.target.x + d.source.x) / 2;
-      var endY = (d.target.y + d.source.y) / 2;
-      var len = dr - ((dr/2) * Math.sqrt(3));
-
-      endX = endX + (dy * len/dr);
-      endY = endY + (-dx * len/dr);
-
-      return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + endX + "," + endY;
-    });
+            // x and y distances from center to outside edge of target node
+            offsetX = (diffX * d.target.radius) / pathLength;
+            offsetY = (diffY * d.target.radius) / pathLength;
+            return "M" + d.source.x + "," + d.source.y + "L" + (d.target.x - offsetX) + "," + (d.target.y - offsetY)
+        });
 
     node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
   });
@@ -129,32 +113,19 @@ function render(data, options, openDetails, cb){
 
   setInitialPositions();
 
-//Show the tooltip on a node mouseover
   function mouseover(d, i) {
     if(state == 0){
       d3.select(this).select("circle").transition()
           .duration(750)
-          .attr("r", 16);
+          .attr("r", function(d){return d.radius = 16;});
     }
-
-    d3.select("#tooltip")
-      .style("visibility", "visible")
-      .html(d.name + "<br/>"
-             + "Sent " + d.sent + " out of " + total + " emails <br />"
-             + "Received " + d.received + " emails")
-      .style("top", function () { return (d3.event.pageY - 75)+"px"})
-      .style("left", function () { return (d3.event.pageX - 60)+"px";});
-
   }
 
-  //Hide the tooltip and make the node smaller again
   function mouseout(d, i) {
-    d3.select("#tooltip").style("visibility", "hidden");
-
     if(state == 0){
       d3.select(this).select("circle").transition()
           .duration(750)
-          .attr("r", 8);
+          .attr("r", function(d){return d.radius = 8;});
     }
   }
 
@@ -194,77 +165,45 @@ function render(data, options, openDetails, cb){
 
 //Transition to the normal node size
 function normalRadius(){
-  circle.transition()
-    .duration(750)
-    .attr("r", 8);
-
-  link.transition()
-    .duration(750)
-    .attr("markerWidth", "8")
-    .attr("markerHeight", "8");
-
-  state = 0;
+  if(state != 0){
+    circle.transition()
+      .duration(750)
+      .attr("r", function(d){return d.radius = 8;});
+    state = 0;
+    force.resume();
+  } 
 }
 
 //Transition the node radius to display the largest receivers
 function receivedRadius(){
-  circle.transition()
-    .duration(750)
-    .attr("r", function(d){
-      if(d.received > 0) {
-        return Math.sqrt(d.received * 100);
-      } else {
-        return Math.sqrt(1 * 100);
-      }
-    });
-
-  link.transition()
-    .duration(750)
-    .attr("markerWidth", function(d){
-      if(d.sent > 0) {
-        return Math.sqrt(d.received * 100);
-      } else {
-        return Math.sqrt(1 * 100);
-      }
-    })
-    .attr("markerHeight", function(d){
-      if(d.sent > 0) {
-        return Math.sqrt(d.received * 100);
-      } else {
-        return Math.sqrt(1 * 100);
-      }
-    });
-
-  state = 2;
+  if(state != 2){
+    circle.transition()
+      .duration(750)
+      .attr("r", function(d){
+        if(d.received > 0) {
+          return d.radius = Math.sqrt(d.received * 100);
+        } else {
+          return d.radius = Math.sqrt(1 * 100);
+        }
+      });
+    state = 2;
+    force.resume();
+  }
 }
 
 //Transition the node radius to display the largest senders
 function sentRadius(){
-  circle.transition()
-    .duration(750)
-    .attr("r", function(d){
-      if(d.sent > 0) {
-        return Math.sqrt(d.sent * 100);
-      } else {
-        return Math.sqrt(1 * 100);
-      }
-    });
-
-  link.transition()
-    .duration(750)
-    .attr("markerWidth", function(d){
-      if(d.sent > 0) {
-        return Math.sqrt(d.sent * 100);
-      } else {
-        return Math.sqrt(1 * 100);
-      }
-    })
-    .attr("markerHeight", function(d){
-      if(d.sent > 0) {
-        return Math.sqrt(d.sent * 100);
-      } else {
-        return Math.sqrt(1 * 100);
-      }
-    });
-  state = 1;
+  if(state != 1){
+    circle.transition()
+      .duration(750)
+      .attr("r", function(d){
+        if(d.sent > 0) {
+          return d.radius = Math.sqrt(d.sent * 100);
+        } else {
+          return d.radius= Math.sqrt(1 * 100);
+        }
+      });
+    state = 1;
+    force.resume();
+  }
 }
