@@ -13,6 +13,8 @@
 }
 
 #d3_visualization .node circle{
+  stroke: #fff;
+  stroke-width: 1.5px;
 }
 
 #d3_visualization text {

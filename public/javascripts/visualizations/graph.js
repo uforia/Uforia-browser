@@ -12,6 +12,15 @@ function render(data, options, openDetails, cb){
       .linkDistance(50)
       .charge(-400)
       .size([width, height]);
+  
+  var zoom = d3.behavior.zoom()
+            .scaleExtent([1, 15])
+            .on("zoom", zoomed);
+
+  var drag = force.drag()
+        .origin(function(d) { return d; })
+        .on("dragstart", dragstarted)
+        .on("drag", dragged)
 
   //Add button to the layout
   var div = d3.select("#d3_visualization").append("div").attr("id", "d3_button_bar");
@@ -23,7 +32,16 @@ function render(data, options, openDetails, cb){
   var svg = d3.select("#d3_visualization").append("svg")
       .attr("id", "d3_svg")
       .attr("width", width)
-      .attr("height", height);
+      .attr("height", height)
+      .attr("pointer-event", "all")
+      .append("svg:g")
+        .call(zoom)
+      .append("svg:g");
+
+  svg.append("svg:rect")
+      .attr("width", width)
+      .attr("height", height)
+      .attr('fill', 'white');
 
   // console.log(JSON.stringify(data));
 
@@ -76,7 +94,7 @@ var path = svg.append("svg:g").selectAll("path")
       .on("mouseover", mouseover)
       .on("mouseout", mouseout)
       .on("click", mouseclick)
-      .call(force.drag());
+      .call(drag);
 
   //Give each node a circle
   circle = node.append("circle")
@@ -114,6 +132,7 @@ var path = svg.append("svg:g").selectAll("path")
   setInitialPositions();
 
   function mouseover(d, i) {
+    force.resume();
     if(state == 0){
       d3.select(this).select("circle").transition()
           .duration(750)
@@ -122,6 +141,7 @@ var path = svg.append("svg:g").selectAll("path")
   }
 
   function mouseout(d, i) {
+    force.resume();
     if(state == 0){
       d3.select(this).select("circle").transition()
           .duration(750)
@@ -158,6 +178,18 @@ var path = svg.append("svg:g").selectAll("path")
     data.nodes.forEach(function(d) { d.x -= ox, d.y -= oy; });
 
     force.resume();
+  }
+
+  function zoomed() {
+    svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+  }
+
+  function dragstarted(d) {
+      d3.event.sourceEvent.stopPropagation();
+  }
+
+  function dragged(d) {
+      d3.select(this).attr("x", d.x = d3.event.x).attr("y", d.y = d3.event.y);
   }
 
   cb(); // send callback, no errors

@@ -1,5 +1,6 @@
 function render(data, options, openDetails, cb){
-console.log(data);  var width = $('#d3_visualization').width(),
+	console.log(data);  
+	var width = $('#d3_visualization').width(),
     height = options.height || window.innerHeight;
 
     var margin = {top: 20, right: 150, bottom: 200, left: 100};
