@@ -22,6 +22,11 @@
   font: 10px sans-serif;
 }
 
+#d3_visualization .zoom {
+  pointer-events: none;
+  font: 20px sans-serif;
+}
+
 #d3_visualization .link {
   stroke: #999;
   stroke-opacity: .6;

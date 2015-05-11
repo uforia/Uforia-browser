@@ -13,9 +13,11 @@ function render(data, options, openDetails, cb){
       .charge(-400)
       .size([width, height]);
   
+  var minZoom = 1, maxZoom = 3, zoomLevel;
   var zoom = d3.behavior.zoom()
-            .scaleExtent([1, 15])
-            .on("zoom", zoomed);
+            .scaleExtent([minZoom, maxZoom])
+            .on("zoom", onZoom);
+
 
   var drag = force.drag()
         .origin(function(d) { return d; })
@@ -29,19 +31,21 @@ function render(data, options, openDetails, cb){
   $("#d3_button_bar").append("<input type='button' value='Radius by Sent' onclick='sentRadius();' />");
   $("#d3_button_bar").append("<input type='button' value='Radius by Received' onclick='receivedRadius();' />");
 
-  var svg = d3.select("#d3_visualization").append("svg")
+  var baseSvg = d3.select("#d3_visualization").append("svg")
       .attr("id", "d3_svg")
       .attr("width", width)
       .attr("height", height)
-      .attr("pointer-event", "all")
-      .append("svg:g")
+      .attr("pointer-event", "all");
+
+  svg = baseSvg.append("svg:g")
         .call(zoom)
-      .append("svg:g");
+      .append("svg:g");   
 
   svg.append("svg:rect")
       .attr("width", width)
       .attr("height", height)
-      .attr('fill', 'white');
+      .attr('fill-opacity', '0.0');
+
 
   // console.log(JSON.stringify(data));
 
@@ -130,6 +134,7 @@ var path = svg.append("svg:g").selectAll("path")
   });
 
   setInitialPositions();
+  initZoomText();
 
   function mouseover(d, i) {
     force.resume();
@@ -180,8 +185,27 @@ var path = svg.append("svg:g").selectAll("path")
     force.resume();
   }
 
-  function zoomed() {
+  function onZoom() {
     svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+    zoomLevel.text("Zoomed " + Math.floor(((d3.event.scale - minZoom) / (maxZoom - minZoom)) * 100) + "%");
+  }
+
+  function initZoomText(){
+    baseSvg.append("rect")
+          .attr("x", 2)
+          .attr("y", 8)
+          .attr("width", 135)
+          .attr("height", 30)
+          .attr("fill", "white")
+          .attr("fill-opacity", 1)
+          .attr("style", "outline: 2px solid grey; z-index: 100;");
+
+    zoomLevel = baseSvg.append("text")
+        .attr("x", 70)
+        .attr("y", 30)
+        .attr("class", "zoom")
+        .style("text-anchor", "middle")
+        .text("Zoomed 0%");
   }
 
   function dragstarted(d) {
