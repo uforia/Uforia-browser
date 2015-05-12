@@ -339,9 +339,24 @@ router.get('/file/:hashid', function(req, res){
     var fullpath = result.fullpath;
 
     fs.exists(fullpath, function (exists) {
-      if (!exists) 
-        res.send('Content not available');
-      else{
+      if (!exists) {
+        var totalContent = "";
+        c.mysql_db.query('SELECT supported_mimetypes.modules FROM supported_mimetypes INNER JOIN files ON supported_mimetypes.mime_type = files.mtype WHERE files.hashid=?', [req.params.hashid], function(err, result) {
+            if (err) throw err;
+            var hashednames = JSON.parse(result[0].modules);
+            var tables = Object.keys(hashednames);
+            async.each(tables, function(table, callback) {
+                c.mysql_db.query('SELECT Content FROM ?? WHERE hashid=?', [hashednames[table],req.params.hashid], function(err, result) {
+                    if (err) throw err;
+                    totalContent += result[0].Content;
+                    callback();
+                });
+            }, function(err) {
+                if (totalContent) res.send(totalContent)
+                else res.send('No content available, because no module has processed or stored it, and the file is not or no longer available on the filesystem.');
+            });
+        });
+      } else {
         res.download(fullpath, result.filename);
       }
     });
@@ -363,7 +378,7 @@ router.get('/file/:hashid/validate', function(req, res){
     fs.readFile(fullpath, function (err, data) {
       if (err) 
         res.send({md5: false, sha1: false, sha256: false});
-      else{
+      else {
         validateHashes(data, {md5: result.md5, sha1: result.sha1, sha256: result.sha256}, function(validated){
           res.send(validated);
         });
