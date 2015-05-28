@@ -1,0 +1,21 @@
+#d3_visualization svg {
+  font: 10px sans-serif;
+}
+
+#d3_visualization .area {
+  fill: steelblue;
+  clip-path: url(#clip);
+}
+
+#d3_visualization .axis path,
+#d3_visualization .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+#d3_visualization .brush .extent {
+  stroke: #fff;
+  fill-opacity: .125;
+  shape-rendering: crispEdges;
+}

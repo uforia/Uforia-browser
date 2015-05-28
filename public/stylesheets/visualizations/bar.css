@@ -2,6 +2,11 @@
   fill: steelblue;
 }
 
+#d3_visualization .contextBar {
+  fill: steelblue;
+}
+
+
 #d3_visualization .bar:hover {
   fill: skyblue;
 }
@@ -17,7 +22,13 @@
 }
 
 #d3_visualization .x.axis path {
-  display: none;
+  /*display: none;*/
+}
+
+#d3_visualization .brush .extent {
+  stroke: #fff;
+  fill-opacity: .125;
+  shape-rendering: crispEdges;
 }
 
 .d3-tip {

@@ -634,6 +634,12 @@ angular.module('uforia')
       field2: 'Y-Axis',
       extra_fields: {'SUM': 'Count'}
     },
+    'area': {
+      type: 'area',
+      field1: 'X-Axis',
+      field2: 'Y-Axis',
+      extra_fields: {'SUM': 'Count'}
+    },
     'graph': {
       type: 'graph',
       field1: 'From',
