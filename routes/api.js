@@ -8,7 +8,9 @@ var express   = require('express'),
     crypto    = require('crypto'),
     md5       = require('MD5'),
     archiver  = require('archiver'),
-    moment    = require('moment');
+    moment    = require('moment'),
+    workerFarm = require('worker-farm'),
+    config     = require('../config');
 
 var INDEX = c.config.elasticsearch.index;
 
@@ -80,8 +82,9 @@ var search = function(search_request, res, type, view, parameters){
         parameters.field1 = vismapping.field1;
         parameters.field2 = vismapping.field2;
         
+        worker = workerFarm(config.workers, require.resolve('../lib/visualizations/' + view.toLowerCase()), ['generateJSON']);
 
-        vis.generateJSON(resp.hits.hits, parameters, function(data){
+        worker.generateJSON(resp.hits.hits, parameters, function(data){
           res.send(data);
         });
       });
