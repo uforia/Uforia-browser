@@ -113,25 +113,64 @@ function render(data, options, openDetails, cb){
   var brush = d3.svg.brush()
           .x(xScaleBrush)
           // .extent([0, width]) //brush will be fully extended initially when uncommented
-          .on("brush", display);
+          .on("brush", display)
+          .on("brushend", brushend);
 
   brushGroup.append("g")
     .attr("class", "brush")
     .call(brush)
+    .call(brush.event)
     .selectAll("rect")
     .attr("opacity", 0.5)
     .attr("height", miniHeight);
 
-  function display () {
-    selected = xScaleBrush.domain().filter(function(d){
-                  return (brush.extent()[0] <= xScaleBrush(d)) && (xScaleBrush(d) <= brush.extent()[1]);
-                });
+  function brushend() {
+    if (!d3.event.sourceEvent) return; // only transition after input
+    selected = getSelected();
+
+    var start;
+    var end;
+
+    if (selected.length > 1) {
+      start = selected[0];
+      end = selected[selected.length - 1];
+    } else {
+      start = 0;
+      end = data.values.length -1;
+    }
+
+    // var extent0 = brush.extent(),
+    //     extent1 = extent0.map(d3.time.day.round);
+
+    // // if empty when rounded, use floor & ceil instead
+    // if (extent1[0] >= extent1[1]) {
+    //   extent1[0] = d3.time.day.floor(extent0[0]);
+    //   extent1[1] = d3.time.day.ceil(extent0[1]);
+    // }
+
+    // d3.select(this).transition()
+    //     .call(brush.extent(extent1))
+    //     .call(brush.event);
+
+    startExtent = xScaleBrush.range()[start];
+    endExtent = xScaleBrush.range()[end] + xScaleBrush.rangeBand(); // +.rangeband is done to make sure it extends to the last part of the item
+
+    d3.select(this).transition()
+        .call(brush.extent([startExtent, endExtent]))
+        .call(brush.event);
+
+    display();
+  }
+
+  function display () {   
+
+    selected = getSelected();
 
     var start;
     var end;
 
     /* Keep a minimum amount of bars on there to avoid any jank */
-    if (selected.length > 1 ) {
+    if (selected.length > 1) {
       start = selected[0];
       end = selected[selected.length - 1] + 1;
     } else {
@@ -142,6 +181,16 @@ function render(data, options, openDetails, cb){
     var updatedData = data.values.slice(start, end);
 
     updateBars(updatedData);
+  }
+
+  //Returns the brush' selected items
+  function getSelected(){
+    var halfWidth = xScaleBrush.rangeBand() / 2; //Half the width of a bar in the brush group 
+
+    return xScaleBrush.domain().filter(function(d){
+                  
+                  return (brush.extent()[0] <= (xScaleBrush(d) + halfWidth)) && (xScaleBrush(d) <= (brush.extent()[1] - halfWidth));
+                });
   }
 
   function update (grp, data, main) {
