@@ -192,6 +192,11 @@ function render(data, options, openDetails, cb){
       .call(yAxis);
   }
 
+  function isDate(val) {
+    var d = new Date(val);
+    return !isNaN(d.valueOf());
+  }
+
   function mouseclick(d){
     openDetails({hashids: d.hashids, adressses:[d.x], tables: d.tables});
   }
