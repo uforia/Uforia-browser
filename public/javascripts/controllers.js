@@ -91,8 +91,8 @@ angular.module('uforia')
             $scope.viewTypes.push(data2);
         });
 
-        $scope.viewType = Object.keys(data)[0];
-        $scope.maxResultCount = (data[Object.keys(data)[0]].maxresults);
+        $scope.viewType = data[0].viewType;
+        $scope.maxResultCount = data[0].maxresults;
       });
 
     //Clear the visualization and search parameters

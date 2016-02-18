@@ -239,13 +239,13 @@ router.post("/view_info", function(req, res){
   }).then(function(resp){
     // console.log(resp.hits.hits);
 
-    var types = {};
+    var visualizations = [];
 
     resp.hits.hits.forEach(function(type){
-      types[type._source.type] = type._source;
+      visualizations.push(type._source);
     });
 
-    res.send(types);
+    res.send(visualizations);
   });
 });
 
