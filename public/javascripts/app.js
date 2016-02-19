@@ -1,7 +1,7 @@
 
 angular.module('uforia',
-    ['ui.router', 'ui.bootstrap.modal', 'ui.bootstrap.datepicker', 'dndLists', 'ui', 'ui.select'])
-  
+    ['ui.router', 'ui.bootstrap.modal', 'ui.bootstrap.datepicker', 'dndLists', 'ui', 'ui.select', 'satellizer'])
+
   .run(function($rootScope) {
     $rootScope.mappings = {};
     socket = io.connect();
@@ -13,14 +13,14 @@ angular.module('uforia',
       $rootScope.$apply();
     });
 
-    $rootScope.$on('$stateChangeStart', function(event, toState){ 
+    $rootScope.$on('$stateChangeStart', function(event, toState){
         // Would print "Hello World!" when 'parent' is activated
         // Would print "Hello UI-Router!" when 'parent.child' is activated
     })
   })
 
   .config(function($stateProvider, $urlRouterProvider, $sceProvider){
-    // Disable Sce 
+    // Disable Sce
     $sceProvider.enabled(false);
     //
     // For any unmatched url, redirect to /state1
@@ -60,5 +60,10 @@ angular.module('uforia',
           types: model.getTypes,
           mapping: model.getMapping
         }
+      })
+      .state('login', {
+        url: "/login",
+        templateUrl: "views/authentication/login",
+        controller: 'loginCtrl'
       });
   });
