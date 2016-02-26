@@ -1,0 +1,8 @@
+{
+  "name": "Sidemenu",
+  "private": "true",
+  "devDependencies": {
+    "ionic": "1.0.0",
+    "satellizer": "^0.11.0"
+  }
+}
