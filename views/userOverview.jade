@@ -1,0 +1,34 @@
+.row
+    .col-lg-12
+        h1 User overview
+
+    .col-lg-12
+        table(st-table="rowCollection" class="table table-striped")
+            thead
+                tr
+                    th ID
+                    th Name
+                    th Email
+                    th Role
+                    th Actions
+                tr
+                    th(colspan="4")
+                        input(st-search="" class="form-control" placeholder="Search ..." type="text")
+                    th
+                        button.btn.btn-success
+                            span.glyphicon.glyphicon-plus
+                            |  Add user
+            tbody
+                tr(ng-repeat="row in rowCollection")
+                    td {{row.id}}
+                    td {{row.firstName + ' ' + row.lastName}}
+                    td {{row.email}}
+                    td {{row.role}}
+                    td
+                        .btn-group
+                            button.btn.btn-warning
+                                span.glyphicon.glyphicon-pencil
+                                |  Edit user
+                            button.btn.btn-danger
+                                span.glyphicon.glyphicon-remove
+                                |  Archive user

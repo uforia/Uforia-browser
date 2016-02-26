@@ -43,7 +43,7 @@ angular.module('uforia')
               $scope.queryMatchesCount = data.count;
               delete $scope.errorMessage;
             }
-            else 
+            else
               $scope.errorMessage = data.error.message;
           });
       }
@@ -107,7 +107,7 @@ angular.module('uforia')
     //Clear the old SVG
     removeSVG();
     hideMessage();
-    
+
     getData(formatParams(), function(data){
       $('#d3_visualization').empty();
       if(data.total > 0 && data.total){
@@ -314,7 +314,7 @@ angular.module('uforia')
     modalInstance.result.then(function () {
       //closed
     }, function () {
-      
+
     });
   }
 
@@ -351,7 +351,7 @@ angular.module('uforia')
       modules[module] = mime_types[key].modules[module];
     }
   }
-  
+
   $scope.modules = modules;
 
   function initMapping() {
@@ -366,12 +366,12 @@ angular.module('uforia')
         if($scope.selectedMimetypes.indexOf(mime_type) == -1)
           $scope.selectedMimetypes.push(mime_type);
       });
-        
+
       table.modules.forEach(function(module){
         if($scope.selectedModules.indexOf(module) == -1)
           $scope.selectedModules.push(module);
       });
-        
+
       table.fields.forEach(function(field){
         if(field != 'hashid'){
           var found = false;
@@ -387,7 +387,7 @@ angular.module('uforia')
           }
           if(!found){
             $scope.models.lists.selectedFields.push({field: field, modules: modules, mime_types: mime_types});
-          }         
+          }
         }
       });
     });
@@ -429,7 +429,7 @@ angular.module('uforia')
       });
       $scope.models.lists.fields.forEach(function(item){
         // console.log(item.field + ':' + item.modules.length);
-      }); 
+      });
       // console.log($scope.models);
     }
     // sort by module list length
@@ -479,7 +479,7 @@ angular.module('uforia')
         if($scope[object].indexOf(item) == -1)
           $scope[object].push(item);
       });
-    }); 
+    });
   }
 
   $scope.updateModulesList = function(){
@@ -539,7 +539,7 @@ angular.module('uforia')
   //       }
   //     });
   //   }
-  // }); 
+  // });
 
   // $scope.$watch('deselectFields', function(newVal){
   //   if(newVal && newVal.length > 0){
@@ -613,7 +613,7 @@ angular.module('uforia')
   for(var key in visualizations){
     $scope.visualizations.push(visualizations[key]);
   }
-  
+
   if($scope.visualizations.length == 0)
     $scope.visualizations.push({});
 
@@ -621,7 +621,7 @@ angular.module('uforia')
     return Object.keys(fields).indexOf(item) > -1 ? "Fields" : "Metadata";
   };
 
-  $scope.types = { 
+  $scope.types = {
     'chord': {
       type: 'chord',
       field1: 'From',
@@ -673,6 +673,16 @@ angular.module('uforia')
       }
     });
   }
+})
+
+.controller('userOverviewCtrl', function($scope){
+  $scope.rowCollection = [
+    {id: 1, firstName: 'Laurent', lastName: 'Renard', email: 'whatever@gmail.com', role: 'Coffee Boy'},
+    {id: 2, firstName: 'Blandine', lastName: 'Faivre', email: 'oufblandou@gmail.com', role: 'Evidence Searcher'},
+    {id: 3, firstName: 'Francoise', lastName: 'Frere', email: 'raymondef@gmail.com', role: 'Evidence Officer'}
+  ];
+  console.log($scope);
+
 });
 
 function ArrayMove(array, old_index, new_index) {
