@@ -1,6 +1,6 @@
 
 angular.module('uforia',
-    ['ui.router', 'ui.bootstrap.modal', 'ui.bootstrap.datepicker', 'dndLists', 'ui', 'ui.select', 'satellizer'])
+    ['ui.router', 'ui.bootstrap.modal', 'ui.bootstrap.datepicker', 'dndLists', 'ui', 'ui.select'])
 
   .run(function($rootScope) {
     $rootScope.mappings = {};

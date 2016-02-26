@@ -676,12 +676,24 @@ angular.module('uforia')
 
 })
 
-.controller('loginCtrl', function($scope, $auth) {
-  console.log("Werkt het?");
-    $scope.authenticate = function(provider) {
-      $auth.authenticate(provider);
+.controller('loginCtrl', function($http, $scope, $location) {
+    $scope.username = "";
+    $scope.password = "";
+    
+    $scope.login = function(){
+        $http.post('/auth', {username: $scope.username, password: $scope.password})
+            .success(function(data) {
+                
+                $location.path('#/admin');
+            }).error(function(){
+                toastr.error('My name is Inigo Montoya. You killed my father, prepare to die!')
+                
+                $location.path('/admin');
+                
+            });
     };
-  });
+    
+});
 
 function ArrayMove(array, old_index, new_index) {
   if (new_index >= array.length) {
