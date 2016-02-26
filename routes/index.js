@@ -12,7 +12,7 @@ router.get('/', function(req, res) {
 });
 
 router.get('/logged-in', function(req, res) {
-	res.send(req.isAuthenticated() ? req.user : '0');
+	res.send(req.isAuthenticated() ? '1' : '0');
 });
 
 router.post('/auth', passport.authenticate('local'), function(req, res) {

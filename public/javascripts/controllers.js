@@ -691,6 +691,24 @@ angular.module('uforia')
             });
     };
     
+})
+.controller('navCtrl', function($scope, $http, $location){
+    $scope.isLoggedIn = false;
+    
+    $http.get('/logged-in')
+        .success(function(user){
+            // Authenticated 
+            if (user !== 0) $scope.isLoggedIn = true;
+    });
+    
+    $scope.logout = function(){
+        $http.post('/logout')
+            .success(function(data){
+                $location.path('/search');
+            });
+    }
+    
+
 });
 
 function ArrayMove(array, old_index, new_index) {

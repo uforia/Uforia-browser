@@ -3,12 +3,12 @@ nav.navbar.navbar-default
     div.navbar-header
       button.navbar-toggle(type="button" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false")
         span.sr-only
-          p Toggle navigation
+          | Toggle navigation
         span.icon-bar
         span.icon-bar
         span.icon-bar
       a.navbar-brand(href="#")
-        p Brand
+        | Brand
     
     div.collapse.navbar-collapse(id="bs-example-navbar-collapse-1")
       ul.nav.navbar-nav
@@ -17,35 +17,37 @@ nav.navbar.navbar-default
             p link
         li
           a(href="#")
-            p Link
+            | Link
         li.dropdown
           a.dropdown-toggle(href="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false")
-            p Dropdown
+            | Dropdown
             span.caret
           ul.dropdown-menu
             li 
               a(href="#")
-                p 1
+                | 1
                 
             li 
               a(href="#")
-                p 2
+                | 2
                 
             li 
               a(href="#")
-                p 3
+                | 3
                 
             li.divider(role="separator") 
               a(href="#")
               
             li 
               a(href="#")
-                p 5
+                | 5
               
             li.divider(role="separator") 
               a(href="#")
               
             li 
-              a(href="#")
-                p 7
-                    
+              a(href="#") 7
+      ul.nav.navbar-nav.navbar-right
+        li
+          a(ng-show="isLoggedIn" href="#" ng-click="logout()") Log out
+          a(ng-show="!isLoggedIn" href="#/login") Login
