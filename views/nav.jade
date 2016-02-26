@@ -2,50 +2,55 @@ nav.navbar.navbar-default
   div.container-fluid
     div.navbar-header
       button.navbar-toggle(type="button" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false")
-        span.sr-only
-          p Toggle navigation
+        span.sr-only Toggle navigatioan.icon-bar
         span.icon-bar
         span.icon-bar
-        span.icon-bar
-      a.navbar-brand(href="#")
-        p Brand
+      a.navbar-brand(href="#") Uforia
     
     div.collapse.navbar-collapse(id="bs-example-navbar-collapse-1")
       ul.nav.navbar-nav
         li.active
-          a(href='#')
-            p link
+          a(href='#') Users
         li
-          a(href="#")
-            p Link
+          a(href="#") Link
         li.dropdown
-          a.dropdown-toggle(href="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false")
-            p Dropdown
+          a.dropdown-toggle(href="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false") Dropdown
             span.caret
           ul.dropdown-menu
             li 
-              a(href="#")
-                p 1
-                
+              a(href="#") 1
             li 
-              a(href="#")
-                p 2
-                
+              a(href="#") 2
             li 
-              a(href="#")
-                p 3
-                
+              a(href="#") 3
             li.divider(role="separator") 
               a(href="#")
-              
             li 
-              a(href="#")
-                p 5
-              
+              a(href="#") 5
             li.divider(role="separator") 
               a(href="#")
-              
             li 
-              a(href="#")
-                p 7
-                    
+              a(href="#") 7
+              
+      form.navbar-form.navbar-left(role="search")        
+        div.form-group
+          input.form-control(type="text" placeholder="search")
+        button.btn.btn-default(type="sumbit") Submit
+      ul.nav.navbar-nav.navbar-right
+        li 
+          a(href="#") Login
+          li.dropdown
+            a.dropdown-toggle(href="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false") Dropdown
+              span.caret
+            ul.dropdown-menu
+              li 
+                a(href="#") Action
+              li 
+                a(href="#") Another action
+              li 
+                a(href="#") Something else
+              li.divider(role="separator") 
+                a(href="#")
+              li 
+                a(href="#") Separated link
+        
