@@ -683,12 +683,10 @@ angular.module('uforia')
     $scope.login = function(){
         $http.post('/auth', {username: $scope.username, password: $scope.password})
             .success(function(data) {
-                
-                $location.path('#/admin');
-            }).error(function(){
-                toastr.error('My name is Inigo Montoya. You killed my father, prepare to die!')
-                
                 $location.path('/admin');
+                toastr.success('Logged in successfully!');
+            }).error(function(data){
+                toastr.error('E-mailaddress and password did not match!')
                 
             });
     };
@@ -705,3 +703,4 @@ function ArrayMove(array, old_index, new_index) {
   array.splice(new_index, 0, array.splice(old_index, 1)[0]);
   return array; // for testing purposes
 };
+

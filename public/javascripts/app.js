@@ -39,7 +39,10 @@ angular.module('uforia',
       .state('admin', {
         abstract: true,
         url: "/admin",
-        template: '<ui-view/>'
+        template: '<ui-view/>',
+        resolve: {
+            loggedin: checkLoggedin
+        }
       })
       .state('admin.overview', {
         url: "",
@@ -47,7 +50,9 @@ angular.module('uforia',
         controller: 'adminCtrl',
         resolve: {
           // modules: model.getAvailableModules,
-          types: model.getTypes
+          types: model.getTypes,
+          loggedin: checkLoggedin
+          
         }
       })
       .state('admin.mapping', {
@@ -67,3 +72,22 @@ angular.module('uforia',
         controller: 'loginCtrl'
       });
   });
+
+
+
+function checkLoggedin($q, $timeout, $http, $location, $rootScope){ 
+    // Initialize a new promise 
+    var deferred = $q.defer(); 
+    // Make an AJAX call to check if the user is logged in 
+    $http.get('/logged-in').success(function(user){ 
+        // Authenticated 
+        if (user !== '0') deferred.resolve(); 
+        // Not Authenticated 
+        else { 
+            $rootScope.message = 'You need to log in.'; 
+            deferred.reject();
+            $location.url('/login');
+        } 
+    }); 
+    return deferred.promise; 
+};
