@@ -676,12 +676,15 @@ angular.module('uforia')
 })
 
 .controller('userOverviewCtrl', function($scope){
+
   $scope.rowCollection = [
     {id: 1, firstName: 'Laurent', lastName: 'Renard', email: 'whatever@gmail.com', role: 'Coffee Boy'},
     {id: 2, firstName: 'Blandine', lastName: 'Faivre', email: 'oufblandou@gmail.com', role: 'Evidence Searcher'},
     {id: 3, firstName: 'Francoise', lastName: 'Frere', email: 'raymondef@gmail.com', role: 'Evidence Officer'}
   ];
-  console.log($scope);
+
+  $scope.itemsByPage = 10;
+  $scope.showNumberOfPages = 7;
 
 });
 
