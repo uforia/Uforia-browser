@@ -1,26 +1,24 @@
 .row
     .col-lg-12
-        h1 User overview
-
-    .col-lg-12
         table(st-table="rowCollection" class="table table-striped")
             thead
                 tr
-                    th ID
-                    th Name
-                    th Email
-                    th Role
-                    th Actions
-                tr
-                    th(colspan="4")
+                    th(colspan="3")
+                        h1 User Overview
+                    th
                         input(st-search="" class="form-control" placeholder="Search ..." type="text")
+                tr
                     th
                         button.btn.btn-success
                             span.glyphicon.glyphicon-plus
                             |  Add user
+                tr
+                    th Name
+                    th Email
+                    th Role
+                    th Actions
             tbody
                 tr(ng-repeat="row in rowCollection")
-                    td {{row.id}}
                     td {{row.firstName + ' ' + row.lastName}}
                     td {{row.email}}
                     td {{row.role}}
@@ -34,5 +32,5 @@
                                 |  Archive user
             tfoot
                 tr
-                    td(colspan="5" class="text-center")
+                    td(colspan="4" class="text-center")
                         div(st-pagination="" st-items-by-page="itemsByPage" st-displayed-pages="showNumberOfPages")
