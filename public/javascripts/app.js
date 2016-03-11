@@ -61,8 +61,8 @@ angular.module('uforia',
                     mapping: model.getMapping
                 }
             })
-            .state('user/overview', {
-                url: "/user/overview",
+            .state('user', {
+                url: "/user",
                 templateUrl: "views/userOverview",
                 controller: 'userOverviewCtrl'
             });
