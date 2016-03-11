@@ -9,45 +9,10 @@ nav.navbar.navbar-default
     
     div.collapse.navbar-collapse(id="bs-example-navbar-collapse-1")
       ul.nav.navbar-nav
-        li.active
+        li
           a(href='#') Users
-        li
-          a(href="#") Link
-        li.dropdown
-          a.dropdown-toggle(href="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false") Dropdown
-            span.caret
-          ul.dropdown-menu
-            li 
-              a(href="#") 1
-            li 
-              a(href="#") 2
-            li 
-              a(href="#") 3
-            li.divider(role="separator") 
-              a(href="#")
-            li 
-              a(href="#") 5
-            li.divider(role="separator") 
-              a(href="#")
-            li 
-              a(href="#") 7
               
-      form.navbar-form.navbar-left(role="search")        
-        div.form-group
-          input.form-control(type="text" placeholder="search")
-        button.btn.btn-default(type="sumbit") Submit
-      ul.nav.navbar-nav.navbar-right
-        li 
-              a(href="#") 7
       ul.nav.navbar-nav.navbar-right
         li
-          a(ng-show="isLoggedIn" href="#" ng-click="logout()") Log out
+          a(ng-show="isLoggedIn" href="" ng-click="logout()") Log out
           a(ng-show="!isLoggedIn" href="#/login") Login
-              li 
-                a(href="#") Action
-              li 
-                a(href="#") Another action
-              li 
-                a(href="#") Something else
-              li.divider(role="separator") 
-                a(href="#") Separated link
