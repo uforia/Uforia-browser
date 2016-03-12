@@ -1,4 +1,13 @@
 .row
+    div.alert.alert-success.alert-dismissible(role="alert" ng-show="isMessage")
+        ul(ng-repeat="m in message")
+            li {{m}}
+.row
+    div.alert.alert-danger.alert-dismissible(role="alert" ng-show="isError")
+        ul(ng-repeat="message in error")
+            li {{message}}
+
+.row
     .col-lg-12
         table(st-table="rowCollection" class="table table-striped")
             thead
@@ -9,7 +18,7 @@
                         input(st-search="" class="form-control" placeholder="Search ..." type="text")
                 tr
                     th
-                        button.btn.btn-success
+                        button.btn.btn-success(ng-click="createUserModal()")
                             span.glyphicon.glyphicon-plus
                             |  Add user
                 tr
