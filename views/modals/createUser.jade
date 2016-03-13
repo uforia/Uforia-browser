@@ -6,8 +6,8 @@
 
         .modal-body
             .row
-                div.alert.alert-danger(role="alert" ng-show="cuError")
-                 ul(ng-repeat="message in cuErrorMessages")
+                div.alert.alert-danger(role="alert" ng-show="cuErrorMessages.length > 0")
+                 ul(ng-repeat="message in cuErrorMessages track by $index")
                     li {{message}}
 
             .row

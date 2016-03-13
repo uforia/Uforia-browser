@@ -679,13 +679,13 @@ angular.module('uforia')
 
       $scope.itemsByPage = 10;
       $scope.showNumberOfPages = 7;
+      $scope.searchCollection = [];
       $scope.user = {
         isDeleted: 0
       };
-      $scope.isMessage = false;
       $scope.message = [];
-      $scope.isError = false;
       $scope.error = [];
+      var users;
 
       function loadUsers() {
         $scope.rowCollection = [];
@@ -697,6 +697,7 @@ angular.module('uforia')
                 $scope.error.push(data.error.message);
                 $scope.isError = true;
               }else if (data.response.hits.total > 0) {
+
                 //Load users in table
                 angular.forEach(data.response.hits.hits, function (value, key) {
                   var u = value._source;
@@ -707,14 +708,13 @@ angular.module('uforia')
                     });
                   }
                 });
-                return data.response.hits.hits;
+                $scope.searchCollection = $scope.rowCollection;
+                users = data.response.hits.hits;
               }
-
-              return false;
             });
       }
 
-      var users = loadUsers();
+      loadUsers();
 
       // Modal for adding new users
       $scope.createUserModal = function(type){
@@ -728,39 +728,32 @@ angular.module('uforia')
 
           $scope.save = function(user){
             $scope.cuErrorMessages = [];
-            $scope.cuError = false;
 
             // Checks
             if(typeof user.firstName === "undefined"){
               $scope.cuErrorMessages.push('First name is required');
-              $scope.cuError = true;
             }
 
             if(typeof user.lastName === "undefined"){
               $scope.cuErrorMessages.push('Last name is required');
-              $scope.cuError = true;
             }
 
             if(typeof user.email === "undefined"){
               $scope.cuErrorMessages.push('Email is required');
-              $scope.cuError = true;
             }
 
             if(typeof user.password === "undefined"){
               $scope.cuErrorMessages.push('Password is invalid. Make sure the password is at least 4 characters long.');
-              $scope.cuError = true;
             }
 
             if(typeof user.password2 === "undefined"){
               $scope.cuErrorMessages.push('Make sure the passwords match.');
-              $scope.cuError = true;
             }
 
-            if($scope.cuError === false){
+            if($scope.cuErrorMessages.length === 0){
 
               if(user.password !== user.password2){
                 $scope.cuErrorMessages.push('Password doesn\'t match.');
-                $scope.cuError = true;
 
               }else if(user.password === user.password2){
                 delete user.password2;
@@ -771,7 +764,6 @@ angular.module('uforia')
                   var u = value._source;
                   if(user.email == u.email){
                     $scope.cuErrorMessages.push('An user with this email address already exists.');
-                    $scope.cuError = true;
                     addUser = false;
                   }
                 });
@@ -789,12 +781,17 @@ angular.module('uforia')
                               if (data.response.created == true) {
                                 $scope.message.push('User has been added.');
                                 $scope.isMessage = true;
+
+                                //Load new user in table
+                                $scope.rowCollection.push({
+                                  id: data.response._id, firstName: user.firstName, lastName: user.lastName, email: user.email,
+                                  role: 'N/A'
+                                });
+                                $scope.searchCollection = $scope.rowCollection;
                               }
                             }
                             // Close modal
                             $scope.modalInstance.dismiss();
-                            // Reload users in table
-                            users = loadUsers();
                           }
                       );
                 }

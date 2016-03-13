@@ -1,21 +1,25 @@
 .row
-    div.alert.alert-success.alert-dismissible(role="alert" ng-show="isMessage")
-        ul(ng-repeat="m in message")
+    div.alert.alert-success.alert-dismissible(role="alert" ng-show="message.length > 0")
+        button.close(type="button" data-dismiss="alert" aria-label="Close")
+            span(aria-hidden="true") &times;
+        ul(ng-repeat="m in message track by $index")
             li {{m}}
 .row
-    div.alert.alert-danger.alert-dismissible(role="alert" ng-show="isError")
-        ul(ng-repeat="message in error")
+    div.alert.alert-danger.alert-dismissible(role="alert" ng-show="error.length > 0")
+        button.close(type="button" data-dismiss="alert" aria-label="Close")
+            span(aria-hidden="true") &times;
+        ul(ng-repeat="message in error track by $index")
             li {{message}}
 
 .row
     .col-lg-12
-        table(st-table="rowCollection" class="table table-striped")
+        table.table.table-striped(st-table="rowCollection" st-safe-src="searchCollection")
             thead
                 tr
                     th(colspan="3")
                         h1 User Overview
-                    th
-                        input(st-search="" class="form-control" placeholder="Search ..." type="text")
+                    th(colspan="1")
+                        input.form-control(st-search="" placeholder="Search ..." type="text")
                 tr
                     th
                         button.btn.btn-success(ng-click="createUserModal()")
