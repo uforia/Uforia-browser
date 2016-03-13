@@ -868,7 +868,8 @@ router.post('/get_users', function(req, res){
   c.elasticsearch.search({
     index: INDEX,
     type: 'users',
-    body: { query: { match_all: {} } },
+    body: { query: { match_all: {}}},
+    _source: ["id", "firstName", "lastName", "email", "isDeleted"],
     size: 999 // all
   }, function (error, response) {
     res.send({error: error, response: response});

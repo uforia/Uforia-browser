@@ -696,20 +696,21 @@ angular.module('uforia')
               if (typeof data.error !== 'undefined') {
                 $scope.error.push(data.error.message);
                 $scope.isError = true;
-              }
-
-              if (data.response.hits.total > 0) {
+              }else if (data.response.hits.total > 0) {
                 //Load users in table
                 angular.forEach(data.response.hits.hits, function (value, key) {
                   var u = value._source;
-                  $scope.rowCollection.push({
-                    id: value._id, firstName: u.firstName, lastName: u.lastName, email: u.email,
-                    role: 'N/A', password: u.password
-                  });
+                  if(u.isDeleted == 0) {
+                    $scope.rowCollection.push({
+                      id: value._id, firstName: u.firstName, lastName: u.lastName, email: u.email,
+                      role: 'N/A'
+                    });
+                  }
                 });
+                return data.response.hits.hits;
               }
 
-              return data.response.hits.hits;
+              return false;
             });
       }
 
@@ -725,11 +726,11 @@ angular.module('uforia')
 
         $scope.modalInstance.opened.then(function(){
 
-          // Checks
           $scope.save = function(user){
             $scope.cuErrorMessages = [];
             $scope.cuError = false;
 
+            // Checks
             if(typeof user.firstName === "undefined"){
               $scope.cuErrorMessages.push('First name is required');
               $scope.cuError = true;
@@ -767,7 +768,6 @@ angular.module('uforia')
 
                 // Check if user exists
                 angular.forEach(users, function(value, key){
-                  console.log(users);
                   var u = value._source;
                   if(user.email == u.email){
                     $scope.cuErrorMessages.push('An user with this email address already exists.');
