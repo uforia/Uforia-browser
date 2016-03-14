@@ -774,13 +774,11 @@ angular.module('uforia')
                       .success(function (data) {
                             if (typeof data.error !== 'undefined') {
                               $scope.error.push(data.error.message);
-                              $scope.isError = true;
                             }
 
                             if (typeof data.response !== 'undefined') {
                               if (data.response.created == true) {
                                 $scope.message.push('User has been added.');
-                                $scope.isMessage = true;
 
                                 //Load new user in table
                                 $scope.rowCollection.push({
@@ -798,7 +796,6 @@ angular.module('uforia')
 
               }else{
                 $scope.cuErrorMessages.push('Unknown error.');
-                $scope.isError = true;
               }
             }
 
