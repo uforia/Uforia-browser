@@ -1,0 +1,18 @@
+nav.navbar.navbar-default
+  div.container-fluid
+    div.navbar-header
+      button.navbar-toggle(type="button" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false")
+        span.sr-only Toggle navigatioan.icon-bar
+        span.icon-bar
+        span.icon-bar
+      a.navbar-brand(href="#") Uforia
+    
+    div.collapse.navbar-collapse(id="bs-example-navbar-collapse-1")
+      ul.nav.navbar-nav
+        li
+          a(href='#') Users
+              
+      ul.nav.navbar-nav.navbar-right
+        li
+          a(ng-show="isLoggedIn" href="" ng-click="logout()") Log out
+          a(ng-show="!isLoggedIn" href="#/login") Login

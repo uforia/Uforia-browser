@@ -673,6 +673,26 @@ angular.module('uforia')
               }
             });
       }
+
+    })
+
+    .controller('loginCtrl', function($http, $scope, $state, $rootScope) {
+        $scope.username = "";
+        $scope.password = "";
+
+        $scope.login = function() {
+            $http.post('/auth', { username: $scope.username, password: $scope.password })
+                .success(function(data) {
+                    $state.go('admin.overview');
+                    toastr.success('Logged in successfully!');
+                }).error(function(data) {
+                    toastr.error('E-mailaddress and password did not match!')
+                });
+        };
+
+    })
+    .controller('navCtrl', function($scope, $http, $location) {
+
     })
 
     .controller('userOverviewCtrl', function($scope, $modal, $http){
@@ -807,12 +827,13 @@ angular.module('uforia')
     });
 
 function ArrayMove(array, old_index, new_index) {
-  if (new_index >= array.length) {
-    var k = new_index - array.length;
-    while ((k--) + 1) {
-      array.push(undefined);
+    if (new_index >= array.length) {
+        var k = new_index - array.length;
+        while ((k--) + 1) {
+            array.push(undefined);
+        }
     }
-  }
-  array.splice(new_index, 0, array.splice(old_index, 1)[0]);
-  return array; // for testing purposes
+    array.splice(new_index, 0, array.splice(old_index, 1)[0]);
+    return array; // for testing purposes
 };
+

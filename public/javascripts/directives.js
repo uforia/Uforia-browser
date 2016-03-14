@@ -13,3 +13,11 @@ angular.module('uforia')
         }
     }
 })
+.directive('navigation', function(){
+    return {
+        restrict: 'E',
+        templateUrl: 'views/nav.jade',
+        controller: 'navCtrl',
+        controllerAs: 'ctrl'
+    }
+});
