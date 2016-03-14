@@ -837,5 +837,44 @@ router.post('/visualizations/save', function(req, res){
 
 });
 
+/**
+ * Save user
+ * url: /api/save_user
+ * Takes user object with firstname, lastname, email, password and isDeleted
+ */
+router.post('/save_user', function(req, res){
+  var bcrypt = require('bcrypt-nodejs');
+  var user = req.body;
+
+  bcrypt.hash(user['password'], null, null, function(err, hash){
+    user.password = hash;
+
+    c.elasticsearch.create({
+      index: INDEX,
+      type: 'users',
+      body: user
+    }, function (error, response) {
+      res.send({error: error, response: response});
+    });
+  })
+});
+
+/**
+ * Get all users
+ * url: /api/get_users
+ */
+router.post('/get_users', function(req, res){
+
+  c.elasticsearch.search({
+    index: INDEX,
+    type: 'users',
+    body: { query: { match_all: {}}},
+    _source: ["id", "firstName", "lastName", "email", "isDeleted"],
+    size: 999 // all
+  }, function (error, response) {
+    res.send({error: error, response: response});
+  });
+});
+
 
 module.exports = router;
