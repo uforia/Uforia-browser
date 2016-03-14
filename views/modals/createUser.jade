@@ -1,0 +1,45 @@
+.modal-header
+    button.close(ng-click="modalInstance.dismiss()", type='button', aria-hidden="true") &times;
+    h2.h3.modal-title Add new user
+
+    form(ng-submit="save(user)" name="addUserForm" ng-controller="userOverviewCtrl")
+
+        .modal-body
+            .row
+                div.alert.alert-danger(role="alert" ng-show="cuErrorMessages.length > 0")
+                 ul(ng-repeat="message in cuErrorMessages track by $index")
+                    li {{message}}
+
+            .row
+                .col-sm-12
+                    .form-group
+                        label.col-sm-4.control-label First name
+                        .col-sm-8
+                            input.form-control(type="text" name="firstName" ng-model="user.firstName" required)
+                .col-sm-12
+                    .form-group
+                        label.col-sm-4.control-label Last name
+                        .col-sm-8
+                            input.form-control(type="text" ng-model="user.lastName" required)
+                .col-sm-12
+                    .form-group
+                        label.col-sm-4.control-label Email
+                        .col-sm-8
+                            input.form-control(type="email" ng-model="user.email" required)
+                .col-sm-12
+                    .form-group
+                        label.col-sm-4.control-label Password
+                        .col-sm-8
+                            input.form-control(type="password" ng-model="user.password" ng-minlength="4" required)
+                            p.help-block.pull-left Passwords should have at least 4 characters.
+                .col-sm-12
+                    .form-group
+                        label.col-sm-4.control-label Retype password
+                        .col-sm-8
+                            input.form-control(type="password" ng-model="user.password2" ng-minlength="4" required)
+        .modal-footer
+            .row
+                .col-lg-6
+                    p.help-block.pull-left All fields are mandatory.
+                .col-lg-6
+                    button.btn.btn-sm.btn-default(type="submit") Save
