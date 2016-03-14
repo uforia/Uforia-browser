@@ -2,7 +2,7 @@
 angular.module('uforia',
     ['ui.router', 'ui.bootstrap.modal', 'ui.bootstrap.datepicker', 'dndLists', 'ui', 'ui.select', 'smart-table'])
 
-    .run(function($rootScope) {
+    .run(function($rootScope, $http, $state, $window) {
         $rootScope.mappings = {};
         socket = io.connect();
         socket.on('connect', function(){
@@ -16,9 +16,29 @@ angular.module('uforia',
         $rootScope.$on('$stateChangeStart', function(event, toState){
             // Would print "Hello World!" when 'parent' is activated
             // Would print "Hello UI-Router!" when 'parent.child' is activated
-        })
-    })
 
+            // Set global var for logged in state.
+
+            $http.get('/logged-in')
+                .success(function(user) {
+                    // Authenticated 
+                    if (user == 1) {
+                        $rootScope.isLoggedIn = true;
+                    } else {
+                        $rootScope.isLoggedIn = false;
+                    }
+                });
+
+            $rootScope.logout = function() {
+                $http.post('/logout')
+                    .success(function(data) {
+                        // $state.go('search', {}, {reload: true});
+                        $window.location.reload();
+                    });                 
+            }
+
+        });
+    })
     .config(function($stateProvider, $urlRouterProvider, $sceProvider){
         // Disable Sce
         $sceProvider.enabled(false);
@@ -39,7 +59,10 @@ angular.module('uforia',
             .state('admin', {
                 abstract: true,
                 url: "/admin",
-                template: '<ui-view/>'
+                template: '<ui-view/>',
+                resolve: {
+                    loggedin: isAuthenticated
+                }
             })
             .state('admin.overview', {
                 url: "",
@@ -47,7 +70,9 @@ angular.module('uforia',
                 controller: 'adminCtrl',
                 resolve: {
                     // modules: model.getAvailableModules,
-                    types: model.getTypes
+                    types: model.getTypes,
+                    loggedin: isAuthenticated
+
                 }
             })
             .state('admin.mapping', {
@@ -61,9 +86,34 @@ angular.module('uforia',
                     mapping: model.getMapping
                 }
             })
+            .state('login', {
+                url: "/login",
+                templateUrl: "views/authentication/login",
+                controller: 'loginCtrl'
+                })
             .state('user', {
                 url: "/user",
                 templateUrl: "views/userOverview",
                 controller: 'userOverviewCtrl'
             });
     });
+
+
+function isAuthenticated($q, $timeout, $http, $location, $rootScope) {
+    // Initialize a new promise 
+    var deferred = $q.defer();
+
+    $http.get('/logged-in')
+        .success(function(user) {
+            // Authenticated 
+            if (user == 1) {
+                deferred.resolve();
+            } else {
+                $rootScope.message = 'You need to log in.';
+                deferred.reject();
+                $location.url('/login');
+            }
+
+            return deferred.promise;
+        });
+}
