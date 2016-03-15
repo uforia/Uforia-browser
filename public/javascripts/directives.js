@@ -16,7 +16,7 @@ angular.module('uforia')
 .directive('navigation', function(){
     return {
         restrict: 'E',
-        templateUrl: 'views/nav.jade',
+        templateUrl: 'views/nav.html',
         controller: 'navCtrl',
         controllerAs: 'ctrl'
     }

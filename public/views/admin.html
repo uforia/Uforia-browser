@@ -1,0 +1,22 @@
+<button ui-sref="admin.mapping" class="btn btn-primary">Create new mapping</button>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Mapping</th>
+      <th>Status</th>
+      <th>Options</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr ng-repeat="type in types">
+      <td ng-bind="type"></td>
+      <td ng-bind="mappings[type].progress | percentage:2"></td>
+      <td>
+        <button ng-if="mappings[type].progress" ng-click="pauseFilling(type)" class="btn btn-default">Pause</button>
+        <button ui-sref="admin.mapping({type:type})" class="btn btn-default">Edit</button>
+        <button ng-click="openVisualizations(type)" class="btn btn-default">Visualizations</button>
+        <button ng-click="deleteMapping(type, $index)" class="btn btn-danger">Delete</button>
+      </td>
+    </tr>
+  </tbody>
+</table>

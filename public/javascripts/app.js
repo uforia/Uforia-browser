@@ -50,7 +50,7 @@ angular.module('uforia',
         $stateProvider
             .state('search', {
                 url: "/search",
-                templateUrl: "views/search",
+                templateUrl: "views/search.html",
                 controller: 'searchCtrl',
                 resolve: {
                     types: model.getTypes
@@ -66,7 +66,7 @@ angular.module('uforia',
             })
             .state('admin.overview', {
                 url: "",
-                templateUrl: "views/admin",
+                templateUrl: "views/admin.html",
                 controller: 'adminCtrl',
                 resolve: {
                     // modules: model.getAvailableModules,
@@ -77,7 +77,7 @@ angular.module('uforia',
             })
             .state('admin.mapping', {
                 url: "/mapping/{type}",
-                templateUrl: "views/mapping",
+                templateUrl: "views/mapping.html",
                 controller: 'mappingCtrl',
                 parent: 'admin',
                 resolve: {
@@ -88,12 +88,12 @@ angular.module('uforia',
             })
             .state('login', {
                 url: "/login",
-                templateUrl: "views/authentication/login",
+                templateUrl: "views/authentication/login.html",
                 controller: 'loginCtrl'
                 })
             .state('user', {
                 url: "/user",
-                templateUrl: "views/userOverview",
+                templateUrl: "views/userOverview.html",
                 controller: 'userOverviewCtrl'
             });
     });

@@ -133,7 +133,7 @@ angular.module('uforia')
         console.log(data);
         $scope.loading = true;
         var modalInstance = $modal.open({
-          templateUrl: 'views/modals/details',
+          templateUrl: 'views/modals/details.html',
           controller: 'detailsModalCtrl',
           size: 'xl',
           resolve: {
@@ -294,7 +294,7 @@ angular.module('uforia')
 
       $scope.openVisualizations = function(type){
         var modalInstance = $modal.open({
-          templateUrl: 'views/modals/visualizations',
+          templateUrl: 'views/modals/visualizations.html',
           controller: 'visualizationModalCtrl',
           size: 'xl',
           scope: $scope,
@@ -739,7 +739,7 @@ angular.module('uforia')
       // Modal for adding new users
       $scope.createUserModal = function(type){
         $scope.modalInstance = $modal.open({
-          templateUrl: 'views/modals/createUser',
+          templateUrl: 'views/modals/createUser.html',
           size: 'lg',
           scope: $scope
         });

@@ -1,0 +1,68 @@
+<div class="modal-header">
+  <button ng-click="modalInstance.dismiss()" type="button" aria-hidden="true" class="close">&times;</button>
+  <h2 class="h3 modal-title">Add new user</h2>
+  <form ng-submit="save(user)" name="addUserForm" ng-controller="userOverviewCtrl">
+    <div class="modal-body">
+      <div class="row">
+        <div role="alert" ng-show="cuErrorMessages.length &gt; 0" class="alert alert-danger">
+          <ul ng-repeat="message in cuErrorMessages track by $index">
+            <li>{{message}}</li>
+          </ul>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="form-group">
+            <label class="col-sm-4 control-label">First name</label>
+            <div class="col-sm-8">
+              <input type="text" name="firstName" ng-model="user.firstName" required="required" class="form-control"/>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-12">
+          <div class="form-group">
+            <label class="col-sm-4 control-label">Last name</label>
+            <div class="col-sm-8">
+              <input type="text" ng-model="user.lastName" required="required" class="form-control"/>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-12">
+          <div class="form-group">
+            <label class="col-sm-4 control-label">Email</label>
+            <div class="col-sm-8">
+              <input type="email" ng-model="user.email" required="required" class="form-control"/>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-12">
+          <div class="form-group">
+            <label class="col-sm-4 control-label">Password</label>
+            <div class="col-sm-8">
+              <input type="password" ng-model="user.password" ng-minlength="4" required="required" class="form-control"/>
+              <p class="help-block pull-left">Passwords should have at least 4 characters.</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-12">
+          <div class="form-group">
+            <label class="col-sm-4 control-label">Retype password</label>
+            <div class="col-sm-8">
+              <input type="password" ng-model="user.password2" ng-minlength="4" required="required" class="form-control"/>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div class="row">
+        <div class="col-lg-6">
+          <p class="help-block pull-left">All fields are mandatory.</p>
+        </div>
+        <div class="col-lg-6">
+          <button type="submit" class="btn btn-sm btn-default">Save</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>

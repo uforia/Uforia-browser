@@ -1,0 +1,62 @@
+<div class="modal-header">
+  <button ng-click="modalInstance.dismiss()" type="button" aria-hidden="true" class="close">&times;</button>
+  <h2 class="h3 modal-title">Visualizations for {{mapping.name}}</h2>
+</div>
+<div class="modal-body">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Field1</th>
+        <th>Field2</th>
+        <th>Max results</th>
+        <th>Options</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="item in visualizations">
+        <td class="col-lg-2">
+          <select ng-model="item.type" required="required" ng-change="item.field1 = undefined; item.field2 = undefined" class="form-control">
+            <option ng-repeat="(key, value) in types" value="{{value.type}}" ng-selected="item.type == value.type">{{key | capitalizeFirst}}</option>
+          </select>
+        </td>
+        <td class="col-lg-2">
+          <input ng-model="item.name" class="form-control"/>
+        </td>
+        <td class="col-lg-3">
+          <ui-select ng-model="item.field1">
+            <ui-select-match placeholder="{{types[item.type].field1}}">{{$select.selected}}</ui-select-match>
+            <ui-select-choices repeat="field in fields | filter: $select.search" group-by="groupFind">
+              <div ng-bind-html="field | highlight: $select.search"></div>
+            </ui-select-choices>
+          </ui-select>
+        </td>
+        <td class="col-lg-3">
+          <ui-select ng-if="!types[item.type].multiple" ng-model="item.field2">
+            <ui-select-match placeholder="{{types[item.type].field2}}">{{$select.selected}}</ui-select-match>
+            <ui-select-choices repeat="field in fields | filter: $select.search" group-by="groupFind">
+              <div ng-bind-html="field | highlight: $select.search"></div>
+            </ui-select-choices>
+          </ui-select>
+          <ui-select ng-if="types[item.type].multiple" ng-model="item.field2" multiple="multiple">
+            <ui-select-match placeholder="{{types[item.type].field2}}">{{$item}}</ui-select-match>
+            <ui-select-choices repeat="field in fields | filter: $select.search" group-by="groupFind">
+              <div ng-bind-html="field | highlight: $select.search"></div>
+            </ui-select-choices>
+          </ui-select>
+        </td>
+        <td class="col-lg-2">
+          <input ng-model="item.maxresults" class="form-control"/>
+        </td>
+        <td class="col-lg-2">
+          <button type="button" ng-click="visualizations.splice($index+1, 0, {})" class="btn btn-sm btn-primary">+</button>
+          <button type="button" ng-click="visualizations.splice($index, 1)" ng-if="visualizations.length > 1" class="btn btn-sm btn-danger">x</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<div class="modal-footer">
+  <button ng-click="save()" class="btn btn-sm btn-default">Save</button>
+</div>
