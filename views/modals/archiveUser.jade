@@ -1,0 +1,23 @@
+.modal-header
+    button.close(ng-click="modalInstance.dismiss()", type='button', aria-hidden="true") &times;
+    h2.h3.modal-title Archive user
+
+    form(ng-submit="save(editUser)" name="archiveUserForm" ng-controller="userOverviewCtrl")
+
+        .modal-body
+            .row
+                div.alert.alert-danger(role="alert" ng-show="cuErrorMessages.length > 0")
+                    ul(ng-repeat="message in cuErrorMessages track by $index")
+                        li {{message}}
+
+            .row
+                .form-group
+                    .col-sm-12
+                        .h4
+                            span.label.label-default() {{editUser.id}}
+                .col-sm-12
+                    .form-group
+                        label.col-sm-12.control-label Are you sure you want the archive the user: {{editUser.firstName}} {{editUser.lastName}}
+        .modal-footer
+            button.btn.btn-sm.btn-danger(ng-click="save()") Yes
+            button.btn.btn-default(type="button" ng-click="modalInstance.dismiss()") No

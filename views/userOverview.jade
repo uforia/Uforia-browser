@@ -37,10 +37,10 @@
                     td {{row.role}}
                     td
                         .btn-group
-                            button.btn.btn-warning
+                            button.btn.btn-warning(ng-click="editUserModal(row)")
                                 span.glyphicon.glyphicon-pencil
                                 |  Edit user
-                            button.btn.btn-danger
+                            button.btn.btn-danger(ng-click="archiveUserModal(row)")
                                 span.glyphicon.glyphicon-remove
                                 |  Archive user
             tfoot

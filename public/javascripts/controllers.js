@@ -736,6 +736,138 @@ angular.module('uforia')
 
       loadUsers();
 
+      $scope.archiveUserModal = function(user) {
+        $scope.editUser = user;
+        $scope.editUser.isDeleted = 0;
+        $scope.modalInstance = $modal.open({
+          templateUrl: 'views/modals/archiveUser',
+          size: 'md',
+          scope: $scope
+        });
+
+        $scope.modalInstance.opened.then(function () {
+
+          $scope.save = function(user) {
+            $scope.cuErrorMessages = [];
+
+            // Checks
+            if (typeof user.id === "undefined") {
+              $scope.cuErrorMessages.push('Id is required');
+            }
+
+            if ($scope.cuErrorMessages.length === 0) {
+              var addUser = true
+
+                // Save user
+                if (addUser) {
+                  $http.post('/api/archive_user', $scope.editUser)
+                      .success(function (data) {
+                            if (typeof data.error !== 'undefined') {
+                              $scope.error.push(data.error.message);
+                            }
+
+                            if (typeof data.response !== 'undefined') {
+                              if (typeof data.response._version !== 'undefined') {
+                                var ruser = $scope.rowCollection.indexOf($scope.editUser);
+                                $scope.rowCollection.splice(ruser, 1);
+
+                                $scope.message.push('User has been archived');
+
+                                $scope.searchCollection = $scope.rowCollection;
+                              }
+                            }
+                            // Close modal
+                            $scope.modalInstance.dismiss();
+                          }
+                      );
+                } else {
+                $scope.cuErrorMessages.push('Unknown error.');
+              }
+            }
+          };
+        });
+      }
+
+      $scope.editUserModal = function(user){
+        $scope.editUser = user;
+        $scope.editUser.isDeleted=0;
+        $scope.modalInstance = $modal.open({
+          templateUrl: 'views/modals/editUser',
+          size: 'lg',
+          scope: $scope
+        });
+
+        $scope.modalInstance.opened.then(function(){
+
+          $scope.save = function(user){
+            $scope.cuErrorMessages = [];
+
+            // Checks
+            if(typeof user.id === "undefined"){
+              $scope.cuErrorMessages.push('Id is required');
+            }
+
+            if(typeof user.firstName === "undefined"){
+              $scope.cuErrorMessages.push('First name is required');
+            }
+
+            if(typeof user.lastName === "undefined"){
+              $scope.cuErrorMessages.push('Last name is required');
+            }
+
+            if(typeof user.email === "undefined"){
+              $scope.cuErrorMessages.push('Email is required');
+            }
+
+            if(typeof user.password === "undefined"){
+              $scope.cuErrorMessages.push('Password is invalid. Make sure the password is at least 4 characters long.');
+            }
+
+            if(typeof user.password2 === "undefined"){
+              $scope.cuErrorMessages.push('Make sure the passwords match.');
+            }
+
+            if($scope.cuErrorMessages.length === 0){
+
+              if(user.password !== user.password2){
+                $scope.cuErrorMessages.push('Password doesn\'t match.');
+
+              }else if(user.password === user.password2){
+                delete user.password2;
+                var addUser = true;
+
+
+                // Save user
+                if(addUser) {
+                  $http.post('/api/edit_user', $scope.editUser)
+                      .success(function (data) {
+                            if (typeof data.error !== 'undefined') {
+                              $scope.error.push(data.error.message);
+                            }
+
+                            if (typeof data.response !== 'undefined') {
+                              if (typeof data.response._version !== 'undefined') {
+                                $scope.message.push('Changes have been updated');
+
+                                $scope.searchCollection = $scope.rowCollection;
+                              }
+                            }
+                            // Close modal
+                            $scope.modalInstance.dismiss();
+                          }
+                      );
+                }
+
+              }else{
+                $scope.cuErrorMessages.push('Unknown error.');
+              }
+            }
+
+          };
+        });
+
+      }
+
       // Modal for adding new users
       $scope.createUserModal = function(type){
         $scope.modalInstance = $modal.open({
