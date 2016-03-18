@@ -39,7 +39,9 @@
     "browser"
   ],
   "contributors": [
-    "Sijmen Vos <sijmenvos@gmail.com>"
+    "Sijmen Vos <sijmenvos@gmail.com>",
+    "Tom Oud <tom-oud@hotmail.com>",
+    "Jeroen Hoogendoorn <jeroen_h@outlook.com>"
   ],
   "license": "AGPL-3.0"
 }

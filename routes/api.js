@@ -863,7 +863,7 @@ router.post('/save_user', function(req, res){
  * Get all users
  * url: /api/get_users
  */
-router.post('/get_users', function(req, res){
+router.get('/get_users', function(req, res){
 
   c.elasticsearch.search({
     index: INDEX,

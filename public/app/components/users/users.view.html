@@ -1,0 +1,74 @@
+<div ui-view="" class="ng-scope">
+    <div class="row wrapper border-bottom white-bg page-heading ng-scope">
+        <div class="col-lg-10">
+            <h2>Users</h2>
+            <ol class="breadcrumb">
+                <li>
+                    <a ui-sref="index">Home</a>
+                </li>
+                <li class="active">
+                    <strong>Users</strong>
+                </li>
+            </ol>
+        </div>
+        <div class="col-lg-2">
+
+        </div>
+    </div>
+    <div class="wrapper wrapper-content animated fadeInRight ng-scope">
+        <!-- Customers table -->
+        <div class="col-lg-6">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>
+                        Users
+                    </h5>
+                    <div class="ibox-tools">
+                        <a ui-sref="users.create" class="btn btn-primary btn-xs">Create new user</a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <table datatable="ng" class="table table-striped table-bordered table-hover dataTables-example">
+                        <thead>
+
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="row in rowCollection">
+                                <td>{{row.firstName + ' ' + row.lastName}}</td>
+                                <td>{{row.email}}</td>
+                                <td>{{row.role}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!--
+        <div class="row">
+            <div role="alert" ng-show="message.length &gt; 0" class="alert alert-success alert-dismissible">
+                <button type="button" data-dismiss="alert" aria-label="Close" class="close"><span aria-hidden="true">&times;</span></button>
+                <ul ng-repeat="m in message track by $index">
+                    <li>{{m}}</li>
+                </ul>
+            </div>
+        </div>
+        <div class="row">
+            <div role="alert" ng-show="error.length &gt; 0" class="alert alert-danger alert-dismissible">
+                <button type="button" data-dismiss="alert" aria-label="Close" class="close"><span aria-hidden="true">&times;</span></button>
+                <ul ng-repeat="message in error track by $index">
+                    <li>{{message}}</li>
+                </ul>
+            </div>
+        </div>
+        
+        -->
