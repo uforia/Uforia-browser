@@ -1,57 +1,111 @@
-<!DOCTYPE html>
-<html xmlns:ng="http://angularjs.org" ng-app="uforia" ng-controller="appCtrl as app">
-  <head>
-    <title>Uforia ElasticSearch Front-End</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="./components/bootstrap/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="./components/angular-ui/build/angular-ui.css">
-    <link rel="stylesheet" href="./components/angular-ui-select/dist/select.css">
-    <link rel="stylesheet" href="./stylesheets/style.css">
-    <link rel="stylesheet" href="./components/toastr/toastr.min.css">
-  </head>
-  <body>
-    <navigation></navigation>
-    <div class="container-fluid margin-top">
-      <header>
-        <p class="logo"><b>U</b>niversal <b>For</b>ensic <b>I</b>ndexer and <b>A</b>nalyzer - Visualize Anything!</p>
-        <p style="font-size: 10pt;">
-          <ul>
-            <li><b>Disclaimer 1: </b>sorry, we can't guarantee this website always works (correctly)! Please <a href="mailto:uforia@dhcp.net?Subject=Uforia Bug Report">report bugs </a>and/or <a href="https://github.com/uforia">submit a pull request </a>!</li>
-            <li><b>Usage tip 1: </b>Unless you are using the Bar Chart visualization, try to visualize up to +/- 200 items: more can make your browser slow!<br /><b>Usage tip 2: </b>Try clicking on the various parts of the visualizations (nodes, lines, edges, etc.) to get a detailed view of the documents.<br /><b>Usage tip 3: </b>For the cellphone log example, try searching for SiteName words such as 'Heineken', 'Bijlmer' or 'Sloterdijk' (set contains dummy data).</li>
-            <li><b>Common issues: </b>Visualizing too many results can make your browser slow or not show anything at all (empty canvas), the timeline horizontal axis breaks sometimes.</li>
-          </ul>
-        </p>
-      </header>
-      <div ui-view class="container-fluid"></div>
-    </div>
+﻿<!--
+* INSPINIA - Responsive Admin Theme
+* Version 2.3
+*
+-->
 
-    <script src="./components/jquery/dist/jquery.min.js"></script>
-    <script src="./components/jquery-ui/jquery-ui.js"></script>
-    <script src="./components/jquery-ui/ui/sortable.js"></script>
-    <script src="./components/bootstrap/dist/js/bootstrap.js"></script>
-    <script src="./components/angular/angular.js"></script>
-    <script src="./components/angular-ui/common/module.js"></script>
-    <script src="./components/angular-ui/modules/directives/sortable/sortable.js"></script>
-    <script src="./components/angular-ui/modules/filters/unique/unique.js"></script>
-    <script src="./components/angular-ui-router/release/angular-ui-router.js"></script>
-    <script src="./components/angular-ui-bootstrap/src/transition/transition.js"></script>
-    <script src="./components/angular-ui-bootstrap/src/modal/modal.js"></script>
-    <script src="./components/angular-ui-bootstrap/src/dateparser/dateparser.js"></script>
-    <script src="./components/angular-ui-bootstrap/src/position/position.js"></script>
-    <script src="./components/angular-ui-bootstrap/src/datepicker/datepicker.js"></script>
-    <script src="./components/angular-ui-select/dist/select.js"></script>
-    <script src="./components/angular-drag-and-drop-lists/angular-drag-and-drop-lists.js"></script>
-    <script src="./components/angular-smart-table/dist/smart-table.min.js"></script>
-    <script src="./components/d3/d3.js"></script>
-    <script src="./components/d3-tip/index.js"></script>
-    <script src="https://cdn.socket.io/socket.io-1.3.3.js"></script>
-    <script src="./components/toastr/toastr.min.js"></script>
-    <script src="./javascripts/app.js"></script>
-    <script src="./javascripts/controllers.js"></script>
-    <script src="./javascripts/models.js"></script>
-    <script src="./javascripts/directives.js"></script>
-    <script src="./javascripts/filters.js"></script>
-    <script src="./javascripts/scrolltotop.js"></script>
-    <script src="./javascripts/analytics.js"></script>
-  </body>
+<!DOCTYPE html>
+<html ng-app="inspinia">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Page title set in pageTitle directive -->
+    <title page-title></title>
+
+    <!-- Font awesome -->
+    <link href="assets/font-awesome/css/font-awesome.css" rel="stylesheet">
+
+    <!-- Bootstrap and Fonts -->
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Toastr -->
+    <link rel="stylesheet" href="assets/css/toastr.min.css" />
+
+    <!-- Main Inspinia CSS files -->
+    <link href="assets/css/animate.css" rel="stylesheet">
+    <link id="loadBefore" href="assets/css/style.css" rel="stylesheet">
+
+
+</head>
+
+<body>
+
+    <!-- Main view  -->
+    <!-- Wrapper-->
+    <div id="wrapper">
+
+        <!-- Navigation -->
+        <div ng-include="'app/shared/navigation/navigation.view.html'"></div>
+
+        <!-- Page wraper -->
+        <!-- ng-class with current state name give you the ability to extended customization your view -->
+        <div id="page-wrapper" class="gray-bg">
+
+            <!-- Page wrapper -->
+            <div ng-include="'app/shared/topnavbar/topnavbar.view.html'"></div>
+
+            <!-- Main view  -->
+            <div ui-view></div>
+
+            <!-- Footer -->
+            <div ng-include="'app/shared/footer/footer.view.html'"></div>
+
+        </div>
+        <!-- End page wrapper-->
+
+    </div>
+    <!-- End wrapper-->
+    <!-- jQuery and Bootstrap -->
+    <script src="assets/js/jquery/jquery-2.1.1.min.js"></script>
+    <script src="assets/js/plugins/jquery-ui/jquery-ui.js"></script>
+    <script src="assets/js/bootstrap/bootstrap.min.js"></script>
+
+    <!-- MetsiMenu -->
+    <script src="assets/js/plugins/metisMenu/jquery.metisMenu.js"></script>
+
+    <!-- SlimScroll -->
+    <script src="assets/js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+
+    <!-- Peace JS -->
+    <script src="assets/js/plugins/pace/pace.min.js"></script>
+
+    <!-- Toastr -->
+    <script src="assets/js/toastr.min.js"></script>
+
+    <!-- Custom and plugin javascript -->
+    <script src="assets/js/inspinia.js"></script>
+
+    <!-- Main Angular scripts-->
+    <script src="assets/js/angular/angular.min.js"></script>
+    <script src="assets/js/plugins/oclazyload/dist/ocLazyLoad.min.js"></script>
+    <script src="assets/js/ui-router/angular-ui-router.min.js"></script>
+    <script src="assets/js/bootstrap/ui-bootstrap-tpls-0.12.0.min.js"></script>
+
+    <!-- Anglar App Script -->
+    <script language="javascript" src="app/app.module.js"></script>
+    <script language="javascript" src="/app/app.config.js"></script>
+
+    <!-- Angular directives -->
+    <script language="javascript" src="app/shared/page-title/page-title.directive.js"></script>
+    <script language="javascript" src="app/shared/side-navigation/side-navigation.directive.js"></script>
+    <script language="javascript" src="app/shared/minimalize-sidebar/minimalize-sidebar.directive.js"></script>
+    <script language="javascript" src="app/shared/ibox-tools/regular/ibox-tools.directive.js"></script>
+    <script language="javascript" src="app/shared/ibox-tools/fullscreen/ibox-tools-fullscreen.directive.js"></script>
+
+    <!-- Angular controllers -->
+    <script language="javascript" src="app/components/main/main.controller.js"></script>
+    <script language="javascript" src="app/components/company/company.controller.js"></script>
+    <script language="javascript" src="app/components/company/create/create.controller.js"></script>
+    <script language="javascript" src="app/components/company/details/details.controller.js"></script>
+    <script language="javascript" src="app/components/company/type-dropdown/type-dropdown.directive.js"></script>
+    <script language="javascript" src="app/components/company/type-dropdown/type-dropdown.controller.js"></script>
+    <script language="javascript" src="app/shared/ibox-tools/fullscreen/ibox-tools-fullscreen.controller.js"></script>
+    <script language="javascript" src="app/shared/ibox-tools/regular/ibox-tools.controller.js"></script>
+    <script language="javascript" src="app/shared/minimalize-sidebar/minimalize-sidebar.controller.js"></script>
+
+
+</body>
 </html>
