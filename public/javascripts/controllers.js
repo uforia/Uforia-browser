@@ -756,10 +756,10 @@ angular.module('uforia')
             }
 
             if ($scope.cuErrorMessages.length === 0) {
-              var addUser = true
+              var archiveUser = true
 
-              // Save user
-              if (addUser) {
+              // Archive user
+              if (archiveUser) {
                 $http.post('/api/archive_user', $scope.editUser)
                     .success(function (data) {
                           if (typeof data.error !== 'undefined') {
@@ -840,11 +840,11 @@ angular.module('uforia')
 
               }else if(user.password === user.password2){
                 delete user.password2;
-                var addUser = true;
+                var updateUser = true;
 
 
-                // Save user
-                if(addUser) {
+                // Update user
+                if(updateUser) {
                   $http.post('/api/edit_user', $scope.editUser)
                       .success(function (data) {
                             if (typeof data.error !== 'undefined') {
