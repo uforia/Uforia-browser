@@ -840,11 +840,11 @@ angular.module('uforia')
 
               }else if(user.password === user.password2){
                 delete user.password2;
-                var updateUser = true;
+                var editUser = true;
 
 
                 // Update user
-                if(updateUser) {
+                if(editUser) {
                   $http.post('/api/edit_user', $scope.editUser)
                       .success(function (data) {
                             if (typeof data.error !== 'undefined') {
