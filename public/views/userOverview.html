@@ -45,8 +45,8 @@
           <td>{{row.role}}</td>
           <td>
             <div class="btn-group">
-              <button class="btn btn-warning"><span class="glyphicon glyphicon-pencil"></span> Edit user</button>
-              <button class="btn btn-danger"><span class="glyphicon glyphicon-remove"></span> Archive user</button>
+              <button class="btn btn-warning" ng-click="editUserModal(row)"><span class="glyphicon glyphicon-pencil"></span> Edit user</button>
+              <button class="btn btn-danger" ng-click="archiveUserModal(row)"><span class="glyphicon glyphicon-remove"></span> Archive user</button>
             </div>
           </td>
         </tr>
