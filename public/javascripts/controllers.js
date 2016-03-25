@@ -756,10 +756,6 @@ angular.module('uforia')
             }
 
             if ($scope.cuErrorMessages.length === 0) {
-              var archiveUser = true
-
-              // Archive user
-              if (archiveUser) {
                 $http.post('/api/archive_user', $scope.editUser)
                     .success(function (data) {
                           if (typeof data.error !== 'undefined') {
@@ -784,8 +780,8 @@ angular.module('uforia')
                 $scope.cuErrorMessages.push('Unknown error.');
               }
             }
-          };
-        });
+          }
+        );
       }
 
       $scope.editUserModal = function(user){
@@ -821,10 +817,16 @@ angular.module('uforia')
             }
 
             var skip = 0;
-            if(typeof user.password === "undefined"){
+            if(typeof user.password === "undefined" && typeof user.password2 === "undefined"){
               delete user.password;
               delete user.password2;
               skip = 1;
+            }
+
+            if(skip === 0){
+              if(typeof user.password === "undefined"){
+                $scope.cuErrorMessages.push('Make sure the passwords match.');
+              }
             }
 
             if(skip === 0){
@@ -840,11 +842,6 @@ angular.module('uforia')
 
               }else if(user.password === user.password2){
                 delete user.password2;
-                var editUser = true;
-
-
-                // Update user
-                if(editUser) {
                   $http.post('/api/edit_user', $scope.editUser)
                       .success(function (data) {
                             if (typeof data.error !== 'undefined') {
@@ -862,8 +859,6 @@ angular.module('uforia')
                             $scope.modalInstance.dismiss();
                           }
                       );
-                }
-
               }else{
                 $scope.cuErrorMessages.push('Unknown error.');
               }
