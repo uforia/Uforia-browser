@@ -772,7 +772,7 @@ angular.module('uforia')
                               $scope.searchCollection = $scope.rowCollection;
                             }
                           }
-                          // Close modal
+                          //Close modal
                           $scope.modalInstance.dismiss();
                         }
                     );
