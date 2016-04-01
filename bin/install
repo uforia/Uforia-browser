@@ -1,0 +1,73 @@
+#!/usr/bin/env node
+var common = require('../lib/common.js');
+var bcrypt = require('bcrypt-nodejs');
+var crypto = require('crypto');
+
+function randomString(length, characters) {
+	var randomData = crypto.randomBytes(length);
+
+	var result = '';
+	for (var i = 0; i < randomData.length; i++) {
+		result += characters[randomData[i] % characters.length];
+	}
+	return result;
+}
+
+const ALPHABET_AND_DIGITS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
+const EMAIL_ADDRESS = 'admin@example.com';
+const PASSWORD = randomString(16, ALPHABET_AND_DIGITS);
+
+common.elasticsearch.indices.putMapping({
+	index: common.config.elasticsearch.index,
+	type: 'users',
+	body: {
+		properties: {
+			firstName: {
+				type: 'string'
+			},
+			lastName: {
+				type: 'string'
+			},
+			email: {
+				type: 'string',
+				index: 'not_analyzed'
+			},
+			password: {
+				type: 'string',
+				index: 'not_analyzed'
+			},
+			role: {
+				type: 'string'
+			},
+			isDeleted: {
+				type: 'boolean'
+			}
+		}
+	}
+})
+.then(function(resp) {
+	var hash = bcrypt.hashSync(PASSWORD);
+
+	return common.elasticsearch.create({
+		index: common.config.elasticsearch.index,
+		type: 'users',
+		body: {
+			firstName: 'John',
+			lastName: 'Doe',
+			email: EMAIL_ADDRESS,
+			password: hash,
+			role: 'admin',
+			isDeleted: false,
+		}
+	});
+})
+.then(function(resp) {
+	console.log('The setup has been completed successfully.');
+	console.log();
+	console.log('You may log in with ' + EMAIL_ADDRESS + ' as email address and ' + PASSWORD + ' as password.');
+})
+.catch(function(err) {
+	console.error('An error occurred:');
+	console.error(err);
+});
