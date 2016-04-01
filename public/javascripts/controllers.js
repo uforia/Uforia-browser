@@ -763,15 +763,13 @@ angular.module('uforia')
                             $scope.error.push(data.error.message);
                           }
 
-                          if (typeof data.response !== 'undefined') {
-                            if (typeof data.response._version !== 'undefined') {
-                              var ruser = $scope.rowCollection.indexOf($scope.editUser);
-                              $scope.rowCollection.splice(ruser, 1);
+                          if (typeof data.response !== 'undefined' && typeof data.response._version !== 'undefined') {
+                            var ruser = $scope.rowCollection.indexOf($scope.editUser);
+                            $scope.rowCollection.splice(ruser, 1);
 
-                              $scope.message.push('User has been archived');
+                            $scope.message.push('User has been archived');
 
-                              $scope.searchCollection = $scope.rowCollection;
-                            }
+                            $scope.searchCollection = $scope.rowCollection;
                           }
                           //Close modal
                           $scope.modalInstance.dismiss();
@@ -849,20 +847,20 @@ angular.module('uforia')
                               $scope.error.push(data.error.message);
                             }
 
-                            if (typeof data.data.response !== 'undefined') {
-                              if (typeof data.data.response._version !== 'undefined') {
-                                $scope.message.push('Changes have been updated');
+                            if (typeof data.data.response !== 'undefined' && typeof data.data.response._version !== 'undefined') {
+
+                              $scope.message.push('Changes have been updated');
 
 
-                                $scope.rowCollection.forEach(function (user, index) {
-                                  if (user.id == $scope.editUser.id){
-                                    $scope.rowCollection[index] = $scope.editUser;
-                                  }
-                                })
+                              $scope.rowCollection.forEach(function (user, index) {
+                                if (user.id == $scope.editUser.id){
+                                  $scope.rowCollection[index] = $scope.editUser;
+                                }
+                              })
 
-                                $scope.searchCollection = $scope.rowCollection;
+                              $scope.searchCollection = $scope.rowCollection;
 
-                              }
+
                             }
                             // Close modal
                             $scope.modalInstance.dismiss();
