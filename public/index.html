@@ -10,25 +10,46 @@
 <head>
 
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Bootstrap Core CSS -->
+    <link href="assets/bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- MetisMenu CSS -->
+    <link href="assets/bower_components/metisMenu/dist/metisMenu.min.css" rel="stylesheet">
+    
+    <!-- Animate -->
+    <link href="assets/bower_components/animate.css/animate.min.css" rel="stylesheet">
+    
+    <!-- Toastr -->
+    <link href="assets/bower_components/toastr/toastr.min.css" rel="stylesheet" />
+
+    <!-- Timeline CSS -->
+    <link href="assets/css/timeline.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="assets/css/sb-admin-2.css" rel="stylesheet">
+
+    <!-- Morris Charts CSS -->
+    <link href="assets/bower_components/morrisjs/morris.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="assets/bower_components/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
 
     <!-- Page title set in pageTitle directive -->
     <title page-title></title>
 
-    <!-- Font awesome -->
-    <link href="assets/font-awesome/css/font-awesome.css" rel="stylesheet">
-
-    <!-- Bootstrap and Fonts -->
-    <link href="assets/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Toastr -->
-    <link rel="stylesheet" href="assets/css/toastr.min.css" />
-
-    <!-- Main Inspinia CSS files -->
-    <link href="assets/css/animate.css" rel="stylesheet">
-    <link id="loadBefore" href="assets/css/style.css" rel="stylesheet">
-
-
+    <link href="assets/css/style.css" rel="stylesheet" />
 </head>
 
 <body>
@@ -42,45 +63,48 @@
 
         <!-- Page wraper -->
         <!-- ng-class with current state name give you the ability to extended customization your view -->
-        <div id="page-wrapper" class="gray-bg">
+        <div id="page-wrapper">
 
             <!-- Page wrapper -->
-            <div ng-include="'app/shared/topnavbar/topnavbar.view.html'"></div>
+            <!--<div ng-include="'app/shared/topnavbar/topnavbar.view.html'"></div>-->
 
             <!-- Main view  -->
+
+
             <div ui-view></div>
 
+
             <!-- Footer -->
-            <div ng-include="'app/shared/footer/footer.view.html'"></div>
+            <!--<div ng-include="'app/shared/footer/footer.view.html'"></div>-->
 
         </div>
         <!-- End page wrapper-->
 
     </div>
     <!-- End wrapper-->
-    <!-- jQuery and Bootstrap -->
-    <script src="assets/js/jquery/jquery-2.1.1.min.js"></script>
-    <script src="assets/js/plugins/jquery-ui/jquery-ui.js"></script>
-    <script src="assets/js/bootstrap/bootstrap.min.js"></script>
 
-    <!-- MetsiMenu -->
-    <script src="assets/js/plugins/metisMenu/jquery.metisMenu.js"></script>
+    <!-- jQuery -->
+    <script src="assets/bower_components/jquery/dist/jquery.min.js"></script>
 
-    <!-- SlimScroll -->
-    <script src="assets/js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="assets/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
 
-    <!-- Peace JS -->
-    <script src="assets/js/plugins/pace/pace.min.js"></script>
+    <!-- Metis Menu Plugin JavaScript -->
+    <script src="assets/bower_components/metisMenu/dist/metisMenu.min.js"></script>
+
+    <!-- Morris Charts JavaScript -->
+    <script src="assets/bower_components/raphael/raphael-min.js"></script>
+    <script src="assets/bower_components/morrisjs/morris.min.js"></script>
 
     <!-- Toastr -->
-    <script src="assets/js/toastr.min.js"></script>
+    <script src="assets/bower_components/toastr/toastr.min.js"></script>
 
-    <!-- Custom and plugin javascript -->
-    <script src="assets/js/inspinia.js"></script>
+    <!-- Custom Theme JavaScript -->
+    <script src="assets/js/sb-admin-2.js"></script>
 
     <!-- Main Angular scripts-->
     <script src="assets/js/angular/angular.min.js"></script>
-    <script src="assets/js/plugins/oclazyload/dist/ocLazyLoad.min.js"></script>
+    <script src="assets/bower_components/oclazyload/dist/ocLazyLoad.min.js"></script>
     <script src="assets/js/ui-router/angular-ui-router.min.js"></script>
     <script src="assets/js/bootstrap/ui-bootstrap-tpls-0.12.0.min.js"></script>
 
@@ -105,4 +129,5 @@
 
 
 </body>
+
 </html>
