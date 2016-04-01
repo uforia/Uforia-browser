@@ -859,6 +859,50 @@ router.post('/save_user', function(req, res){
   })
 });
 
+router.post('/edit_user', function(req, res){
+  var bcrypt = require('bcrypt-nodejs');
+  var user = req.body;
+  var id = user.id;
+  delete user.id;
+
+  if (user.password != 'undefined') {
+    bcrypt.hash(user['password'], null, null, function(err, hash){
+      user.password = hash;
+    })
+  }
+
+    c.elasticsearch.update({
+      index: INDEX,
+      type: 'users',
+      id: id,
+      body: {
+        "doc" : user
+      }
+    }, function (error, response) {
+      res.send({error: error, response: response});
+    });
+
+});
+
+router.post('/archive_user', function(req, res){
+  var user = req.body;
+  var id = user.id;
+
+  c.elasticsearch.update({
+    index: INDEX,
+    type: 'users',
+    id: id,
+    body: {
+      doc: {
+        isDeleted: 1
+      }
+    }
+  }, function (error, response) {
+    res.send({error: error, response: response});
+  });
+
+});
+
 /**
  * Get all users
  * url: /api/get_users
