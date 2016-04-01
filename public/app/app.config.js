@@ -1,17 +1,48 @@
 (function() {
 
-    angular.module('uforia').config(config).run(function($rootScope, $state) {
-        $rootScope.$state = $state;
-    });
+    angular.module('uforia').config(config).run(run);
 
-    /**
-     * INSPINIA - Responsive Admin Theme
-     *
-     * Inspinia theme use AngularUI Router to manage routing and views
-     * Each view are defined as state.
-     * Initial there are written state for all view in theme.
-     *
-     */
+
+    function run($rootScope, $http, $state, $window) {
+        $rootScope.$state = $state;
+
+        $rootScope.mappings = {};
+        socket = io.connect();
+        socket.on('connect', function() {
+
+        });
+        socket.on('uforia', function(info) {
+            $rootScope.mappings[info.mapping] = info;
+            $rootScope.$apply();
+        });
+
+        $rootScope.$on('$stateChangeStart', function(event, toState) {
+            // Would print "Hello World!" when 'parent' is activated
+            // Would print "Hello UI-Router!" when 'parent.child' is activated
+
+            // Set global var for logged in state.
+
+            $http.get('/logged-in')
+                .success(function(user) {
+                    // Authenticated 
+                    if (user == 1) {
+                        $rootScope.isLoggedIn = true;
+                    } else {
+                        $rootScope.isLoggedIn = false;
+                    }
+                });
+
+            $rootScope.logout = function() {
+                $http.post('/logout')
+                    .success(function(data) {
+                        // $state.go('search', {}, {reload: true});
+                        $window.location.reload();
+                    });
+            }
+
+        });
+    }
+
     function config($stateProvider, $urlRouterProvider, $ocLazyLoadProvider) {
         $urlRouterProvider.otherwise("/");
 
@@ -40,6 +71,38 @@
                 controller: "UsersCreateController",
                 controllerAs: 'ctrl',
                 data: { pageTitle: "Create user" }
+            })
+            .state('auth', {
+                url: "/auth",
+                template: "<div ui-view></div>",
+                controller: "AuthController"
+            })
+            .state('auth.login', {
+                url: "/login",
+                templateUrl: "app/components/authentication/login/login.view.html",
+                controller: 'AuthLoginController',
+                controllerAs: 'ctrl',
+                data: { pageTitle: "Login" }
             });
     }
 })();
+
+
+function isAuthenticated($q, $timeout, $http, $location, $rootScope) {
+    // Initialize a new promise 
+    var deferred = $q.defer();
+
+    $http.get('/logged-in')
+        .success(function(user) {
+            // Authenticated 
+            if (user == 1) {
+                deferred.resolve();
+            } else {
+                $rootScope.message = 'You need to log in.';
+                deferred.reject();
+                $location.url('/login');
+            }
+
+            return deferred.promise;
+        });
+}
