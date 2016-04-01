@@ -701,7 +701,7 @@ angular.module('uforia')
       $scope.showNumberOfPages = 7;
       $scope.searchCollection = [];
       $scope.user = {
-        isDeleted: 0
+        isDeleted: false
       };
       $scope.message = [];
       $scope.error = [];
@@ -721,7 +721,7 @@ angular.module('uforia')
                 //Load users in table
                 angular.forEach(data.response.hits.hits, function (value, key) {
                   var u = value._source;
-                  if(u.isDeleted == 0) {
+                  if(u.isDeleted == false) {
                     $scope.rowCollection.push({
                       id: value._id, firstName: u.firstName, lastName: u.lastName, email: u.email,
                       role: 'N/A'
@@ -739,7 +739,7 @@ angular.module('uforia')
       $scope.archiveUserModal = function(user) {
         $scope.editUser = angular.copy(user);
 
-        $scope.editUser.isDeleted = 0;
+        $scope.editUser.isDeleted = false;
         $scope.modalInstance = $modal.open({
           templateUrl: 'views/modals/archiveUser.html',
           size: 'md',
@@ -785,7 +785,7 @@ angular.module('uforia')
 
       $scope.editUserModal = function(user){
         $scope.editUser = angular.copy(user);
-        $scope.editUser.isDeleted=0;
+        $scope.editUser.isDeleted=false;
         $scope.modalInstance = $modal.open({
           templateUrl: 'views/modals/editUser.html',
           size: 'lg',
@@ -842,12 +842,12 @@ angular.module('uforia')
                 delete user.password2;
                   console.log(user);
                   $http.post('/api/edit_user', $scope.editUser)
-                      .then(function (data) {
-                            if (typeof data.data.error !== 'undefined') {
+                      .success(function (data) {
+                            if (typeof data.error !== 'undefined') {
                               $scope.error.push(data.error.message);
                             }
 
-                            if (typeof data.data.response !== 'undefined' && typeof data.data.response._version !== 'undefined') {
+                            if (typeof data.response !== 'undefined' && typeof data.response._version !== 'undefined') {
 
                               $scope.message.push('Changes have been updated');
 
