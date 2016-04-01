@@ -865,8 +865,11 @@ router.post('/edit_user', function(req, res){
   var id = user.id;
   delete user.id;
 
-  bcrypt.hash(user['password'], null, null, function(err, hash){
-    user.password = hash;
+  if (user.password != 'undefined') {
+    bcrypt.hash(user['password'], null, null, function(err, hash){
+      user.password = hash;
+    })
+  }
 
     c.elasticsearch.update({
       index: INDEX,
@@ -878,7 +881,7 @@ router.post('/edit_user', function(req, res){
     }, function (error, response) {
       res.send({error: error, response: response});
     });
-  })
+
 });
 
 router.post('/archive_user', function(req, res){

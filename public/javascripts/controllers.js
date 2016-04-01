@@ -737,7 +737,8 @@ angular.module('uforia')
       loadUsers();
 
       $scope.archiveUserModal = function(user) {
-        $scope.editUser = user;
+        $scope.editUser = angular.copy(user);
+
         $scope.editUser.isDeleted = 0;
         $scope.modalInstance = $modal.open({
           templateUrl: 'views/modals/archiveUser.html',
@@ -785,7 +786,7 @@ angular.module('uforia')
       }
 
       $scope.editUserModal = function(user){
-        $scope.editUser = user;
+        $scope.editUser = angular.copy(user);
         $scope.editUser.isDeleted=0;
         $scope.modalInstance = $modal.open({
           templateUrl: 'views/modals/editUser.html',
@@ -796,7 +797,6 @@ angular.module('uforia')
         $scope.modalInstance.opened.then(function(){
 
           $scope.save = function(user){
-            console.log(user);
             $scope.cuErrorMessages = [];
 
             // Checks
@@ -842,17 +842,26 @@ angular.module('uforia')
 
               }else if(user.password === user.password2){
                 delete user.password2;
+                  console.log(user);
                   $http.post('/api/edit_user', $scope.editUser)
-                      .success(function (data) {
-                            if (typeof data.error !== 'undefined') {
+                      .then(function (data) {
+                            if (typeof data.data.error !== 'undefined') {
                               $scope.error.push(data.error.message);
                             }
 
-                            if (typeof data.response !== 'undefined') {
-                              if (typeof data.response._version !== 'undefined') {
+                            if (typeof data.data.response !== 'undefined') {
+                              if (typeof data.data.response._version !== 'undefined') {
                                 $scope.message.push('Changes have been updated');
 
+
+                                $scope.rowCollection.forEach(function (user, index) {
+                                  if (user.id == $scope.editUser.id){
+                                    $scope.rowCollection[index] = $scope.editUser;
+                                  }
+                                })
+
                                 $scope.searchCollection = $scope.rowCollection;
+
                               }
                             }
                             // Close modal
