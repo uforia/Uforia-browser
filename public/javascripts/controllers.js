@@ -756,30 +756,23 @@ angular.module('uforia')
         $scope.modalInstance.opened.then(function () {
 
           $scope.save = function(user) {
-            $scope.cuErrorMessages = [];
-
-            if ($scope.cuErrorMessages.length === 0) {
-                $http.post('/api/archive_user', user)
-                    .success(function (data) {
-                          console.log(data.error);
-                          if (typeof data.error !== 'undefined') {
-                            toastr.error(data.error.message);
-                          }
-
-                          if (typeof data.response !== 'undefined' && typeof data.response._version !== 'undefined') {
-                            var ruser = $scope.rowCollection.indexOf($scope.editUser);
-                            $scope.rowCollection.splice(ruser, 1);
-
-                            toastr.success('User has been archived');
-                            $scope.searchCollection = $scope.rowCollection;
-                          }
-                          //Close modal
-                          $scope.modalInstance.dismiss();
+              $http.post('/api/archive_user', user)
+                  .success(function (data) {
+                        if (typeof data.error !== 'undefined') {
+                          toastr.error(data.error.message);
                         }
-                    );
-              } else {
-                toastr.error('Unknown Error');
-              }
+
+                        if (typeof data.response !== 'undefined' && typeof data.response._version !== 'undefined') {
+                          var ruser = $scope.rowCollection.indexOf($scope.editUser);
+                          $scope.rowCollection.splice(ruser, 1);
+
+                          toastr.success('User has been archived');
+                          $scope.searchCollection = $scope.rowCollection;
+                        }
+                        //Close modal
+                        $scope.modalInstance.dismiss();
+                      }
+                  );
             }
           }
         )
@@ -797,50 +790,36 @@ angular.module('uforia')
         $scope.modalInstance.opened.then(function(){
 
           $scope.save = function(user){
-          $scope.cuErrorMessages = [];
 
-          var skip = 0;
-          if((typeof user.password === "undefined" || user.password =="") && (typeof user.password2 === "undefined" || user.password =="")){
-            delete user.password;
-            delete user.password2;
-            skip = 1;
-          }
+            if ((typeof user.password === "undefined" || user.password =="") && (typeof user.password2 === "undefined" || user.password =="")){
+              delete user.password;
+              delete user.password2;
 
-            if($scope.cuErrorMessages.length === 0){
-
-              if(user.password !== user.password2 && skip === 0){
-                $scope.cuErrorMessages.push('Password doesn\'t match.');
-
-              }else if(user.password === user.password2){
-                delete user.password2;
-                  console.log(user);
-                  $http.post('/api/edit_user', $scope.editUser)
-                      .success(function (data) {
-                            console.log(data);
-                            if (typeof data.error !== 'undefined') {
-                              toastr.error(data.error.message);
-                            }
-
-                            if (typeof data.response !== 'undefined' && typeof data.response._version !== 'undefined') {
-                              toastr.success('Changes have been updated');
-
-                              $scope.rowCollection.forEach(function (user, index) {
-                                if (user.id == $scope.editUser.id){
-                                  $scope.rowCollection[index] = $scope.editUser;
-                                }
-                              })
-
-                              $scope.searchCollection = $scope.rowCollection;
-
-                            }
-                            // Close modal
-                            $scope.modalInstance.dismiss();
-                          }
-                      );
-              } else{
-                toastr.error('Unknown error');
-              }
+            } else if(user.password === user.password2){
+              delete user.password2;
             }
+
+            $http.post('/api/edit_user', $scope.editUser)
+                .success(function (data) {
+                      if (typeof data.error !== 'undefined') {
+                        toastr.error(data.error.message);
+                      }
+
+                      if (typeof data.response !== 'undefined' && typeof data.response._version !== 'undefined') {
+                        toastr.success('Changes have been updated');
+
+                        $scope.rowCollection.forEach(function (user, index) {
+                          if (user.id == $scope.editUser.id){
+                            $scope.rowCollection[index] = $scope.editUser;
+                          }
+                        });
+
+                        $scope.searchCollection = $scope.rowCollection;
+                      }
+                      // Close modal
+                      $scope.modalInstance.dismiss();
+                    }
+                );
           };
         })
       };
@@ -894,7 +873,7 @@ angular.module('uforia')
                       }
                   );
             } else if (!addUser){
-              toastr.error('An user with this email address already exists');
+              toastr.error('A user with this email address already exists');
             } else {
               toastr.error('Unknown error');
             }
