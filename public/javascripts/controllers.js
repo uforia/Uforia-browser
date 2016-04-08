@@ -723,19 +723,19 @@ angular.module('uforia')
                 angular.forEach(data.response.hits.hits, function (value, key) {
                   var u = value._source;
 
-                  if(u.isDeleted == false) {
+                //   if(u.isDeleted == false) {
                     $scope.rowCollection.push({
                       id: value._id, firstName: u.firstName, lastName: u.lastName, email: u.email,
-                      role: 'N/A', isDeleted: ''
+                      role: 'N/A', isDeleted: u.isDeleted
                     });
-                  }
+                //   }
 
-                  if(u.isDeleted == true) {
-                    $scope.rowCollection.push({
-                      id: value._id, firstName: u.firstName, lastName: u.lastName, email: u.email,
-                      role: 'N/A', isDeleted: 'disabled'
-                    });
-                  }
+                //   if(u.isDeleted == true) {
+                //     $scope.rowCollection.push({
+                //       id: value._id, firstName: u.firstName, lastName: u.lastName, email: u.email,
+                //       role: 'N/A', isDeleted:
+                //     });
+                //   }
 
                 });
 

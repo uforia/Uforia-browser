@@ -40,12 +40,12 @@
       </thead>
       <tbody>
         <tr id="mydiv" ng-repeat="row in rowCollection">
-          <td id="{{row.isDeleted}}">{{row.firstName + ' ' + row.lastName}}</td>
-          <td id="{{row.isDeleted}}">{{row.email}}</td>
-          <td id="{{row.isDeleted}}">{{row.role}}</td>
-          <td id="{{row.isDeleted}}">
+          <td ng-attr-class="{{ (row.isDeleted) ? 'disabled' : '' }}">{{row.firstName + ' ' + row.lastName}}</td>
+          <td ng-attr-class="{{ (row.isDeleted) ? 'disabled' : '' }}">{{row.email}}</td>
+          <td ng-attr-class="{{ (row.isDeleted) ? 'disabled' : '' }}">{{row.role}}</td>
+          <td ng-attr-class="{{ (row.isDeleted) ? 'disabled' : '' }}">
             <div class="btn-group">
-              <button class="btn btn-warning {{row.isDeleted}}" ng-click="editUserModal(row)"><span class="glyphicon glyphicon-pencil"></span> Edit user</button>
+              <button ng-attr-class="{{ row.isDeleted ? 'btn btn-warning disabled' : 'btn btn-warning ' }}" ng-click="editUserModal(row)"><span class="glyphicon glyphicon-pencil"></span> Edit user</button>
 
               <button ng-show="row.isDeleted"  class="btn btn-danger" ng-click="unarchiveUserModal(row)"><span class="glyphicon glyphicon-remove"></span> Unarchive user</button>
               <button ng-show="!row.isDeleted"  class="btn btn-danger" ng-click="archiveUserModal(row)"><span class="glyphicon glyphicon-remove"></span> Archive user</button>
