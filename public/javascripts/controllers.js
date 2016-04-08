@@ -736,8 +736,15 @@ angular.module('uforia')
 
       loadUsers();
 
+      $scope.clearFields = function (changePassword) {
+        if (!changePassword){
+          $scope.editUser.password="";
+          $scope.editUser.password2="";
+        }
+      };
+
       $scope.archiveUserModal = function(user) {
-        $scope.editUser = angular.copy(user);
+        $scope.editUser = user;
 
         $scope.editUser.isDeleted = false;
         $scope.modalInstance = $modal.open({
@@ -751,24 +758,19 @@ angular.module('uforia')
           $scope.save = function(user) {
             $scope.cuErrorMessages = [];
 
-            // Checks
-            if (typeof user.id === "undefined") {
-              $scope.cuErrorMessages.push('Id is required');
-            }
-
             if ($scope.cuErrorMessages.length === 0) {
-                $http.post('/api/archive_user', $scope.editUser)
+                $http.post('/api/archive_user', user)
                     .success(function (data) {
+                          console.log(data.error);
                           if (typeof data.error !== 'undefined') {
-                            $scope.error.push(data.error.message);
+                            toastr.error(data.error.message);
                           }
 
                           if (typeof data.response !== 'undefined' && typeof data.response._version !== 'undefined') {
                             var ruser = $scope.rowCollection.indexOf($scope.editUser);
                             $scope.rowCollection.splice(ruser, 1);
 
-                            $scope.message.push('User has been archived');
-
+                            toastr.success('User has been archived');
                             $scope.searchCollection = $scope.rowCollection;
                           }
                           //Close modal
@@ -776,12 +778,12 @@ angular.module('uforia')
                         }
                     );
               } else {
-                $scope.cuErrorMessages.push('Unknown error.');
+                toastr.error('Unknown Error');
               }
             }
           }
-        );
-      }
+        )
+      };
 
       $scope.editUserModal = function(user){
         $scope.editUser = angular.copy(user);
@@ -795,43 +797,14 @@ angular.module('uforia')
         $scope.modalInstance.opened.then(function(){
 
           $scope.save = function(user){
-            $scope.cuErrorMessages = [];
+          $scope.cuErrorMessages = [];
 
-            // Checks
-            if(typeof user.id === "undefined"){
-              $scope.cuErrorMessages.push('Id is required');
-            }
-
-            if(typeof user.firstName === "undefined"){
-              $scope.cuErrorMessages.push('First name is required');
-            }
-
-            if(typeof user.lastName === "undefined"){
-              $scope.cuErrorMessages.push('Last name is required');
-            }
-
-            if(typeof user.email === "undefined"){
-              $scope.cuErrorMessages.push('Email is required');
-            }
-
-            var skip = 0;
-            if(typeof user.password === "undefined" && typeof user.password2 === "undefined"){
-              delete user.password;
-              delete user.password2;
-              skip = 1;
-            }
-
-            if(skip === 0){
-              if(typeof user.password === "undefined"){
-                $scope.cuErrorMessages.push('Make sure the passwords match.');
-              }
-            }
-
-            if(skip === 0){
-              if(typeof user.password2 === "undefined"){
-                $scope.cuErrorMessages.push('Make sure the passwords match.');
-              }
-            }
+          var skip = 0;
+          if((typeof user.password === "undefined" || user.password =="") && (typeof user.password2 === "undefined" || user.password =="")){
+            delete user.password;
+            delete user.password2;
+            skip = 1;
+          }
 
             if($scope.cuErrorMessages.length === 0){
 
@@ -843,14 +816,13 @@ angular.module('uforia')
                   console.log(user);
                   $http.post('/api/edit_user', $scope.editUser)
                       .success(function (data) {
+                            console.log(data);
                             if (typeof data.error !== 'undefined') {
-                              $scope.error.push(data.error.message);
+                              toastr.error(data.error.message);
                             }
 
                             if (typeof data.response !== 'undefined' && typeof data.response._version !== 'undefined') {
-
-                              $scope.message.push('Changes have been updated');
-
+                              toastr.success('Changes have been updated');
 
                               $scope.rowCollection.forEach(function (user, index) {
                                 if (user.id == $scope.editUser.id){
@@ -860,21 +832,18 @@ angular.module('uforia')
 
                               $scope.searchCollection = $scope.rowCollection;
 
-
                             }
                             // Close modal
                             $scope.modalInstance.dismiss();
                           }
                       );
-              }else{
-                $scope.cuErrorMessages.push('Unknown error.');
+              } else{
+                toastr.error('Unknown error');
               }
             }
-
           };
-        });
-
-      }
+        })
+      };
 
       // Modal for adding new users
       $scope.createUserModal = function(type){
@@ -888,82 +857,50 @@ angular.module('uforia')
 
           $scope.save = function(user){
             $scope.cuErrorMessages = [];
-
-            // Checks
-            if(typeof user.firstName === "undefined"){
-              $scope.cuErrorMessages.push('First name is required');
-            }
-
-            if(typeof user.lastName === "undefined"){
-              $scope.cuErrorMessages.push('Last name is required');
-            }
-
-            if(typeof user.email === "undefined"){
-              $scope.cuErrorMessages.push('Email is required');
-            }
-
-            if(typeof user.password === "undefined"){
-              $scope.cuErrorMessages.push('Password is invalid. Make sure the password is at least 4 characters long.');
-            }
-
-            if(typeof user.password2 === "undefined"){
-              $scope.cuErrorMessages.push('Make sure the passwords match.');
-            }
-
-            if($scope.cuErrorMessages.length === 0){
-
-              if(user.password !== user.password2){
-                $scope.cuErrorMessages.push('Password doesn\'t match.');
-
-              }else if(user.password === user.password2){
-                delete user.password2;
-                var addUser = true;
-
-                // Check if user exists
-                angular.forEach(users, function(value, key){
-                  var u = value._source;
-                  if(user.email == u.email){
-                    $scope.cuErrorMessages.push('An user with this email address already exists.');
-                    addUser = false;
-                  }
-                });
-
-                // Save user
-                if(addUser) {
-                  $http.post('/api/save_user', user)
-                      .success(function (data) {
-                            if (typeof data.error !== 'undefined') {
-                              $scope.error.push(data.error.message);
-                            }
-
-                            if (typeof data.response !== 'undefined') {
-                              if (data.response.created == true) {
-                                $scope.message.push('User has been added.');
-
-                                //Load new user in table
-                                $scope.rowCollection.push({
-                                  id: data.response._id, firstName: user.firstName, lastName: user.lastName, email: user.email,
-                                  role: 'N/A'
-                                });
-                                $scope.searchCollection = $scope.rowCollection;
-                              }
-                            }
-                            // Close modal
-                            $scope.modalInstance.dismiss();
-                          }
-                      );
-                }
-
-              }else{
-                $scope.cuErrorMessages.push('Unknown error.');
+            
+            var addUser = true;
+  
+            // Check if user exists
+            angular.forEach(users, function(value, key){
+              var u = value._source;
+              if(user.email == u.email){
+                addUser = false;
               }
+            });
+  
+            // Save user
+            if(addUser) {
+              delete user.password2;
+              $http.post('/api/save_user', user)
+                  .success(function (data) {
+                        if (typeof data.error !== 'undefined') {
+                          toastr.error(data.error.message);
+                        }
+  
+                        if (typeof data.response !== 'undefined') {
+                          if (data.response.created == true) {
+                            toastr.success('User has been added');
+  
+                            //Load new user in table
+                            $scope.rowCollection.push({
+                              id: data.response._id, firstName: user.firstName, lastName: user.lastName, email: user.email,
+                              role: 'N/A'
+                            });
+                            $scope.searchCollection = $scope.rowCollection;
+                          }
+                        }
+                        // Close modal
+                        $scope.modalInstance.dismiss();
+                      }
+                  );
+            } else if (!addUser){
+              toastr.error('An user with this email address already exists');
+            } else {
+              toastr.error('Unknown error');
             }
-
           };
         });
-
       }
-
     });
 
 function ArrayMove(array, old_index, new_index) {

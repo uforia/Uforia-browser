@@ -44,7 +44,7 @@ var auth = function(req, res, next) {
 }
 
 app.use('/', m.init, routes);
-app.use('/api', auth, api);
+app.use('/api', api);
 
 passport.serializeUser(function(user, done) {
   done(null, user);
