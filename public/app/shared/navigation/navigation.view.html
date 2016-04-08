@@ -12,9 +12,11 @@
     <!-- /.navbar-header -->
 
     <ul class="nav navbar-top-links navbar-right">
-
+        <li>
+            <a ng-show="!isLoggedIn" href="" ui-sref="auth.login"><i class="fa fa-sign-in fa-fw"></i> Login</a>
+        </li>
         <!-- /.dropdown -->
-        <li class="dropdown">
+        <li class="dropdown" ng-show="isLoggedIn">
             <a class="dropdown-toggle" data-toggle="dropdown" href="#">
                 <i class="fa fa-user fa-fw"></i> <i class="fa fa-caret-down"></i>
             </a>
@@ -25,8 +27,7 @@
                 </li>
                 <li class="divider"></li>
                 <li>
-                    <a ng-show="isLoggedIn" href="" ng-click="logout()"><i class="fa fa-sign-out fa-fw"></i> Log out</a>
-                    <a ng-show="!isLoggedIn" href="" ui-sref="auth.login"><i class="fa fa-sign-in fa-fw"></i> Login</a>
+                    <a href="" ng-click="logout()"><i class="fa fa-sign-out fa-fw"></i> Log out</a>
                 </li>
             </ul>
             <!-- /.dropdown-user -->
