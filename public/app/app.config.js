@@ -63,14 +63,20 @@
                 templateUrl: "app/components/users/users.view.html",
                 controller: 'UsersController',
                 controllerAs: 'ctrl',
-                data: { pageTitle: "User overview" }
+                data: { pageTitle: "User overview" },
+                resolve:{
+                    loggedin: isAuthenticated
+                }
             })
             .state('users.create', {
                 url: "/create",
                 templateUrl: "app/components/users/create/create.view.html",
                 controller: "UsersCreateController",
                 controllerAs: 'ctrl',
-                data: { pageTitle: "Create user" }
+                data: { pageTitle: "Create user" },
+                resolve:{
+                    loggedin: isAuthenticated
+                }
             })
             .state('auth', {
                 url: "/auth",
@@ -88,7 +94,7 @@
 })();
 
 
-function isAuthenticated($q, $timeout, $http, $location, $rootScope) {
+function isAuthenticated($q, $timeout, $http, $location, $rootScope, $state) {
     // Initialize a new promise 
     var deferred = $q.defer();
 
@@ -102,7 +108,7 @@ function isAuthenticated($q, $timeout, $http, $location, $rootScope) {
                 $rootScope.message = 'You need to log in.';
                 deferred.reject();
                 $rootScope.isLoggedIn = false;
-                $location.url('/login');
+                $state.go('auth.login');
             }
 
             return deferred.promise;

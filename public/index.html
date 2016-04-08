@@ -1,10 +1,4 @@
-﻿<!--
-* INSPINIA - Responsive Admin Theme
-* Version 2.3
-*
--->
-
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html ng-app="uforia">
 
 <head>
@@ -52,7 +46,7 @@
     <link href="assets/css/style.css" rel="stylesheet" />
 </head>
 
-<body>
+<body ng-attr-class="{{($state.includes('auth.login')) ? 'login-page' : ''}}">
 
     <!-- Main view  -->
     <!-- Wrapper-->

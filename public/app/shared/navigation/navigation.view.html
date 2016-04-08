@@ -24,7 +24,9 @@
                 <li><a href="#"><i class="fa fa-gear fa-fw"></i> Settings</a>
                 </li>
                 <li class="divider"></li>
-                <li><a href="login.html"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
+                <li>
+                    <a ng-show="isLoggedIn" href="" ng-click="logout()"><i class="fa fa-sign-out fa-fw"></i> Log out</a>
+                    <a ng-show="!isLoggedIn" href="" ui-sref="auth.login"><i class="fa fa-sign-in fa-fw"></i> Login</a>
                 </li>
             </ul>
             <!-- /.dropdown-user -->

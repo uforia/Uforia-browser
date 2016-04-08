@@ -15,6 +15,7 @@
         $scope.login = function() {
             $http.post('/auth', { username: $scope.username, password: $scope.password })
                 .success(function(data) {
+                    $rootScope.isLoggedIn = true;
                     $state.go('users');
                     toastr.success('Logged in successfully!');
                 }).error(function(data) {

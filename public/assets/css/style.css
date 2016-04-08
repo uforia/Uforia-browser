@@ -1,0 +1,13 @@
+
+/*================ LOGIN PAGE ===================*/
+.login-page{
+    background:url('/assets/img/world-map-grey.png');
+    background-size: 100%;
+}
+
+.login-title{
+    text-align: center;
+    font-size:43pt;
+    margin-bottom:-60px;
+    margin-top:20%;
+}
