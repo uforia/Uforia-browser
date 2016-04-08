@@ -1,0 +1,112 @@
+<div ui-view class="ng-scope">
+    <div class="row">
+        <div class="col-xs-12">
+            <h1 class="page-header">Search</h1>
+            <ol class="breadcrumb">
+                <li>
+                    <a ui-sref="index">Home</a>
+                </li>
+                <li class="active">
+                    <strong>Search</strong>
+                </li>
+            </ol>
+        </div>
+    </div>
+    <div class="wrapper wrapper-content animated fadeIn ng-scope">
+
+        <div class="col-xs-12">
+        <form name="searchForm" class="form-horizontal">
+            <div class="col-xs-12 col-lg-3 form-group">
+                <label for="searchType" class="control-label col-lg-6">Use evidence type</label>
+                <div class="col-lg-6">
+                    <select id="searchType" ng-model="searchType" class="form-control">
+                        <option ng-repeat="item in searchTypes" value="{{item}}" ng-bind="item" ng-selected="{{searchType == item}}" required="required"></option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-xs-12 col-lg-9 form-group">
+                <div ng-repeat="parameter in parameters" class="row col-lg-12 less-padding">
+                    <label ng-if="$index == 0" class="control-label col-xs-4 col-md-2 col-lg-2 center"></label>
+                    <div ng-if="$index > 0" class="col-xs-4 col-md-2">
+                        <select ng-model="parameter.andOr" required="required" class="form-control">
+                            <option value="AND">And</option>
+                            <option value="OR">Or</option>
+                        </select>
+                    </div>
+                    <div class="col-xs-4 col-md-2">
+                        <select ng-model="parameter.memeType" required="required" class="form-control">
+                            <option ng-repeat="(key, item) in memeTypes" value="{{key}}" ng-bind="key"></option>
+                        </select>
+                    </div>
+                    <div class="col-xs-4 col-md-2">
+                        <select ng-model="parameter.operator" class="form-control">
+                            <option value="must">contains</option>
+                            <option value="must_not">omits</option>
+                        </select>
+                    </div>
+                    <div ng-if="parameter.memeType != 'Date'" class="col-xs-12 col-md-4">
+                        <input type="text" ng-model="parameter.query" required="required" class="form-control" />
+                    </div>
+                    <div ng-if="parameter.memeType == 'Date'" class="col-xs-12 col-md-4">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="input-group">
+                                    <input type="text" ng-model="parameter.startDate" datepicker-popup="dd-MM-yyyy" is-open="parameter.startDateOpen" max-date="parameter.endDate"
+                                    close-text="Close" required="required" class="form-control" /><span class="input-group-btn">
+                  <button type="button" ng-click="openDatePicker($event, $index, 'startDateOpen')" class="btn btn-default"><i class="glyphicon glyphicon-calendar"></i></button></span>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 dash">
+                                <div class="input-group">
+                                    <input type="text" ng-model="parameter.endDate" datepicker-popup="dd-MM-yyyy" is-open="parameter.endDateOpen" min-date="parameter.startDate"
+                                    close-text="Close" required="required" class="form-control" /><span class="input-group-btn">
+                  <button type="button" ng-click="openDatePicker($event, $index, 'endDateOpen')" class="btn btn-default"><i class="glyphicon glyphicon-calendar"></i></button></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-12 col-md-2">
+                        <button type="button" ng-click="add($index)" class="btn btn-sm btn-primary">Refine</button>
+                        <button type="button" ng-click="remove($index)" ng-if="parameters.length > 1" class="btn btn-sm btn-danger">Remove</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="row border-top">
+        <form class="form-horizontal">
+            <div class="col-lg-3 form-group">
+                <label for="viewType" class="control-label col-lg-6">Visualization type</label>
+                <div class="col-lg-6">
+                    <select id="viewType" ng-model="viewIndex" ng-change="selectType()" ng-options="index as item.name for (index, item) in viewTypes"
+                    ng-init="viewIndex = options[0]" class="form-control">
+                        <option value="" ng-if="false"></option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-lg-9 form-group">
+                <div class="row col-lg-12 less-padding">
+                    <div class="col-lg-10 control-text text-center">
+                        <p>-- <span ng-if="!errorMessage"><span ng-class="{'text-danger': queryMatchesCount > maxResultCount}" ng-bind="queryMatchesCount"> </span>                            evidence items match</span><span ng-if="errorMessage" ng-bind="errorMessage" class="text-danger"></span>                            --</p>
+                        <p> <span ng-if="queryMatchesCount > maxResultCount">Too many results for this visualization. Please refine your search query</span></p>
+                    </div>
+                    <div class="col-lg-2">
+                        <button ng-disabled="searchForm.$invalid || queryMatchesCount > maxResultCount" type="button" ng-click="search()" ng-class="{'btn-danger': queryMatchesCount > maxResultCount}"
+                        class="btn btn-sm btn-primary">Visualize</button>
+                    </div>
+                </div>
+                <div ng-if="queryMatchesCount > maxResultCount" class="row col-lg-12"></div>
+            </div>
+        </form>
+    </div>
+    <div class="row">
+        <div id="d3_visualization" class="col-lg-12"></div>
+        <div id="d3_script"></div>
+        <div ng-if="loading" class="spinner">
+            <div class="cube1"></div>
+            <div class="cube2"></div>
+        </div>
+    </div>
+        
+    </div>
+</div>

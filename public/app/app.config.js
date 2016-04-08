@@ -58,6 +58,15 @@
                 controller: "MainController",
                 controllerAs: "mainCtrl"
             })
+            .state('search', {
+                url: "/search",
+                templateUrl: "app/components/search/search.view.html",
+                controller: 'SearchController',
+                data: { pageTitle: "Search" },
+                resolve: {
+                    types: search.getTypes
+                }
+            })
             .state('users', {
                 url: "/users",
                 templateUrl: "app/components/users/users.view.html",

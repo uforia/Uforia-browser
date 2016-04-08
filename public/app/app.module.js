@@ -6,6 +6,7 @@
         'main',
         'users',
         'authentication',
+        'search',
         'pageTitle',
         'sideNavigation',
         'minimalizeSidebar',
