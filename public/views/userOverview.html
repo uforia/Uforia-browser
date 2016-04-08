@@ -39,7 +39,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr id="mydiv" ng-repeat="row in rowCollection">
+        <tr ng-repeat="row in rowCollection">
           <td ng-attr-class="{{ (row.isDeleted) ? 'disabled' : '' }}">{{row.firstName + ' ' + row.lastName}}</td>
           <td ng-attr-class="{{ (row.isDeleted) ? 'disabled' : '' }}">{{row.email}}</td>
           <td ng-attr-class="{{ (row.isDeleted) ? 'disabled' : '' }}">{{row.role}}</td>
