@@ -705,13 +705,14 @@ angular.module('uforia')
       };
       $scope.message = [];
       $scope.error = [];
-      var users;
+      $scope.rowCollection = [];
+      var users = [];
 
       function loadUsers() {
-        $scope.rowCollection = [];
+
         $http.post('/api/get_users')
             .success(function (data) {
-
+                $scope.rowCollection = [];
               // Check if error
               if (typeof data.error !== 'undefined') {
                 $scope.error.push(data.error.message);
@@ -721,13 +722,23 @@ angular.module('uforia')
                 //Load users in table
                 angular.forEach(data.response.hits.hits, function (value, key) {
                   var u = value._source;
-                  if(u.isDeleted == false) {
+
+                //   if(u.isDeleted == false) {
                     $scope.rowCollection.push({
                       id: value._id, firstName: u.firstName, lastName: u.lastName, email: u.email,
-                      role: 'N/A'
+                      role: 'N/A', isDeleted: u.isDeleted
                     });
-                  }
+                //   }
+
+                //   if(u.isDeleted == true) {
+                //     $scope.rowCollection.push({
+                //       id: value._id, firstName: u.firstName, lastName: u.lastName, email: u.email,
+                //       role: 'N/A', isDeleted:
+                //     });
+                //   }
+
                 });
+
                 $scope.searchCollection = $scope.rowCollection;
                 users = data.response.hits.hits;
               }
@@ -745,7 +756,6 @@ angular.module('uforia')
           size: 'md',
           scope: $scope
         });
-
         $scope.modalInstance.opened.then(function () {
 
           $scope.save = function(user) {
@@ -764,15 +774,61 @@ angular.module('uforia')
                           }
 
                           if (typeof data.response !== 'undefined' && typeof data.response._version !== 'undefined') {
-                            var ruser = $scope.rowCollection.indexOf($scope.editUser);
-                            $scope.rowCollection.splice(ruser, 1);
 
-                            $scope.message.push('User has been archived');
+                            $scope.message.push("User has been unarchived");
 
                             $scope.searchCollection = $scope.rowCollection;
                           }
                           //Close modal
                           $scope.modalInstance.dismiss();
+                          loadUsers();
+
+                      }
+                    );
+              } else {
+                $scope.cuErrorMessages.push('Unknown error.');
+              }
+            }
+          }
+        );
+
+      }
+
+      $scope.unarchiveUserModal = function(user) {
+        $scope.editUser = angular.copy(user);
+
+        $scope.editUser.isDeleted = true;
+        $scope.modalInstance = $modal.open({
+          templateUrl: 'views/modals/unarchiveUser.html',
+          size: 'md',
+          scope: $scope
+        });
+
+        $scope.modalInstance.opened.then(function () {
+
+          $scope.save = function(user) {
+            $scope.cuErrorMessages = [];
+
+            // Checks
+            if (typeof user.id === "undefined") {
+              $scope.cuErrorMessages.push('Id is required');
+            }
+
+            if ($scope.cuErrorMessages.length === 0) {
+                $http.post('/api/unarchive_user', $scope.editUser)
+                    .success(function (data) {
+                          if (typeof data.error !== 'undefined') {
+                            $scope.error.push(data.error.message);
+                          }
+
+                          if (typeof data.response !== 'undefined' && typeof data.response._version !== 'undefined') {
+                              $scope.message.push('User has been unarchived');
+
+                              $scope.searchCollection = $scope.rowCollection;
+                          }
+                          //Close modal
+                          $scope.modalInstance.dismiss();
+                          loadUsers();
                         }
                     );
               } else {
@@ -976,4 +1032,3 @@ function ArrayMove(array, old_index, new_index) {
     array.splice(new_index, 0, array.splice(old_index, 1)[0]);
     return array; // for testing purposes
 };
-
