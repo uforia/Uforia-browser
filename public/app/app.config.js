@@ -96,10 +96,12 @@ function isAuthenticated($q, $timeout, $http, $location, $rootScope) {
         .success(function(user) {
             // Authenticated 
             if (user == 1) {
+                $rootScope.isLoggedIn = true;
                 deferred.resolve();
             } else {
                 $rootScope.message = 'You need to log in.';
                 deferred.reject();
+                $rootScope.isLoggedIn = false;
                 $location.url('/login');
             }
 

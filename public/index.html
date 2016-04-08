@@ -59,11 +59,11 @@
     <div id="wrapper">
 
         <!-- Navigation -->
-        <div ng-include="'app/shared/navigation/navigation.view.html'"></div>
+        <div ng-include="'app/shared/navigation/navigation.view.html'" ng-hide="$state.includes('auth.login')"></div>
 
         <!-- Page wraper -->
         <!-- ng-class with current state name give you the ability to extended customization your view -->
-        <div id="page-wrapper">
+        <div id="{{($state.includes('auth.login')) ? '' : 'page-wrapper' }}">
 
             <!-- Main view  -->
             <div ui-view></div>
