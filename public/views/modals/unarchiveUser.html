@@ -1,0 +1,30 @@
+<div class="modal-header">
+    <button ng-click="modalInstance.dismiss()" type="button" aria-hidden="true" class="close">&times;</button>
+    <h2 class="h3 modal-title">Unarchive user</h2>
+
+    <form ng-submit="save(editUser)" name="unarchiveUserForm" ng-controller="userOverviewCtrl">
+
+        <div class="modal-body">
+            <div class="row">
+                <div class="alert alert-danger" role="alert" ng-show="cuErrorMessages.length > 0">
+                    <ul ng-repeat="message in cuErrorMessages track by $index">
+                        <li>{{message}}</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form group">
+                        <label>Are you sure you want the unarchive the user: {{editUser.firstName}} {{editUser.lastName}}</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-sm btn-danger" ng-click="save()">Yes</button>
+            <button type="button" class="btn btn-sm btn-default" ng-click="modalInstance.dismiss()">No</button>
+        </div>
+    </form>
+</div>

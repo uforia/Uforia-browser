@@ -1,3 +1,4 @@
+
 body {
   /*padding: 50px;*/
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
@@ -224,4 +225,8 @@ div[size="xl"] .modal-dialog {
 /*== LOGIN PAGE ==*/
 .login-container{
 	overflow: hidden;
+}
+#disabled{
+	color: grey;
+	background-color: rgb(233, 233, 233);
 }
