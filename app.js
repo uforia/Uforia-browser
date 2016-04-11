@@ -74,7 +74,7 @@ passport.use(new LocalStrategy(
     }).then(function(response) {
       if (response.hits.total == 1) {
         var user = response.hits.hits[0]._source;
-        if (user['email'] === username && bcrypt.compareSync(password, user['password'])) {
+        if (user['email'] === username && !user['isDeleted'] && bcrypt.compareSync(password, user['password'])) {
           done(null, user);
           return;
         }
