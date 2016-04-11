@@ -865,11 +865,10 @@ router.post('/edit_user', function(req, res){
   var id = user.id;
   delete user.id;
 
-  if (user.password != 'undefined') {
-    bcrypt.hash(user['password'], null, null, function(err, hash){
+  bcrypt.hash(user['password'], null, null, function(err, hash){
+    if (user.password != null){
       user.password = hash;
-    })
-  }
+    }
 
     c.elasticsearch.update({
       index: INDEX,
@@ -881,8 +880,9 @@ router.post('/edit_user', function(req, res){
     }, function (error, response) {
       res.send({error: error, response: response});
     });
-
+  })
 });
+
 
 router.post('/archive_user', function(req, res){
   var user = req.body;
@@ -894,13 +894,12 @@ router.post('/archive_user', function(req, res){
     id: id,
     body: {
       doc: {
-        isDeleted: 1
+        isDeleted: true
       }
     }
   }, function (error, response) {
     res.send({error: error, response: response});
   });
-
 });
 
 router.post('/unarchive_user', function(req, res){
