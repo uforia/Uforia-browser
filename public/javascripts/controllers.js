@@ -804,7 +804,7 @@ angular.module('uforia')
 
         $scope.modalInstance.opened.then(function () {
 
-          $scope.save = function(user) {
+          $scope.save = function (user) {
             $scope.cuErrorMessages = [];
 
             // Checks
@@ -813,26 +813,27 @@ angular.module('uforia')
             }
 
             if ($scope.cuErrorMessages.length === 0) {
-                $http.post('/api/unarchive_user', $scope.editUser)
-                    .success(function (data) {
-                          if (typeof data.error !== 'undefined') {
-                            $scope.error.push(data.error.message);
-                          }
+              $http.post('/api/unarchive_user', $scope.editUser)
+                  .success(function (data) {
+                        if (typeof data.error !== 'undefined') {
+                          $scope.error.push(data.error.message);
+                        }
 
-                          if (typeof data.response !== 'undefined' && typeof data.response._version !== 'undefined') {
-                              $scope.message.push('User has been unarchived');
+                        if (typeof data.response !== 'undefined' && typeof data.response._version !== 'undefined') {
+                          $scope.message.push('User has been unarchived');
 
-                              $scope.searchCollection = $scope.rowCollection;
-                          }
-                          //Close modal
-                          $scope.modalInstance.dismiss();
-                          loadUsers();
+                          $scope.searchCollection = $scope.rowCollection;
+                        }
+                        //Close modal
+                        $scope.modalInstance.dismiss();
+                        loadUsers();
                       }
                   );
             }
           }
 
-      });
+        });
+      };
 
       $scope.editUserModal = function(user){
         $scope.editUser = angular.copy(user);
@@ -936,7 +937,6 @@ angular.module('uforia')
           };
         });
       }
-    };
 });
 
 
