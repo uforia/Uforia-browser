@@ -866,8 +866,6 @@ router.post('/edit_user', function(req, res){
   delete user.id;
 
   bcrypt.hash(user['password'], null, null, function(err, hash){
-    var hash = hash;
-
     if (user.password != null){
       user.password = hash;
     }
