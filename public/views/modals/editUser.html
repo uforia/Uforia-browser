@@ -55,6 +55,16 @@
                         </div>
                     </div>
                 </div>
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">Choose role</label>
+                        <div class="col-sm-8">
+                            <select ng-model="editUser.role" >
+                                <option ng-repeat="role in roles" value="{{role.name}}">{{role.name}}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 

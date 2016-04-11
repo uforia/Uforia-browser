@@ -1,6 +1,6 @@
 
 angular.module('uforia',
-    ['ui.router', 'ui.bootstrap.modal', 'ui.bootstrap.datepicker', 'dndLists', 'ui', 'ui.select', 'smart-table'])
+    ['ui.router', 'ui.bootstrap.modal', 'ui.bootstrap.datepicker', 'dndLists', 'ui', 'ui.select', 'smart-table', 'ngStorage'])
 
     .run(function($rootScope, $http, $state, $window) {
         $rootScope.mappings = {};
@@ -14,10 +14,6 @@ angular.module('uforia',
         });
 
         $rootScope.$on('$stateChangeStart', function(event, toState){
-            // Would print "Hello World!" when 'parent' is activated
-            // Would print "Hello UI-Router!" when 'parent.child' is activated
-
-            // Set global var for logged in state.
 
             $http.get('/logged-in')
                 .success(function(user) {
@@ -32,9 +28,9 @@ angular.module('uforia',
             $rootScope.logout = function() {
                 $http.post('/logout')
                     .success(function(data) {
-                        // $state.go('search', {}, {reload: true});
+                        delete $rootScope.user;
                         $window.location.reload();
-                    });                 
+                    });
             }
 
         });
@@ -72,7 +68,6 @@ angular.module('uforia',
                     // modules: model.getAvailableModules,
                     types: model.getTypes,
                     loggedin: isAuthenticated
-
                 }
             })
             .state('admin.mapping', {
@@ -90,11 +85,14 @@ angular.module('uforia',
                 url: "/login",
                 templateUrl: "views/authentication/login.html",
                 controller: 'loginCtrl'
-                })
+            })
             .state('user', {
                 url: "/user",
                 templateUrl: "views/userOverview.html",
-                controller: 'userOverviewCtrl'
+                controller: 'userOverviewCtrl',
+                resolve: {
+                    role: isAdmin
+                }
             });
     });
 
@@ -116,4 +114,17 @@ function isAuthenticated($q, $timeout, $http, $location, $rootScope) {
 
             return deferred.promise;
         });
+}
+
+function isAdmin($q, $timeout, $http, $location, $rootScope) {
+    var deferred = $q.defer();
+
+    if($rootScope.user.role == 'Admin'){
+        // User is admin
+        deferred.resolve();
+    }else{
+        deferred.reject();
+    }
+
+    return deferred.promise;
 }
