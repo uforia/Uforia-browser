@@ -7,6 +7,14 @@
   </div>
 </div>
 <div class="row">
+  <div role="alert" ng-show="error.length &gt; 0" class="alert alert-danger alert-dismissible">
+    <button type="button" data-dismiss="alert" aria-label="Close" class="close"><span aria-hidden="true">&times;</span></button>
+    <ul ng-repeat="message in error track by $index">
+      <li>{{message}}</li>
+    </ul>
+  </div>
+</div>
+<div class="row">
   <div class="col-lg-12">
     <table st-table="rowCollection" st-safe-src="searchCollection" class="table table-striped">
       <thead>
@@ -32,16 +40,13 @@
       </thead>
       <tbody>
         <tr ng-repeat="row in rowCollection">
-          <td ng-attr-class="{{ (row.isDeleted) ? 'disabled' : '' }}">{{row.firstName + ' ' + row.lastName}}</td>
-          <td ng-attr-class="{{ (row.isDeleted) ? 'disabled' : '' }}">{{row.email}}</td>
-          <td ng-attr-class="{{ (row.isDeleted) ? 'disabled' : '' }}">{{row.role}}</td>
-          <td ng-attr-class="{{ (row.isDeleted) ? 'disabled' : '' }}">
+          <td>{{row.firstName + ' ' + row.lastName}}</td>
+          <td>{{row.email}}</td>
+          <td>{{row.role}}</td>
+          <td>
             <div class="btn-group">
-              <button ng-attr-class="{{ row.isDeleted ? 'btn btn-warning disabled' : 'btn btn-warning ' }}" ng-click="editUserModal(row)"><span class="glyphicon glyphicon-pencil"></span> Edit user</button>
-
-              <button ng-show="row.isDeleted"  class="btn btn-danger" ng-click="unarchiveUserModal(row)"><span class="glyphicon glyphicon-remove"></span> Unarchive user</button>
-              <button ng-show="!row.isDeleted"  class="btn btn-danger" ng-click="archiveUserModal(row)"><span class="glyphicon glyphicon-remove"></span> Archive user</button>
-
+              <button class="btn btn-warning" ng-click="editUserModal(row)"><span class="glyphicon glyphicon-pencil"></span> Edit user</button>
+              <button class="btn btn-danger" ng-click="archiveUserModal(row)"><span class="glyphicon glyphicon-remove"></span> Archive user</button>
             </div>
           </td>
         </tr>
