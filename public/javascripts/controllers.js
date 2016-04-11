@@ -783,9 +783,9 @@ angular.module('uforia')
 
                       }
                     );
-              } else {
-                $scope.cuErrorMessages.push('Unknown error.');
-              }
+              // } else {
+              //   $scope.cuErrorMessages.push('Unknown error.');
+              // }
             }
           }
         );
@@ -831,8 +831,8 @@ angular.module('uforia')
                   );
             }
           }
-        )
-      };
+
+      });
 
       $scope.editUserModal = function(user){
         $scope.editUser = angular.copy(user);
@@ -936,7 +936,9 @@ angular.module('uforia')
           };
         });
       }
-    });
+    };
+});
+
 
 function ArrayMove(array, old_index, new_index) {
     if (new_index >= array.length) {
