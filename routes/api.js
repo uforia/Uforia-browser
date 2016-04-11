@@ -931,7 +931,7 @@ router.post('/get_users', function(req, res){
     index: INDEX,
     type: 'users',
     body: { query: { match_all: {}}},
-    _source: ["id", "firstName", "lastName", "email", "isDeleted"],
+    _source: ["id", "firstName", "lastName", "email", "isDeleted", "role"],
     size: 999 // all
   }, function (error, response) {
     res.send({error: error, response: response});
