@@ -1,4 +1,4 @@
-(function() {
+(function () {
 
     angular.module('uforia').config(config).run(run);
 
@@ -6,24 +6,28 @@
     function run($rootScope, $http, $state, $window) {
         $rootScope.$state = $state;
 
+        $rootScope.Utils = {
+            keys: Object.keys
+        }
+
         $rootScope.mappings = {};
         socket = io.connect();
-        socket.on('connect', function() {
+        socket.on('connect', function () {
 
         });
-        socket.on('uforia', function(info) {
+        socket.on('uforia', function (info) {
             $rootScope.mappings[info.mapping] = info;
             $rootScope.$apply();
         });
 
-        $rootScope.$on('$stateChangeStart', function(event, toState) {
+        $rootScope.$on('$stateChangeStart', function (event, toState) {
             // Would print "Hello World!" when 'parent' is activated
             // Would print "Hello UI-Router!" when 'parent.child' is activated
 
             // Set global var for logged in state.
 
             $http.get('/logged-in')
-                .success(function(user) {
+                .success(function (user) {
                     // Authenticated 
                     if (user == 1) {
                         $rootScope.isLoggedIn = true;
@@ -32,9 +36,9 @@
                     }
                 });
 
-            $rootScope.logout = function() {
+            $rootScope.logout = function () {
                 $http.post('/logout')
-                    .success(function(data) {
+                    .success(function (data) {
                         // $state.go('search', {}, {reload: true});
                         $window.location.reload();
                     });
@@ -73,7 +77,7 @@
                 controller: 'UsersController',
                 controllerAs: 'ctrl',
                 data: { pageTitle: "User overview" },
-                resolve:{
+                resolve: {
                     loggedin: isAuthenticated
                 }
             })
@@ -83,7 +87,7 @@
                 controller: "UsersCreateController",
                 controllerAs: 'ctrl',
                 data: { pageTitle: "Create user" },
-                resolve:{
+                resolve: {
                     loggedin: isAuthenticated
                 }
             })
@@ -108,7 +112,7 @@ function isAuthenticated($q, $timeout, $http, $location, $rootScope, $state) {
     var deferred = $q.defer();
 
     $http.get('/logged-in')
-        .success(function(user) {
+        .success(function (user) {
             // Authenticated 
             if (user == 1) {
                 $rootScope.isLoggedIn = true;

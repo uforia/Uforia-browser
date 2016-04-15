@@ -3,7 +3,7 @@
 
     mod.controller('SearchController', SearchController);
 
-    function SearchController($rootScope, $scope, $http, $modal, $timeout, types) {
+    function SearchController($scope, $http, $modal, $timeout, types) {
         $scope.queryMatchesCount = 0;
         $scope.maxResultCount = 0;
         
