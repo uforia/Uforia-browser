@@ -696,8 +696,7 @@ angular.module('uforia')
     })
 
     .controller('navCtrl', function($scope, $http, $location, $sessionStorage, $rootScope) {
-        // Only set user when someone is logged in
-        if($rootScope.isLoggedIn) $rootScope.user = $sessionStorage.user;
+        $rootScope.user = $sessionStorage.user;
     })
 
     .controller('userOverviewCtrl', function($scope, $modal, $http, ROLES){

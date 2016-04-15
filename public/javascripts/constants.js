@@ -4,16 +4,16 @@
     angular
         .module('uforia')
         .constant('ROLES',
-            [
-                {id: 0, name: 'Admin'},
-                {id: 1, name: 'Manager'},
-                {id: 2, name: 'User'}
-            ])
+            {
+                admin: 'admin',
+                manager: 'manager',
+                user: 'user'
+            })
         .constant('USER_ROLES',
-            [
-                {id: 0, name: 'Team leader'},
-                {id: 1, name: 'Evidence officer'},
-                {id: 2, name: 'Evidence searcher'},
-                {id: 3, name: 'Photographer'}
-            ]);
+            {
+                teamLeader: 'Team leader',
+                evidenceOfficer: 'Evidence officer',
+                evidenceSearcher: 'Evidence searcher',
+                photographer: 'Photographer'
+            });
 })();

@@ -2,7 +2,7 @@
 angular.module('uforia',
     ['ui.router', 'ui.bootstrap.modal', 'ui.bootstrap.datepicker', 'dndLists', 'ui', 'ui.select', 'smart-table', 'ngStorage'])
 
-    .run(function($rootScope, $http, $state, $window) {
+    .run(function($rootScope, $http, $state, $window, ROLES, $sessionStorage) {
         $rootScope.mappings = {};
         socket = io.connect();
         socket.on('connect', function(){
@@ -12,6 +12,9 @@ angular.module('uforia',
             $rootScope.mappings[info.mapping] = info;
             $rootScope.$apply();
         });
+        $rootScope.roles = ROLES;
+
+        if(typeof $rootScope.user == 'undefined') $rootScope.user = $sessionStorage.user;
 
         $rootScope.$on('$stateChangeStart', function(event, toState){
 
@@ -116,15 +119,16 @@ function isAuthenticated($q, $timeout, $http, $location, $rootScope) {
         });
 }
 
+
 function isAdmin($q, $timeout, $http, $location, $rootScope) {
     var deferred = $q.defer();
 
-    if($rootScope.user.role == 'Admin'){
+    if($rootScope.user.role == $rootScope.roles.admin){
         // User is admin
         deferred.resolve();
     }else{
         deferred.reject();
     }
 
-    return deferred.promise;
+    return deferred.resolve();
 }
