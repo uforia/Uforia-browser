@@ -844,7 +844,6 @@ router.post('/visualizations/save', function(req, res){
  */
 router.post('/save_user', function(req, res){
   var user = req.body;
-  var username = user.email;
 
   function isDef(v) {
     return v !== undefined && v !== null;
@@ -860,7 +859,7 @@ router.post('/save_user', function(req, res){
           filtered: {
             filter: {
               term: {
-                email: username
+                email: user.email;
               }
             }
           }
@@ -870,7 +869,7 @@ router.post('/save_user', function(req, res){
       if (response.hits.total != 0) {
         res.send({
           error: {
-            message: 'email address already exists'
+            message: 'Email address already exists'
           }
         });
       }
