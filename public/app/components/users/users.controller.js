@@ -37,7 +37,7 @@
                         if (u.isDeleted == 0) {
                             $scope.rowCollection.push({
                                 id: value._id, firstName: u.firstName, lastName: u.lastName, email: u.email,
-                                role: 'N/A'
+                                role: u.role
                             });
                         }
                     });
