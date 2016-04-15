@@ -846,50 +846,60 @@ router.post('/save_user', function(req, res){
   var user = req.body;
   var username = user.email;
 
-  if (user.firstname) {
-
+  function isDef(v) {
+    return v !== undefined && v !== null;
   }
 
-  c.elasticsearch.search({
-    index: c.config.elasticsearch.index,
-    type: 'users',
-    size: 1,
-    body: {
-      query: {
-        filtered: {
-          filter: {
-            term: {
-              email: username
+  if(isDef(user.firstName) && isDef(user.lastName) && isDef(user.password) && isDef(user.email) && isDef(user.isDeleted)){
+    c.elasticsearch.search({
+      index: c.config.elasticsearch.index,
+      type: 'users',
+      size: 1,
+      body: {
+        query: {
+          filtered: {
+            filter: {
+              term: {
+                email: username
+              }
             }
           }
         }
       }
-    }
-  }).then(function(response) {
-    if (response.hits.total != 0) {
-      res.send({
-        error: {
-          message: 'email address already exists'
-        }
-      });
-    }
-    else {
-      var bcrypt = require('bcrypt-nodejs');
-
-
-      bcrypt.hash(user['password'], null, null, function(err, hash){
-        user.password = hash;
-
-        c.elasticsearch.create({
-          index: INDEX,
-          type: 'users',
-          body: user
-        }, function (error, response) {
-          res.send({error: error, response: response});
+    }).then(function(response) {
+      if (response.hits.total != 0) {
+        res.send({
+          error: {
+            message: 'email address already exists'
+          }
         });
-      })
-    }
-  });
+      }
+      else {
+        var bcrypt = require('bcrypt-nodejs');
+
+
+        bcrypt.hash(user['password'], null, null, function(err, hash){
+          user.password = hash;
+
+          c.elasticsearch.create({
+            index: INDEX,
+            type: 'users',
+            body: user
+          }, function (error, response) {
+            res.send({error: error, response: response});
+          });
+        })
+      }
+    });
+  }
+  else {
+    res.send({
+      error: {
+        message: 'Variable is undefined'
+      }
+    });
+  }
+
 });
 
 router.post('/edit_user', function(req, res){
