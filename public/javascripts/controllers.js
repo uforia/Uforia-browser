@@ -858,25 +858,25 @@ angular.module('uforia')
 
             $http.post('/api/edit_user', $scope.editUser)
                 .success(function (data) {
-                      if (typeof data.error !== 'undefined') {
-                        toastr.error(data.error.message);
-                      }
-
-                      if (typeof data.response !== 'undefined' && typeof data.response._version !== 'undefined') {
-                        toastr.success('Changes have been updated');
-
-                        $scope.rowCollection.forEach(function (user, index) {
-                          if (user.id == $scope.editUser.id){
-                            $scope.rowCollection[index] = $scope.editUser;
-                          }
-                        });
-
-                        $scope.searchCollection = $scope.rowCollection;
-                      }
-                      // Close modal
-                      $scope.modalInstance.dismiss();
+                    if (typeof data.error !== 'undefined') {
+                      toastr.error(data.error.message);
                     }
-                );
+
+                    if (typeof data.response !== 'undefined' && typeof data.response._version !== 'undefined') {
+                      toastr.success('Changes have been updated');
+
+                      $scope.rowCollection.forEach(function (user, index) {
+                        if (user.id == $scope.editUser.id){
+                          $scope.rowCollection[index] = $scope.editUser;
+                        }
+                      });
+
+                      $scope.searchCollection = $scope.rowCollection;
+                    }
+                    // Close modal
+                    $scope.modalInstance.dismiss();
+                  }
+              );
           };
         })
       };
@@ -907,28 +907,29 @@ angular.module('uforia')
             // Save user
             if(addUser) {
               delete user.password2;
+              console.log(user);
               $http.post('/api/save_user', user)
                   .success(function (data) {
-                        if (typeof data.error !== 'undefined') {
-                          toastr.error(data.error.message);
-                        }
-  
-                        if (typeof data.response !== 'undefined') {
-                          if (data.response.created == true) {
-                            toastr.success('User has been added');
-  
-                            //Load new user in table
-                            $scope.rowCollection.push({
-                              id: data.response._id, firstName: user.firstName, lastName: user.lastName, email: user.email,
-                              role: 'N/A'
-                            });
-                            $scope.searchCollection = $scope.rowCollection;
-                          }
-                        }
-                        // Close modal
-                        $scope.modalInstance.dismiss();
+                      if (typeof data.error !== 'undefined') {
+                        toastr.error(data.error.message);
                       }
-                  );
+
+                      if (typeof data.response !== 'undefined') {
+                        if (data.response.created == true) {
+                          toastr.success('User has been added');
+
+                          //Load new user in table
+                          $scope.rowCollection.push({
+                            id: data.response._id, firstName: user.firstName, lastName: user.lastName, email: user.email,
+                            role: 'N/A'
+                          });
+                          $scope.searchCollection = $scope.rowCollection;
+                        }
+                      }
+                      // Close modal
+                      $scope.modalInstance.dismiss();
+                    }
+                );
             } else if (!addUser){
               toastr.error('A user with this email address already exists');
             } else {
@@ -949,4 +950,4 @@ function ArrayMove(array, old_index, new_index) {
     }
     array.splice(new_index, 0, array.splice(old_index, 1)[0]);
     return array; // for testing purposes
-};
+}
