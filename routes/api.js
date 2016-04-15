@@ -843,20 +843,51 @@ router.post('/visualizations/save', function(req, res){
  * Takes user object with firstname, lastname, email, password and isDeleted
  */
 router.post('/save_user', function(req, res){
-  var bcrypt = require('bcrypt-nodejs');
   var user = req.body;
+  var username = user.email;
 
-  bcrypt.hash(user['password'], null, null, function(err, hash){
-    user.password = hash;
+  c.elasticsearch.search({
+    index: c.config.elasticsearch.index,
+    type: 'users',
+    size: 1,
+    body: {
+      query: {
+        filtered: {
+          filter: {
+            term: {
+              email: username
+            }
+          }
+        }
+      }
+    }
+  }).then(function(response) {
+    if (response.hits.total != 0) {
+      res.send({
+        error: {
+          message: 'email address already exists'
+        }
+      });
+    }
+    else {
+      var bcrypt = require('bcrypt-nodejs');
 
-    c.elasticsearch.create({
-      index: INDEX,
-      type: 'users',
-      body: user
-    }, function (error, response) {
-      res.send({error: error, response: response});
-    });
-  })
+      bcrypt.hash(user['password'], null, null, function(err, hash){
+        user.password = hash;
+
+        c.elasticsearch.create({
+          index: INDEX,
+          type: 'users',
+          body: user
+        }, function (error, response) {
+          res.send({error: error, response: response});
+        });
+      })
+    }
+  });
+
+  //res.send({error: "Fout"});
+
 });
 
 router.post('/edit_user', function(req, res){
