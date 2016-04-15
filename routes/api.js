@@ -846,6 +846,10 @@ router.post('/save_user', function(req, res){
   var user = req.body;
   var username = user.email;
 
+  if (user.firstname) {
+
+  }
+
   c.elasticsearch.search({
     index: c.config.elasticsearch.index,
     type: 'users',
@@ -872,6 +876,7 @@ router.post('/save_user', function(req, res){
     else {
       var bcrypt = require('bcrypt-nodejs');
 
+
       bcrypt.hash(user['password'], null, null, function(err, hash){
         user.password = hash;
 
@@ -885,9 +890,6 @@ router.post('/save_user', function(req, res){
       })
     }
   });
-
-  //res.send({error: "Fout"});
-
 });
 
 router.post('/edit_user', function(req, res){
