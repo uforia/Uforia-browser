@@ -859,7 +859,7 @@ router.post('/save_user', function(req, res){
           filtered: {
             filter: {
               term: {
-                email: user.email;
+                email: user.email
               }
             }
           }
