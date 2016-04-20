@@ -157,14 +157,19 @@ router.post("/get_types", function(req, res){
         var last = mapping.split('_');
         last = last[last.length-1];
 
-        var exclude = ['fields', 'visualizations'];
+        var suffixesToExclude = ['fields', 'visualizations'];
+        var typesToExclude = ['users'];
 
-        if(mappings.indexOf(mapping) == -1 && exclude.indexOf(last) == -1){
+        if (mappings.indexOf(mapping) == -1 && suffixesToExclude.indexOf(last) == -1 && typesToExclude.indexOf(mapping) == -1) {
           mappings.push(mapping);
         }
         // If there are empty mappings, show the mapping in the UI anyways
-        else if(exclude.indexOf(last) != -1 && mappings.indexOf(mapping.slice(0, mapping.indexOf('_' + last))) == -1){
-          mappings.push(mapping.slice(0, mapping.indexOf('_' + last)));
+        else if (suffixesToExclude.indexOf(last) != -1) {
+          var mappingName = mapping.slice(0, mapping.indexOf('_' + last));
+
+          if (mappings.indexOf(mappingName) == -1 && typesToExclude.indexOf(mappingName) == -1) {
+            mappings.push(mappingName);
+          }
         }
 
         cb();
