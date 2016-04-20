@@ -152,7 +152,6 @@ router.post("/get_types", function(req, res){
   }).then(function(resp){
 
     var mappings = [];
-    var visualization_types = [];
     if(resp[INDEX]){
       async.each(Object.keys(resp[INDEX].mappings), function(mapping, cb){
         var last = mapping.split('_');
@@ -168,11 +167,6 @@ router.post("/get_types", function(req, res){
           mappings.push(mapping.slice(0, mapping.indexOf('_' + last)));
         }
 
-        var mapping = exclude.indexOf(last) != -1 ? mapping.slice(0, mapping.indexOf('_' + last)) : mapping;
-
-        if(visualization_types.indexOf(mapping + '_visualizations') == -1){
-          visualization_types.push(mapping + '_visualizations');
-        }
         cb();
       }, function(err){
 
