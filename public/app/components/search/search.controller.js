@@ -221,12 +221,12 @@
             if ($scope.viewType) {
                 $timeout(function() {
                     if ($('#d3_style').length == 0) {
-                        $('head').append("<link href=\"stylesheets/visualizations/" + $scope.viewType.toLowerCase() + ".css\" rel=\"stylesheet\" type=\"text/css\" id=\"d3_style\">");
+                        $('head').append("<link href=\"assets/css/visualizations/" + $scope.viewType.toLowerCase() + ".css\" rel=\"stylesheet\" type=\"text/css\" id=\"d3_style\">");
                     }
                     else {
-                        $('#d3_style').replaceWith("<link href=\"stylesheets/visualizations/" + $scope.viewType.toLowerCase() + ".css\" rel=\"stylesheet\" type=\"text/css\" id=\"d3_style\">");
+                        $('#d3_style').replaceWith("<link href=\"assets/css/visualizations/" + $scope.viewType.toLowerCase() + ".css\" rel=\"stylesheet\" type=\"text/css\" id=\"d3_style\">");
                     }
-                    $('#d3_script').replaceWith("<script src=\"javascripts/visualizations/" + $scope.viewType.toLowerCase() + ".js\" type=\"text/javascript\" id=\"d3_script\"></script>");
+                    $('#d3_script').replaceWith("<script src=\"assets/js/visualizations/" + $scope.viewType.toLowerCase() + ".js\" type=\"text/javascript\" id=\"d3_script\"></script>");
                     cb();
                 });
             }
