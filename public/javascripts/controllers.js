@@ -91,7 +91,7 @@ angular.module('uforia')
                 $scope.viewTypes.push(data2);
               });
 
-              $scope.viewType = data[0].viewType;
+              $scope.viewType = data[0].type;
               $scope.maxResultCount = data[0].maxresults;
             });
 
