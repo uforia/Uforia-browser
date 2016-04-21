@@ -94,11 +94,10 @@ angular.module('uforia',
                 templateUrl: "views/userOverview.html",
                 controller: 'userOverviewCtrl',
                 resolve: {
-                    role: isAdmin
+                    isAllowed: hasRoles([ROLES.admin])
                 }
             });
     });
-
 
 function isAuthenticated($q, $timeout, $http, $location, $rootScope) {
     // Initialize a new promise 
@@ -119,16 +118,20 @@ function isAuthenticated($q, $timeout, $http, $location, $rootScope) {
         });
 }
 
+function hasRoles(roles) {
+    return function($q, $rootScope, ROLES) {
+        var deferred = $q.defer();
 
-function isAdmin($q, $timeout, $http, $location, $rootScope) {
-    var deferred = $q.defer();
-
-    if($rootScope.user.role == $rootScope.roles.admin){
-        // User is admin
-        deferred.resolve();
-    }else{
-        deferred.reject();
+        for (var i = 0; i < roles.length; i++) {
+            //Resolve state if roles match with user roles
+            if (roles[i] === ROLES.admin && $rootScope.user.role == ROLES.admin || roles[i] === ROLES.manager && $rootScope.user.role == ROLES.manager
+                || roles[i] === ROLES.user && $rootScope.user.role == ROLES.user) {
+                return deferred.resolve();
+            }else{
+                // No match, do not resolve state
+                deferred.reject();
+            }
+        }
+        return deferred.promise;
     }
-
-    return deferred.resolve();
 }
