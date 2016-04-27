@@ -38,7 +38,7 @@ angular.module('uforia',
 
         });
     })
-    .config(function($stateProvider, $urlRouterProvider, $sceProvider){
+    .config(function($stateProvider, $urlRouterProvider, $sceProvider, ROLES){
         // Disable Sce
         $sceProvider.enabled(false);
         //
