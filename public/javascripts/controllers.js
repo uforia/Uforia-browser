@@ -676,23 +676,26 @@ angular.module('uforia')
 
     })
 
-    .controller('loginCtrl', function($http, $scope, $state, $rootScope) {
-        $scope.username = "";
-        $scope.password = "";
+    .controller('loginCtrl', function($http, $scope, $rootScope, $state, $sessionStorage) {
+      $scope.username = "";
+      $scope.password = "";
 
-        $scope.login = function() {
-            $http.post('/auth', { username: $scope.username, password: $scope.password })
-                .success(function(data) {
-                    $state.go('admin.overview');
-                    toastr.success('Logged in successfully!');
-                }).error(function(data) {
-                    toastr.error('E-mailaddress and password did not match!')
-                });
-        };
+      $scope.login = function() {
+        $http.post('/auth', { username: $scope.username, password: $scope.password })
+            .success(function(data) {
+              delete data.password;
+              $sessionStorage.user = data;
+              $rootScope.user = data;
+              $state.go('admin.overview');
+              toastr.success('Logged in successfully!');
+            }).error(function(data) {
+          toastr.error('E-mailaddress and password did not match!')
+        });
+      };
 
     })
-    .controller('navCtrl', function($scope, $http, $location) {
-
+    .controller('navCtrl', function($scope, $http, $location, $sessionStorage, $rootScope) {
+      $rootScope.user = $sessionStorage.user;
     })
 
     .controller('userOverviewCtrl', function($scope, $modal, $http){
@@ -723,19 +726,11 @@ angular.module('uforia')
                 angular.forEach(data.response.hits.hits, function (value, key) {
                   var u = value._source;
 
-                //   if(u.isDeleted == false) {
-                    $scope.rowCollection.push({
+                  $scope.rowCollection.push({
                       id: value._id, firstName: u.firstName, lastName: u.lastName, email: u.email,
-                      role: 'N/A', isDeleted: u.isDeleted
+                      role: u.role, isDeleted: u.isDeleted
                     });
-                //   }
 
-                //   if(u.isDeleted == true) {
-                //     $scope.rowCollection.push({
-                //       id: value._id, firstName: u.firstName, lastName: u.lastName, email: u.email,
-                //       role: 'N/A', isDeleted:
-                //     });
-                //   }
 
                 });
 
@@ -783,9 +778,6 @@ angular.module('uforia')
 
                       }
                     );
-              // } else {
-              //   $scope.cuErrorMessages.push('Unknown error.');
-              // }
             }
           }
         );
@@ -893,9 +885,9 @@ angular.module('uforia')
 
           $scope.save = function(user){
             $scope.cuErrorMessages = [];
-            
+
             var addUser = true;
-  
+
             // Check if user exists
             angular.forEach(users, function(value, key){
               var u = value._source;
@@ -903,7 +895,7 @@ angular.module('uforia')
                 addUser = false;
               }
             });
-  
+
             // Save user
             if(addUser) {
               delete user.password2;
@@ -921,7 +913,7 @@ angular.module('uforia')
                           //Load new user in table
                           $scope.rowCollection.push({
                             id: data.response._id, firstName: user.firstName, lastName: user.lastName, email: user.email,
-                            role: 'N/A'
+                            role: user.role
                           });
                           $scope.searchCollection = $scope.rowCollection;
                         }
