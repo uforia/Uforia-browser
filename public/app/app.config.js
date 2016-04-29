@@ -28,7 +28,7 @@
 
             $http.get('/logged-in')
                 .success(function (user) {
-                    // Authenticated 
+                    // Authenticated
                     if (user == 1) {
                         $rootScope.isLoggedIn = true;
                     } else {
@@ -102,18 +102,42 @@
                 controller: 'AuthLoginController',
                 controllerAs: 'ctrl',
                 data: { pageTitle: "Login" }
+            })
+            .state('mappings', {
+                url: "/mappings",
+                templateUrl: "app/components/mappings/mappings.view.html",
+                controller: 'MappingsController',
+                controllerAs: 'ctrl',
+                data: { pageTitle: "Mapping overview" },
+                resolve: {
+                    loggedin: isAuthenticated,
+                    types: mappings.getTypes
+                }
+            })
+            .state('mappings.create', {
+                url: "/create",
+                templateUrl: "app/components/mappings/create/create.view.html",
+                controller: 'MappingsCreateController',
+                controllerAs: 'ctrl',
+                data: { pageTitle: "Mapping create" },
+                resolve: {
+                    loggedin: isAuthenticated,
+                    types: mappings.getTypes,
+                    mapping: mappings.getMapping,
+                    mime_types: mappings.getAvailableModules
+                }
             });
     }
 })();
 
 
 function isAuthenticated($q, $timeout, $http, $location, $rootScope, $state) {
-    // Initialize a new promise 
+    // Initialize a new promise
     var deferred = $q.defer();
 
     $http.get('/logged-in')
         .success(function (user) {
-            // Authenticated 
+            // Authenticated
             if (user == 1) {
                 $rootScope.isLoggedIn = true;
                 deferred.resolve();

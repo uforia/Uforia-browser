@@ -705,4 +705,3 @@ function ArrayMove(array, old_index, new_index) {
     array.splice(new_index, 0, array.splice(old_index, 1)[0]);
     return array; // for testing purposes
 };
-

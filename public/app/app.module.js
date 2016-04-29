@@ -5,6 +5,7 @@
         'ui.bootstrap', // Ui Bootstrap
         'main',
         'users',
+        'mappings',
         'authentication',
         'search',
         'pageTitle',
@@ -12,5 +13,6 @@
         'minimalizeSidebar',
         'iboxTools',
         'iboxToolsFullScreen'
+
     ]);
 })();
