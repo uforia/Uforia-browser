@@ -11,3 +11,8 @@
     margin-bottom:-60px;
     margin-top:20%;
 }
+
+/*================ SEARCH DETAILS MODAL =================*/
+div[size="xl"] .modal-dialog {
+  width: 80%;
+}

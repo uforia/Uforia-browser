@@ -1,21 +1,21 @@
-(function() {
-    var mod = angular.module('search', []);
+(function () {
+    var mod = angular.module('search', ['search.details']);
 
     mod.controller('SearchController', SearchController);
 
     function SearchController($scope, $http, $modal, $timeout, types) {
         $scope.queryMatchesCount = 0;
         $scope.maxResultCount = 0;
-        
+
         $scope.searchTypes = types;
         $scope.searchType = $scope.searchTypes[0];
         $scope.parameters = [{ operator: "must", andOr: "And" }];
         var visualization = {};
 
-        $scope.$watch('viewType', function(newVal, oldVal) {
+        $scope.$watch('viewType', function (newVal, oldVal) {
             if (newVal) {
                 removeSVG();
-                changeScripts(function() {
+                changeScripts(function () {
                     if ($scope.searchForm.$valid && $scope.queryMatchesCount < $scope.maxResultCount) {
                         $scope.search();
                     }
@@ -23,18 +23,18 @@
             }
         });
 
-        $timeout(function() {
-            $scope.$watch('searchType', function(newVal, oldVal) {
+        $timeout(function () {
+            $scope.$watch('searchType', function (newVal, oldVal) {
                 changeType(newVal);
             });
 
-            $scope.$watch('parameters', function(newVal, oldVal) {
+            $scope.$watch('parameters', function (newVal, oldVal) {
                 var api_params = {};
                 if ($scope.searchForm.$valid) {
                     $scope.loading = true;
                     $http
                         .post('api/count', formatParams())
-                        .success(function(data) {
+                        .success(function (data) {
                             $scope.loading = false;
                             if (!data.error) {
                                 $scope.queryMatchesCount = data.count;
@@ -47,25 +47,25 @@
             }, true);
         }, 0);
 
-        $scope.openDatePicker = function($event, index, parameter) {
+        $scope.openDatePicker = function ($event, index, parameter) {
             $event.preventDefault();
             $event.stopPropagation();
             $scope.parameters[index][parameter] = true;
         }
 
-        $scope.add = function($index) {
+        $scope.add = function ($index) {
             $scope.parameters.splice($index + 1, 0, {
                 operator: "must",
                 andOr: "AND"
             });
         }
 
-        $scope.remove = function($index) {
+        $scope.remove = function ($index) {
             $scope.parameters.splice($index, 1);
             $scope.parameters[0].andOr = 'AND';
         }
 
-        $scope.selectType = function() {
+        $scope.selectType = function () {
             $scope.maxResultCount = $scope.viewTypes[$scope.viewIndex].maxresults;
             $scope.viewType = $scope.viewTypes[$scope.viewIndex].type;
         }
@@ -75,16 +75,16 @@
 
             $http
                 .post("api/mapping_info", { type: type })
-                .success(function(data) {
+                .success(function (data) {
                     $scope.memeTypes = data;
                 });
 
             $http
                 .post("api/view_info?type=" + type, '')
-                .success(function(data) {
+                .success(function (data) {
                     console.log(data);
                     $scope.viewTypes = [];
-                    angular.forEach(data, function(data2) {
+                    angular.forEach(data, function (data2) {
                         $scope.viewTypes.push(data2);
                     });
 
@@ -100,15 +100,15 @@
             $scope.parameters = [{ operator: "must", andOr: "And" }];
         }
 
-        $scope.search = function() {
+        $scope.search = function () {
             //Clear the old SVG
             removeSVG();
             hideMessage();
 
-            getData(formatParams(), function(data) {
+            getData(formatParams(), function (data) {
                 $('#d3_visualization').empty();
                 if (data.total > 0 && data.total) {
-                    render(data, { height: window.innerHeight - 65 }, openDetails, function(error) {
+                    render(data, { height: window.innerHeight - 65 }, openDetails, function (error) {
                         if (error)
                             console.log(error); // TODO: show error to user
                         else {
@@ -130,22 +130,23 @@
             console.log(data);
             $scope.loading = true;
             var modalInstance = $modal.open({
-                templateUrl: 'views/modals/details.html',
-                controller: 'detailsModalCtrl',
+                templateUrl: 'app/components/search/details/details.html',
+                controller: 'SearchDetailsController',
+                controllerAs: 'detailsModalCtrl',
                 size: 'xl',
                 resolve: {
                     files: search.getFileDetails({ hashids: data.hashids, type: $scope.searchType, tables: data.tables }),
-                    addresses: function() { return data.adressses; }
+                    addresses: function () { return data.adressses; }
                 }
             });
 
-            modalInstance.opened.then(function() {
+            modalInstance.opened.then(function () {
                 $scope.loading = false;
             });
 
-            modalInstance.result.then(function() {
+            modalInstance.result.then(function () {
                 //closed
-            }, function() {
+            }, function () {
                 $('html, body').animate({
                     scrollTop: $("#d3_visualization").offset().top
                 }, 1000);
@@ -158,7 +159,7 @@
             $scope.loading = true;
             $http
                 .post('api/search', params)
-                .success(function(data) {
+                .success(function (data) {
                     $scope.loading = false;
                     cb(data);
                 });
@@ -178,7 +179,7 @@
             };
 
             //Get all the search parameters and add them to the query object.
-            $scope.parameters.forEach(function(parameter) {
+            $scope.parameters.forEach(function (parameter) {
                 if (parameter.memeType && parameter.memeType.toLowerCase() == 'date' && !isNaN(parameter.startDate.getTime()) && !isNaN(parameter.endDate.getTime())) {
                     if (api_params.query.length > 0)
                         api_params.query += ' ' + parameter.andOr + ' ';
@@ -219,7 +220,7 @@
 
         function changeScripts(cb) {
             if ($scope.viewType) {
-                $timeout(function() {
+                $timeout(function () {
                     if ($('#d3_style').length == 0) {
                         $('head').append("<link href=\"assets/css/visualizations/" + $scope.viewType.toLowerCase() + ".css\" rel=\"stylesheet\" type=\"text/css\" id=\"d3_style\">");
                     }
