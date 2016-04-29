@@ -12,7 +12,8 @@
         'sideNavigation',
         'minimalizeSidebar',
         'iboxTools',
-        'iboxToolsFullScreen'
-
+        'iboxToolsFullScreen',
+        'dndLists',
+        'ui'
     ]);
 })();
