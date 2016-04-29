@@ -16,3 +16,6 @@
 div[size="xl"] .modal-dialog {
   width: 80%;
 }
+.panel-heading .btn-group {
+    margin-top: -6.5px;
+}

@@ -32,5 +32,16 @@
             }
         });
 
+        $scope.selectedFile = JSON.stringify(files[0]);
+
+        $scope.copyLink = function (file) {
+            var link = window.location.origin + window.location.pathname + 'api/file/' + file.hashid;
+            prompt('Copy the link below:', link);
+        }
+
+        $scope.copyFilesLink = function () {
+            prompt('Copy the link below:', $scope.filesLink);
+        }
+
     }
 })();

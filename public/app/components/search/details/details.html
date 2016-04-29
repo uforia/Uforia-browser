@@ -10,7 +10,7 @@
           <button type="button" ng-click="copyFilesLink()" class="btn btn-default btn-sm col-lg-6">Copy link to files</button>
         </div>
       </div>
-      <select ng-size="{{files.length}}" ng-model="selectedFile" required="required" class="form-control">
+      <select data-ng-attr-size="{{files.length}}" ng-model="selectedFile" required="required" class="form-control">
         <option ng-hide="true" value="?"></option>
         <option ng-repeat="item in files" value="{{item}}" ng-selected="showFile.hashid == item.hashid">{{item.label}}</option>
       </select>
