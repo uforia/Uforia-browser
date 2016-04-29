@@ -2,7 +2,7 @@
     <button ng-click="modalInstance.dismiss()" type="button" aria-hidden="true" class="close">&times;</button>
     <h2 class="h3 modal-title">Edit user</h2>
 
-    <form novalidate ng-submit="editUserForm.$valid && save(editUser)" name="editUserForm" ng-controller="userOverviewCtrl">
+    <form ng-submit="save(editUser)" name="editUserForm" ng-controller="userOverviewCtrl">
 
         <div class="modal-body">
             <div class="row">
@@ -18,10 +18,7 @@
                     <div class="form-group">
                         <label class="col-sm-4 control-label">First name</label>
                         <div class="col-sm-8">
-                            <input type="text" name="firstName" ng-model="editUser.firstName" class="form-control" required/>
-                            <div ng-show="editUserForm.firstName.$invalid && editUserForm.firstName.$dirty || editUserForm.$submitted">
-                                <small class="text-danger" ng-show="editUserForm.firstName.$error.required">Please enter the first name</small>
-                            </div>
+                            <input type="text" name="firstName" ng-model="editUser.firstName" required="required" class="form-control"/>
                         </div>
                     </div>
                 </div>
@@ -29,10 +26,7 @@
                     <div class="form-group">
                         <label class="col-sm-4 control-label">Last name</label>
                         <div class="col-sm-8">
-                            <input type="text" name="lastName" ng-model="editUser.lastName" class="form-control" required/>
-                            <div ng-show="editUserForm.lastName.$invalid && editUserForm.lastName.$dirty || editUserForm.$submitted">
-                                <small class="text-danger" ng-show="editUserForm.lastName.$error.required">Please enter the last name</small>
-                            </div>
+                            <input type="text" ng-model="editUser.lastName" required="required" class="form-control"/>
                         </div>
                     </div>
                 </div>
@@ -40,25 +34,7 @@
                     <div class="form-group">
                         <label class="col-sm-4 control-label">Email</label>
                         <div class="col-sm-8">
-                            <input type="email" name="email" ng-model="editUser.email" class="form-control" required/>
-                            <div ng-show="editUserForm.email.$invalid && editUserForm.email.$dirty || addUserForm.$submitted">
-                                <small class="text-danger" ng-show="editUserForm.email.$error.email">Please enter a valid email address</small>
-                                <small class="text-danger" ng-show="editUserForm.email.$error.required">Please enter an email address</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-sm-12">
-                    <div class="form-group">
-                        <label class="col-sm-4 control-label"></label>
-                        <div class="col-sm-8">
-                            <div class="checkbox">
-                                <label><input type="checkbox" value="" ng-model="changePassword" ng-change="clearFields(changePassword)">Change password</label>
-                            </div>
-                            <div ng-show="editUserForm.email.$invalid && editUserForm.email.$dirty || addUserForm.$submitted">
-                                <small class="text-danger" ng-show="editUserForm.email.$error.email">Please enter a valid email address</small>
-                                <small class="text-danger" ng-show="editUserForm.email.$error.required">Please enter an email address</small>
-                            </div>
+                            <input type="email" ng-model="editUser.email" required="required" class="form-control"/>
                         </div>
                     </div>
                 </div>
@@ -66,11 +42,8 @@
                     <div class="form-group">
                         <label class="col-sm-4 control-label">Password</label>
                         <div class="col-sm-8">
-                            <input ng-disabled="!changePassword" type="password" name="password" ng-model="editUser.password" ng-minlength="4" class="form-control" ng-required="changePassword"/>
-                            <div ng-show="editUserForm.password.$invalid && editUserForm.password.$dirty || editUserForm.$submitted">
-                                <small class="text-danger" ng-show="editUserForm.password.$error.minlength">The password has to be at least 4 characters</small>
-                                <small class="text-danger" ng-show="editUserForm.password.$error.required && editUserForm.$submitted">This field is required</small>
-                            </div>
+                            <input type="password" ng-model="editUser.password" class="form-control"/>
+                            <p class="help-block pull-left">Passwords should have at least 4 characters.</p>
                         </div>
                     </div>
                 </div>
@@ -78,11 +51,17 @@
                     <div class="form-group">
                         <label class="col-sm-4 control-label">Retype password</label>
                         <div class="col-sm-8">
-                            <input ng-disabled="!changePassword" type="password" name="password2" ng-model="editUser.password2" ng-minlength="4" class="form-control" compare-to="editUser.password" ng-required="changePassword"/>
-                            <div ng-show="editUserForm.password2.$invalid && editUserForm.password2.$dirty || editUserForm.$submitted">
-                                <small class="text-danger" ng-show="editUserForm.password2.$error.minlength">The password has to be at least 4 characters</small>
-                                <small class="text-danger" ng-show="editUserForm.password2.$error.compareTo && editUserForm.$submitted">The passwords must match</small>
-                            </div>
+                            <input type="password" ng-model="editUser.password2"class="form-control"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">Choose role</label>
+                        <div class="col-sm-8">
+                            <select ng-model="editUser.role" class="form-control">
+                                <option ng-repeat="role in roles" value="{{role}}">{{role}}</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -96,7 +75,7 @@
                 </div>
 
                 <div class="col-lg-6">
-                    <button ng-click="submit(editUserForm.$valid)" class="btn btn-sm btn-default">Save</button>
+                    <button type="submit" class="btn btn-sm btn-default">Save</button>
                 </div>
             </div>
         </div>

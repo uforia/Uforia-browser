@@ -1,7 +1,7 @@
 var express   = require('express'),
     c         = require('../lib/common'),
     router    = express.Router(),
-    fs        = require('fs'),
+    fs        = require('fs'), 
     mime      = require('mime'),
     async     = require('async'),
     _         = require('lodash'),
@@ -21,12 +21,12 @@ var INDEX = c.config.elasticsearch.index;
 * parameters
 *   must(objects with field and a query)
 *   must_not(objects with field and a query)
-* filters
+* filters 
 *   must(objects with a field, stard_date and end_date)
-*   must_not(objects with a field, stard_date and end_date)
+*   must_not(objects with a field, stard_date and end_date) 
 * view
 * visualization
-*
+* 
 */
 router.post("/search", function(req, res) {
   var data = req.body;
@@ -81,7 +81,7 @@ var search = function(search_request, res, type, view, parameters){
 
         parameters.field1 = vismapping.field1;
         parameters.field2 = vismapping.field2;
-
+        
         worker = workerFarm(config.workers, require.resolve('../lib/visualizations/' + view.toLowerCase()), ['generateJSON']);
 
         worker.generateJSON(resp.hits.hits, parameters, function(data){
@@ -102,15 +102,15 @@ var search = function(search_request, res, type, view, parameters){
 * parameters
 *   must(objects with field and a query)
 *   must_not(objects with field and a query)
-* filters
+* filters 
 *   must(objects with a field, stard_date and end_date)
-*   must_not(objects with a field, stard_date and end_date)
+*   must_not(objects with a field, stard_date and end_date) 
 * view
-*
+* 
 */
 router.post("/count", function(req, res){
   var data = req.body;
-  var search_request = {};
+  var search_request = {};  
 
   search_request['index'] = INDEX;
   search_request['type'] = data.type;
@@ -195,7 +195,7 @@ router.post("/mapping_info", function(req, res){
   var type = req.body.type;
   // console.log(type);
 
-  c.elasticsearch.indices.getMapping({
+  c.elasticsearch.indices.getMapping({ 
     index : INDEX,
     type: type
   }).then(function(resp){
@@ -207,7 +207,7 @@ router.post("/mapping_info", function(req, res){
         if(data['_table']);
           delete data['_table'];
 
-        res.send(data);
+        res.send(data); 
       }
       else { // Else send empty data, could be that the mapping isn't filled yet
         res.send([]);
@@ -261,7 +261,7 @@ router.post("/get_file_details", function(req, res){
   var tables = Object.keys(req.body.tables);
 
   var filesTable = 'files'; // Todo: get this from config
-
+  
   var data = [];
 
   var labelFields = ['Subject', 'Date', 'From', 'Author', 'To'];
@@ -368,7 +368,7 @@ router.get('/file/:hashid', function(req, res){
 /* Return the content from a evidence file
 * url: /api/get_file_content
 * takes params:
-*
+* 
 */
 router.get('/file/:hashid/validate', function(req, res){
   c.mysql_db.query('SELECT fullpath, md5, sha1, sha256 FROM files WHERE hashid=?', [req.params.hashid], function(err, result){
@@ -378,7 +378,7 @@ router.get('/file/:hashid/validate', function(req, res){
     var fullpath = result.fullpath;
 
     fs.readFile(fullpath, function (err, data) {
-      if (err)
+      if (err) 
         res.send({md5: false, sha1: false, sha256: false});
       else {
         validateHashes(data, {md5: result.md5, sha1: result.sha1, sha256: result.sha256}, function(validated){
@@ -454,11 +454,11 @@ router.get('/files', function(req, res){
 /* Return the indexed mappings for a type
 * url: /api/get_modules
 * takes params:
-*
+* 
 */
 router.post("/get_modules", function(req, res){
   c.mysql_db.query('SELECT * FROM supported_mimetypes', function(err, results){
-    if(err) throw err;
+    if(err) throw err;    
 
     results.push({mime_type: 'files', modules: '{"files":"files"}'});
 
@@ -508,11 +508,11 @@ router.post("/get_modules", function(req, res){
         callback();
       });
     }, function(err){
-      if(err) throw err;
+      if(err) throw err; 
 // console.log(mime_types);
       res.send(mime_types);
     });
-
+        
 
       // if(mime.extension(result.mime_type)){
       //   modules.push({
@@ -573,7 +573,7 @@ router.post("/create_mapping", function(req, res){
     if(meta.hashids[meta.tables[tableIndex]]){
 
       if(meta.hashids[meta.tables[tableIndex]].length > 0){
-
+        
         var hashids = meta.hashids[meta.tables[tableIndex]].slice(0, maxItems);
         meta.hashids[meta.tables[tableIndex]] = meta.hashids[meta.tables[tableIndex]].slice(maxItems);
 
@@ -630,7 +630,7 @@ router.post("/create_mapping", function(req, res){
     }, function (error, response) {
       if(error)
         throw error;
-
+  
       callback();
     });
   }
@@ -649,7 +649,7 @@ router.post("/create_mapping", function(req, res){
           type: type,
           body: data
         }, function (error, response) {
-          if(error){
+          if(error){ 
             console.log(data, response);
             console.error(error);
           }
@@ -906,10 +906,11 @@ router.post('/edit_user', function(req, res){
   var id = user.id;
   delete user.id;
 
-  bcrypt.hash(user['password'], null, null, function(err, hash){
-    if (user.password != null){
+  if (user.password != 'undefined') {
+    bcrypt.hash(user['password'], null, null, function(err, hash){
       user.password = hash;
-    }
+    })
+  }
 
     c.elasticsearch.update({
       index: INDEX,
@@ -921,9 +922,8 @@ router.post('/edit_user', function(req, res){
     }, function (error, response) {
       res.send({error: error, response: response});
     });
-  })
-});
 
+});
 
 router.post('/archive_user', function(req, res){
   var user = req.body;
@@ -935,25 +935,7 @@ router.post('/archive_user', function(req, res){
     id: id,
     body: {
       doc: {
-        isDeleted: true
-      }
-    }
-  }, function (error, response) {
-    res.send({error: error, response: response});
-  });
-});
-
-router.post('/unarchive_user', function(req, res){
-  var user = req.body;
-  var id = user.id;
-
-  c.elasticsearch.update({
-    index: INDEX,
-    type: 'users',
-    id: id,
-    body: {
-      doc: {
-        isDeleted: 0
+        isDeleted: 1
       }
     }
   }, function (error, response) {
@@ -972,7 +954,7 @@ router.post('/get_users', function(req, res){
     index: INDEX,
     type: 'users',
     body: { query: { match_all: {}}},
-    _source: ["id", "firstName", "lastName", "email", "isDeleted"],
+    _source: ["id", "firstName", "lastName", "email", "isDeleted", "role"],
     size: 999 // all
   }, function (error, response) {
     res.send({error: error, response: response});
