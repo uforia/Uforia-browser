@@ -126,6 +126,19 @@
                     mapping: mappings.getMapping,
                     mime_types: mappings.getAvailableModules
                 }
+            })
+            .state('mappings.edit', {
+                url: "/edit/{type}",
+                templateUrl: "app/components/mappings/edit/edit.view.html",
+                controller: 'MappingsEditController',
+                controllerAs: 'ctrl',
+                data: { pageTitle: "Mapping edit" },
+                resolve: {
+                    loggedin: isAuthenticated,
+                    types: mappings.getTypes,
+                    mapping: mappings.getMapping,
+                    mime_types: mappings.getAvailableModules
+                }
             });
     }
 })();
