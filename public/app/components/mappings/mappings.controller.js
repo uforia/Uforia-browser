@@ -1,5 +1,5 @@
 (function() {
-    var mod = angular.module('mappings',['mappings.create']);
+    var mod = angular.module('mappings',['mappings.create', 'mappings.edit']);
 
     mod.controller('MappingsController', MappingsController);
 
