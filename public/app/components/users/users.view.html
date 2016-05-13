@@ -32,6 +32,7 @@
                                 <th>Name</th>
                                 <th>Email</th>
                                 <th>Role</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -39,6 +40,15 @@
                                 <td>{{row.firstName + ' ' + row.lastName}}</td>
                                 <td>{{row.email}}</td>
                                 <td>{{row.role}}</td>
+                                <td>
+                                    <button ng-show="!row.isDeleted" class="btn btn-xs btn-danger" ng-click="archiveUser(row)">
+                                        <span class="glyphicon glyphicon-remove"></span> Archive user
+                                    </button>
+
+                                    <button ng-show="row.isDeleted" class="btn btn-xs btn-danger" ng-click="unarchiveUser(row)">
+                                        <span class="glyphicon glyphicon-remove"></span> Unarchive user
+                                    </button>
+                                </td>
                             </tr>
                         </tbody>
                     </table>

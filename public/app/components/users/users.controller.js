@@ -3,7 +3,7 @@
 
     mod.controller('UsersController', UsersController);
 
-    function UsersController($scope, $http) {
+    function UsersController($scope, $http, $modal) {
 
         $scope.itemsByPage = 10;
         $scope.showNumberOfPages = 7;
@@ -11,6 +11,8 @@
         $scope.user = {
             isDeleted: false
         };
+        $scope.archiveUser = archiveUser;
+        $scope.unarchiveUser = unarchiveUser;
         $scope.message = [];
         $scope.error = [];
         var users;
@@ -20,7 +22,7 @@
         var vm = this;
         vm.companies = [];
 
-        if ($scope.isLoggedIn) {
+        function loadUsers() {
             $http({
                 method: 'GET',
                 url: '/api/get_users'
@@ -30,23 +32,69 @@
                     $scope.error.push(data.data.error.message);
                     $scope.isError = true;
                 } else if (data.data.response.hits.total > 0) {
+                    $scope.rowCollection = [];
 
                     //Load users in table
                     angular.forEach(data.data.response.hits.hits, function(value, key) {
-                        var u = value._source;
-                        if (u.isDeleted == 0) {
-                            $scope.rowCollection.push({
-                                id: value._id, firstName: u.firstName, lastName: u.lastName, email: u.email,
-                                role: u.role
-                            });
-                        }
+                        var user = value._source;
+                        $scope.rowCollection.push({
+                            id: value._id,
+                            firstName: user.firstName,
+                            lastName: user.lastName,
+                            email: user.email,
+                            role: user.role,
+                            isDeleted: user.isDeleted
+                        });
                     });
+                    
                     $scope.searchCollection = $scope.rowCollection;
                     users = data.data.response.hits.hits;
                 }
             }, function errorCallback(data) {
                 toastr.error('Please try again later.', 'Something went wrong!');
             });
+        }
+
+        function archiveUser(user) {
+            var modalInstance = $modal.open({
+                templateUrl: 'app/components/users/modals/archiveUserModal.html',
+                controller: 'ArchiveUserModalController',
+                size: 'md',
+                resolve: {
+                    user: function() {
+                        return user;
+                    }
+                },
+            });
+
+            modalInstance.result.then(function() {
+                loadUsers();
+            },
+            function() {
+            });
+        }
+
+        function unarchiveUser(user) {
+            var modalInstance = $modal.open({
+                templateUrl: 'app/components/users/modals/unarchiveUserModal.html',
+                controller: 'UnarchiveUserModalController',
+                size: 'md',
+                resolve: {
+                    user: function() {
+                        return user;
+                    }
+                },
+            });
+
+            modalInstance.result.then(function() {
+                loadUsers();
+            },
+            function() {
+            });
+        };
+
+        if ($scope.isLoggedIn) {
+            loadUsers();
         }
     }
 })();
