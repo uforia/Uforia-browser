@@ -5,6 +5,7 @@
         'ui.bootstrap', // Ui Bootstrap
         'main',
         'users',
+        'profile',
         'authentication',
         'search',
         'pageTitle',

@@ -63,6 +63,16 @@
                 controller: "MainController",
                 controllerAs: "mainCtrl"
             })
+            .state('profile', {
+                url: "/profile",
+                templateUrl: "app/components/main/profile/profile.view.html",
+                controller: "profileController",
+                controllerAs: "profileCtrl",
+                data: { pageTitle: "profile" },
+                resolve: {
+                    loggedin: isAuthenticated
+                }
+            })
             .state('search', {
                 url: "/search",
                 templateUrl: "app/components/search/search.view.html",
