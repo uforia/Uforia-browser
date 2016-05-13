@@ -24,3 +24,6 @@ div[size="xl"] .modal-dialog {
 .no-padding {
     padding: 0;
 }
+.wrapper, .page-wrapper {
+    height: 100%;
+}
