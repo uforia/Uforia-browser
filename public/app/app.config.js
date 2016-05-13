@@ -68,7 +68,8 @@
                 controller: 'SearchController',
                 data: { pageTitle: "Search" },
                 resolve: {
-                    types: search.getTypes
+                    types: search.getTypes,
+                    loggedin: isAuthenticated
                 }
             })
             .state('users', {
