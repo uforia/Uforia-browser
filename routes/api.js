@@ -869,12 +869,62 @@ router.get('/get_users', function(req, res){
     index: INDEX,
     type: 'users',
     body: { query: { match_all: {}}},
-    _source: ["id", "firstName", "lastName", "email", "isDeleted"],
+    _source: ["id", "firstName", "lastName", "email", "isDeleted", "role"],
     size: 999 // all
   }, function (error, response) {
     res.send({error: error, response: response});
   });
 });
 
+/**
+ * Get one user
+ * url: /api/get_user
+ */
+router.get('/get_user', function(req, res){
+  var userId = req.query.id;
+
+  c.elasticsearch.search({
+    index: INDEX,
+    type: 'users',
+    body: {
+      query: {
+        "ids" : {
+          "values" : [userId]
+        }
+      }
+    },
+    _source: ["id", "firstName", "lastName", "email", "isDeleted", "role"],
+  }, function (error, response) {
+    res.send({error: error, response: response});
+  });
+});
+
+/**
+ * Edit an existing user
+ * url: /api/edit_user
+ */
+router.post('/edit_user', function(req, res){
+  var bcrypt = require('bcrypt-nodejs');
+  var user = req.body;
+  var id = user.id;
+  delete user.id;
+
+  bcrypt.hash(user['password'], null, null, function(err, hash){
+    if (user.password != null){
+      user.password = hash;
+    }
+
+    c.elasticsearch.update({
+      index: INDEX,
+      type: 'users',
+      id: id,
+      body: {
+        "doc" : user
+      }
+    }, function (error, response) {
+      res.send({error: error, response: response});
+    });
+  })
+});
 
 module.exports = router;
