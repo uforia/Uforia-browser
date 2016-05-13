@@ -30,6 +30,9 @@
     <!-- Morris Charts CSS -->
     <link href="assets/bower_components/morrisjs/morris.css" rel="stylesheet">
 
+    <!-- Angular UI-select CSS-->
+    <link href="assets/js/angular-ui-select/dist/select.css" rel="stylesheet">
+
     <!-- Custom Fonts -->
     <link href="assets/bower_components/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
 
@@ -70,6 +73,10 @@
     <!-- jQuery -->
     <script src="assets/bower_components/jquery/dist/jquery.min.js"></script>
 
+    <!-- JQuery UI-->
+    <script src="assets/js/jquery-ui/jquery-ui.min.js"></script>
+    <script src="assets/js/jquery-ui/ui/sortable.js"></script>
+
     <!-- Bootstrap Core JavaScript -->
     <script src="assets/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
 
@@ -90,11 +97,21 @@
 
     <!-- Custom Theme JavaScript -->
     <script src="assets/js/sb-admin-2.js"></script>
-    <script src="./javascripts/constants.js"></script>
 
     <!-- Main Angular scripts-->
     <!--<script src="assets/js/angular/angular.min.js"></script>-->
     <script src="old/components/angular/angular.min.js"></script>
+
+    <!-- Angular UI modules-->
+    <script src="assets/js/angular-ui/common/module.js"></script>
+    <script src="assets/js/angular-ui/modules/filters/unique/unique.js"></script>
+    <script src="assets/js/angular-ui/modules/filters/highlight/highlight.js"></script>
+    <script src="assets/js/angular-ui-select/dist/select.js"></script>
+
+
+    <!-- Angular Drag and Drop Lists (dndList) -->
+    <script src="assets/js/angular-drag-and-drop-lists/angular-drag-and-drop-lists.js"></script>
+
     <script src="assets/bower_components/oclazyload/dist/ocLazyLoad.min.js"></script>
     <script src="assets/js/ui-router/angular-ui-router.min.js"></script>
     <script src="assets/js/bootstrap/ui-bootstrap-tpls-0.12.0.min.js"></script>
@@ -111,9 +128,10 @@
     <script language="javascript" src="app/shared/minimalize-sidebar/minimalize-sidebar.directive.js"></script>
     <script language="javascript" src="app/shared/ibox-tools/regular/ibox-tools.directive.js"></script>
     <script language="javascript" src="app/shared/ibox-tools/fullscreen/ibox-tools-fullscreen.directive.js"></script>
-
+    
     <!-- Component models -->
     <script language="javascript" src="app/components/search/search.models.js"></script>
+    <script language="javascript" src="app/components/mappings/mappings.models.js"></script>
 
     <!-- Angular controllers -->
     <script language="javascript" src="app/components/main/main.controller.js"></script>
@@ -125,13 +143,19 @@
     <script language="javascript" src="app/components/users/modals/archiveUserModal.controller.js"></script>
     <script language="javascript" src="app/components/users/modals/unarchiveUserModal.controller.js"></script>
     <script language="javascript" src="app/components/main/profile/profile.controller.js"></script>
+    <script language="javascript" src="app/components/mappings/mappings.controller.js"></script>
+    <script language="javascript" src="app/components/mappings/create/create.controller.js"></script>
+    <script language="javascript" src="app/components/mappings/edit/edit.controller.js"></script>
+    <script language="javascript" src="app/components/mappings/visualizations/visualizations.controller.js"></script>
     <script language="javascript" src="app/components/search/search.controller.js"></script>
     <script language="javascript" src="app/components/search/details/details.controller.js"></script>
-
-
+    
     <script language="javascript" src="app/shared/ibox-tools/fullscreen/ibox-tools-fullscreen.controller.js"></script>
     <script language="javascript" src="app/shared/ibox-tools/regular/ibox-tools.controller.js"></script>
     <script language="javascript" src="app/shared/minimalize-sidebar/minimalize-sidebar.controller.js"></script>
+
+    <!-- Component filters -->
+    <script language="javascript" src="app/app.filter.js"></script>
 </body>
 
 </html>

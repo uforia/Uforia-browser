@@ -29,7 +29,7 @@
 
             $http.get('/logged-in')
                 .success(function (user) {
-                    // Authenticated 
+                    // Authenticated
                     if (user == 1) {
                         $rootScope.isLoggedIn = true;
                     } else {
@@ -48,8 +48,11 @@
         });
     }
 
-    function config($stateProvider, $urlRouterProvider, $ocLazyLoadProvider, ROLES) {
+    function config($stateProvider, $urlRouterProvider, $ocLazyLoadProvider, $sceProvider, ROLES) {
         $urlRouterProvider.otherwise("/");
+
+        // Disable Sce for ui-select plugin on mappings page
+        $sceProvider.enabled(false);
 
         $ocLazyLoadProvider.config({
             // Set to true if you want to see what and when is dynamically loaded
@@ -124,6 +127,55 @@
                 controller: 'AuthLoginController',
                 controllerAs: 'ctrl',
                 data: { pageTitle: "Login" }
+            })
+            .state('mappings', {
+                url: "/mappings",
+                templateUrl: "app/components/mappings/mappings.view.html",
+                controller: 'MappingsController',
+                controllerAs: 'ctrl',
+                data: { pageTitle: "Mapping overview" },
+                resolve: {
+                    loggedin: isAuthenticated,
+                    types: mappings.getTypes
+                }
+            })
+            .state('mappings.create', {
+                url: "/create",
+                templateUrl: "app/components/mappings/create/create.view.html",
+                controller: 'MappingsCreateController',
+                controllerAs: 'ctrl',
+                data: { pageTitle: "Mapping create" },
+                resolve: {
+                    loggedin: isAuthenticated,
+                    types: mappings.getTypes,
+                    mapping: mappings.getMapping,
+                    mime_types: mappings.getAvailableModules
+                }
+            })
+            .state('mappings.edit', {
+                url: "/edit/{type}",
+                templateUrl: "app/components/mappings/edit/edit.view.html",
+                controller: 'MappingsEditController',
+                controllerAs: 'ctrl',
+                data: { pageTitle: "Mapping edit" },
+                resolve: {
+                    loggedin: isAuthenticated,
+                    types: mappings.getTypes,
+                    mapping: mappings.getMapping,
+                    mime_types: mappings.getAvailableModules
+                }
+            })
+            .state('mappings.visualizations', {
+                url: "/visualizations/{type}",
+                templateUrl: "app/components/mappings/visualizations/visualizations.view.html",
+                controller: 'MappingsVisualizationsController',
+                controllerAs: 'ctrl',
+                data: { pageTitle: "Edit mapping visualizations" },
+                resolve: {
+                    loggedin: isAuthenticated,
+                    mapping: mappings.getMapping,
+                    mime_types: mappings.getAvailableModules
+                }
             });
     }
 })();

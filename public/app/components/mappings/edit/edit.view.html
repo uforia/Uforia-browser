@@ -1,0 +1,64 @@
+<!--<div ui-view class="ng-scope">-->
+    <div class="row">
+        <div class="col-xs-12">
+            <h1 class="page-header">Mappings</h1>
+            <ol class="breadcrumb">
+                <li>
+                    <a ui-sref="index">Home</a>
+                </li>
+
+                <li>
+                    <a ui-sref="mappings">Mappings</a>
+                </li>
+                <li class="active">
+                    <strong>Create</strong>
+                </li>
+            </ol>
+        </div>
+    </div>
+    <div class="wrapper wrapper-content animated fadeIn">
+        <div class="col-lg-12 widget">
+            <a ui-sref="^" class="btn btn-info btn-md btn-rounded" type="submit"><i class="fa fa-arrow-left"></i> Back to overview</a>
+        </div>
+
+
+        <div class="row">
+            <div class="col-lg-2">
+                <label>Name</label>
+                <input ng-model="mapping.name" class="form-control"/>
+            </div>
+            <div class="col-lg-2">
+                <label>Mime-types</label>
+                <select ui-sortable="ui-sortable" ng-model="selectedMimetypes" ng-size="{{Utils.keys(mime_types).length+1}}" multiple="multiple" ng-change="updateModulesList()" ng-click="updateModulesList()" class="form-control selectFields">
+                    <optgroup ng-repeat="(key, mime_types) in mimetypesList" label="{{key}}">
+                        <option ng-repeat="type in mime_types" value="{{type}}" ng-selected="selectedMimetypes.indexOf(type) != -1" ng-class="{available: checkMimetypeForFields(type)}">{{type.split('/')[1] || type}}</option>
+                    </optgroup>
+                </select>
+            </div>
+            <div class="col-lg-2">
+                <label>Modules</label>
+                <select ui-sortable="ui-sortable" ng-model="selectedModules" ng-size="{{Utils.keys(modules).length+1}}" multiple="multiple" ng-change="checkSelected('selectedModules', 'modules')" ng-click="checkSelected('selectedModules', 'modules')" class="form-control">
+                    <optgroup ng-repeat="(key, modules) in modulesList" label="{{key}}">
+                        <option ng-repeat="module in modules" value="{{module}}" ng-selected="selectedModules.indexOf(module) != -1" ng-class="{available: checkModuleForFields(module)}">{{module.split('_').pop() || module}}</option>
+                    </optgroup>
+                </select>
+            </div>
+            <div class="col-lg-2 dnd">
+                <label>Fields</label>
+                <ul dnd-list="models.lists.fields" class="list-group">
+                    <li class="list-group-item" ng-repeat="(key,item) in models.lists.fields | unique:'field';" dnd-draggable="item" dnd-moved="models.lists.fields.splice($index, 1)" dnd-effect-allowed="move" ng-hide="item.field=='hashid'" ng-click="models.lists.fields.splice($index, 1); addField(item);" ng-class="{present: checkPresent(item)}">{{item.field}}</li>
+                </ul>
+            </div>
+            <div class="col-lg-2 dnd">
+                <label>Selected</label>
+                <ul dnd-list="models.lists.selectedFields" dnd-drop="selectField(event, index, item, type)" class="list-group">
+                    <li class="list-group-item" ng-repeat="(key,item) in models.lists.selectedFields" dnd-draggable="item" dnd-moved="models.lists.selectedFields.splice($index, 1); reloadFields();" dnd-effect-allowed="move" ng-click="models.lists.selectedFields.splice($index, 1); reloadFields();">{{item.field}}</li>
+                </ul>
+            </div>
+            <div class="col-lg-2">
+                <button type="button" ng-click="createMapping()" class="btn btn-primary">Create Mapping</button>
+            </div>
+        </div>
+
+    </div>
+<!--</div>-->

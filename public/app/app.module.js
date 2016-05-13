@@ -6,6 +6,7 @@
         'main',
         'users',
         'profile',
+        'mappings',
         'authentication',
         'search',
         'pageTitle',
@@ -14,5 +15,9 @@
         'iboxTools',
         'iboxToolsFullScreen',
         'compareTo'
+        'iboxToolsFullScreen',
+        'dndLists',
+        'ui',
+        'ui.select'
     ]);
 })();
