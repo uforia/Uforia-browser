@@ -14,6 +14,7 @@
         'iboxTools',
         'iboxToolsFullScreen',
         'dndLists',
-        'ui'
+        'ui',
+        'ui.select'
     ]);
 })();

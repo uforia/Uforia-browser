@@ -47,8 +47,11 @@
         });
     }
 
-    function config($stateProvider, $urlRouterProvider, $ocLazyLoadProvider) {
+    function config($stateProvider, $urlRouterProvider, $ocLazyLoadProvider, $sceProvider) {
         $urlRouterProvider.otherwise("/");
+
+        // Disable Sce
+        $sceProvider.enabled(false);
 
         $ocLazyLoadProvider.config({
             // Set to true if you want to see what and when is dynamically loaded
@@ -136,6 +139,18 @@
                 resolve: {
                     loggedin: isAuthenticated,
                     types: mappings.getTypes,
+                    mapping: mappings.getMapping,
+                    mime_types: mappings.getAvailableModules
+                }
+            })
+            .state('mappings.visualizations', {
+                url: "/visualizations/{type}",
+                templateUrl: "app/components/mappings/visualizations/visualizations.view.html",
+                controller: 'MappingsVisualizationsController',
+                controllerAs: 'ctrl',
+                data: { pageTitle: "Edit mapping visualizations" },
+                resolve: {
+                    loggedin: isAuthenticated,
                     mapping: mappings.getMapping,
                     mime_types: mappings.getAvailableModules
                 }
