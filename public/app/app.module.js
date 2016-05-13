@@ -14,7 +14,7 @@
         'minimalizeSidebar',
         'iboxTools',
         'iboxToolsFullScreen',
-        'compareTo'
+        'compareTo',
         'iboxToolsFullScreen',
         'dndLists',
         'ui',
