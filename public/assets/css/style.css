@@ -19,3 +19,8 @@ div[size="xl"] .modal-dialog {
 .panel-heading .btn-group {
     margin-top: -5px;
 }
+
+/*================ MISC =================*/
+.no-padding {
+    padding: 0;
+}
