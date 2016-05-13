@@ -3,7 +3,7 @@
     angular.module('uforia').config(config).run(run);
 
 
-    function run($rootScope, $http, $state, $window) {
+    function run($rootScope, $http, $state, ROLES, $window) {
         $rootScope.$state = $state;
 
         $rootScope.Utils = {
@@ -19,6 +19,7 @@
             $rootScope.mappings[info.mapping] = info;
             $rootScope.$apply();
         });
+        $rootScope.roles = ROLES;
 
         $rootScope.$on('$stateChangeStart', function (event, toState) {
             // Would print "Hello World!" when 'parent' is activated
@@ -47,7 +48,7 @@
         });
     }
 
-    function config($stateProvider, $urlRouterProvider, $ocLazyLoadProvider) {
+    function config($stateProvider, $urlRouterProvider, $ocLazyLoadProvider, ROLES) {
         $urlRouterProvider.otherwise("/");
 
         $ocLazyLoadProvider.config({
@@ -88,7 +89,17 @@
                 controller: "UsersCreateController",
                 controllerAs: 'ctrl',
                 data: { pageTitle: "Create user" },
-                resolve: {
+                resolve:{
+                    loggedin: isAuthenticated,
+                }
+            })
+            .state('users.edit', {
+                url: "/edit/:userId",
+                templateUrl: "app/components/users/edit/edit.view.html",
+                controller: "UsersEditController",
+                controllerAs: 'ctrl',
+                data: { pageTitle: "Edit user" },
+                resolve:{
                     loggedin: isAuthenticated
                 }
             })
@@ -127,4 +138,21 @@ function isAuthenticated($q, $timeout, $http, $location, $rootScope, $state) {
 
             return deferred.promise;
         });
+}
+function hasRoles(roles) {
+    return function($q, $rootScope, ROLES) {
+        var deferred = $q.defer();
+
+        for (var i = 0; i < roles.length; i++) {
+            //Resolve state if roles match with user roles
+            if (roles[i] === ROLES.admin && $rootScope.user.role == ROLES.admin || roles[i] === ROLES.manager && $rootScope.user.role == ROLES.manager
+                || roles[i] === ROLES.user && $rootScope.user.role == ROLES.user) {
+                return deferred.resolve();
+            }else{
+                // No match, do not resolve state
+                deferred.reject();
+            }
+        }
+        return deferred.promise;
+    }
 }

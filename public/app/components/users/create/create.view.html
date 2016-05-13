@@ -21,42 +21,70 @@
             <a ui-sref="^" class="btn btn-info btn-md btn-rounded" type="submit"><i class="fa fa-arrow-left"></i> Back to overview</a>
         </div>
         <div class="col-lg-6">
-            <form class="form-horizontal" ng-submit="save(user)" name="addUserForm">
+            <form class="form-horizontal" novalidate ng-submit="addUserForm.$valid && save(user)" name="addUserForm">
 
-                <div role="alert" ng-show="cuErrorMessages.length &gt; 0" class="alert alert-danger">
-                    <ul ng-repeat="message in cuErrorMessages track by $index">
-                        <li>{{message}}</li>
-                    </ul>
-                </div>
                 <div class="form-group">
                     <label class="col-sm-4 control-label">First name</label>
                     <div class="col-sm-8">
-                        <input type="text" name="firstName" ng-model="user.firstName" required="required" class="form-control" />
+                        <input title="first name" type="text" name="firstName" ng-model="user.firstName" class="form-control" required/>
+                        <div ng-show="addUserForm.firstName.$invalid && addUserForm.firstName.$dirty || addUserForm.$submitted">
+                            <small class="text-danger" ng-show="addUserForm.firstName.$error.required">Please enter the first name</small>
+                        </div>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="col-sm-4 control-label">Last name</label>
                     <div class="col-sm-8">
-                        <input type="text" ng-model="user.lastName" required="required" class="form-control" />
+                        <input title="last name" type="text" name="lastName" ng-model="user.lastName" class="form-control" required/>
+                        <div ng-show="addUserForm.lastName.$invalid && addUserForm.lastName.$dirty || addUserForm.$submitted">
+                            <small class="text-danger" ng-show="addUserForm.lastName.$error.required">Please enter the last name</small>
+                        </div>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="col-sm-4 control-label">Email</label>
                     <div class="col-sm-8">
-                        <input type="email" ng-model="user.email" required="required" class="form-control" />
+                        <input title="email" type="email" name="email" ng-model="user.email" class="form-control" required/>
+                        <div ng-show="addUserForm.email.$invalid && addUserForm.email.$dirty || addUserForm.$submitted">
+                            <small class="text-danger" ng-show="addUserForm.email.$error.email">Please enter a valid email address</small>
+                            <small class="text-danger" ng-show="addUserForm.email.$error.required">Please enter an email address</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label"></label>
+                    <div class="col-sm-8">
+                        <p class="help-block pull-left">Passwords should have at least 4 characters.</p>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="col-sm-4 control-label">Password</label>
                     <div class="col-sm-8">
-                        <input type="password" ng-model="user.password" ng-minlength="4" required="required" class="form-control" />
-                        <p class="help-block pull-left">Passwords should have at least 4 characters.</p>
+                        <input title="password" type="password" name="password" ng-model="user.password" ng-minlength="4" class="form-control" required/>
+                        <div ng-show="addUserForm.password.$invalid && addUserForm.password.$dirty || addUserForm.$submitted">
+                            <small class="text-danger" ng-show="addUserForm.password.$error.minlength">The password has to be at least 4 characters</small>
+                            <small class="text-danger" ng-show="addUserForm.password.$error.required && addUserForm.$submitted">This field is required</small>
+                        </div>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="col-sm-4 control-label">Retype password</label>
                     <div class="col-sm-8">
-                        <input type="password" ng-model="user.password2" ng-minlength="4" required="required" class="form-control" />
+                        <input title="password2" type="password" name="password2" ng-model="user.password2" class="form-control" compare-to="user.password" required/>
+                        <div ng-show="addUserForm.password2.$invalid && addUserForm.password2.$dirty || addUserForm.$submitted">
+                            <small class="text-danger" ng-show="addUserForm.password2.$error.compareTo">The passwords must match</small>
+                            <small class="text-danger" ng-show="addUserForm.password.$error.required && addUserForm.$submitted">This field is required</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Choose role</label>
+                    <div class="col-sm-8">
+                        <select name="role" ng-model="user.role" class="form-control" required>
+                            <option ng-repeat="role in roles" value="{{role}}">{{role}}</option>
+                        </select>
+                        <small class="text-danger" ng-show="addUserForm.role.$error.required && addUserForm.$submitted">This field is required</small>
                     </div>
                 </div>
 
