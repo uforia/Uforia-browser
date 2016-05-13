@@ -35,7 +35,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr ng-repeat="row in rowCollection">
+                            <tr ng-repeat="row in rowCollection" ui-sref="users.edit({userId:row.id})">
                                 <td>{{row.firstName + ' ' + row.lastName}}</td>
                                 <td>{{row.email}}</td>
                                 <td>{{row.role}}</td>

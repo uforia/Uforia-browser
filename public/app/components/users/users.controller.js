@@ -1,5 +1,5 @@
 (function() {
-    var mod = angular.module('users', ['users.create']);
+    var mod = angular.module('users', ['users.create', 'users.edit']);
 
     mod.controller('UsersController', UsersController);
 
@@ -9,7 +9,7 @@
         $scope.showNumberOfPages = 7;
         $scope.searchCollection = [];
         $scope.user = {
-            isDeleted: 0
+            isDeleted: false
         };
         $scope.message = [];
         $scope.error = [];

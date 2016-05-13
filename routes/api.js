@@ -843,20 +843,62 @@ router.post('/visualizations/save', function(req, res){
  * Takes user object with firstname, lastname, email, password and isDeleted
  */
 router.post('/save_user', function(req, res){
-  var bcrypt = require('bcrypt-nodejs');
   var user = req.body;
+  var username = user.email;
 
-  bcrypt.hash(user['password'], null, null, function(err, hash){
-    user.password = hash;
+  function isDef(v) {
+    return v !== undefined && v !== null;
+  }
 
-    c.elasticsearch.create({
-      index: INDEX,
+  if(isDef(user.firstName) && isDef(user.lastName) && isDef(user.password) && isDef(user.email) && isDef(user.isDeleted)){
+    c.elasticsearch.search({
+      index: c.config.elasticsearch.index,
       type: 'users',
-      body: user
-    }, function (error, response) {
-      res.send({error: error, response: response});
+      size: 1,
+      body: {
+        query: {
+          filtered: {
+            filter: {
+              term: {
+                email: username
+              }
+            }
+          }
+        }
+      }
+    }).then(function(response) {
+      if (response.hits.total != 0) {
+        res.send({
+          error: {
+            message: 'Email address already exists'
+          }
+        });
+      }
+      else {
+        var bcrypt = require('bcrypt-nodejs');
+
+
+        bcrypt.hash(user['password'], null, null, function(err, hash){
+          user.password = hash;
+
+          c.elasticsearch.create({
+            index: INDEX,
+            type: 'users',
+            body: user
+          }, function (error, response) {
+            res.send({error: error, response: response});
+          });
+        })
+      }
     });
-  })
+  }
+  else {
+    res.send({
+      error: {
+        message: 'Variable is undefined'
+      }
+    });
+  }
 });
 
 router.post('/edit_user', function(req, res){
@@ -931,12 +973,62 @@ router.get('/get_users', function(req, res){
     index: INDEX,
     type: 'users',
     body: { query: { match_all: {}}},
-    _source: ["id", "firstName", "lastName", "email", "isDeleted"],
+    _source: ["id", "firstName", "lastName", "email", "isDeleted", "role"],
     size: 999 // all
   }, function (error, response) {
     res.send({error: error, response: response});
   });
 });
 
+/**
+ * Get one user
+ * url: /api/get_user
+ */
+router.get('/get_user', function(req, res){
+  var userId = req.query.id;
+
+  c.elasticsearch.search({
+    index: INDEX,
+    type: 'users',
+    body: {
+      query: {
+        "ids" : {
+          "values" : [userId]
+        }
+      }
+    },
+    _source: ["id", "firstName", "lastName", "email", "isDeleted", "role"],
+  }, function (error, response) {
+    res.send({error: error, response: response});
+  });
+});
+
+/**
+ * Edit an existing user
+ * url: /api/edit_user
+ */
+router.post('/edit_user', function(req, res){
+  var bcrypt = require('bcrypt-nodejs');
+  var user = req.body;
+  var id = user.id;
+  delete user.id;
+
+  bcrypt.hash(user['password'], null, null, function(err, hash){
+    if (user.password != null){
+      user.password = hash;
+    }
+
+    c.elasticsearch.update({
+      index: INDEX,
+      type: 'users',
+      id: id,
+      body: {
+        "doc" : user
+      }
+    }, function (error, response) {
+      res.send({error: error, response: response});
+    });
+  })
+});
 
 module.exports = router;

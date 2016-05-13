@@ -5,67 +5,66 @@
     mod.controller('UsersCreateController', UsersCreateController);
 
     function UsersCreateController($scope, $http, $state) {
+        $scope.user = {};
+        $scope.user.isDeleted = false;
+        var users = {};
 
 
-        $scope.save = function(user) {
-            $scope.cuErrorMessages = [];
+        $http({
+            method: 'GET',
+            url: '/api/get_users'
+        }).then(function successCallback(data) {
+            // Check if error
+            if (typeof data.data.error !== 'undefined') {
+                $scope.error.push(data.data.error.message);
+                $scope.isError = true;
+            } else if (data.data.response.hits.total > 0) {
 
-            // Checks
-            if (typeof user.firstName === "undefined") {
-                $scope.cuErrorMessages.push('First name is required');
+                users = data.data.response.hits.hits;
             }
+        }, function errorCallback(data) {
+            toastr.error('Please try again later.', 'Something went wrong!');
+        });
 
-            if (typeof user.lastName === "undefined") {
-                $scope.cuErrorMessages.push('Last name is required');
+        angular.forEach(users, function(value, key){
+            var u = value._source;
+            if(user.email == u.email){
+                addUser = false;
             }
+        });
+        
+        $scope.save = function(user){
+            var addUser = true;
 
-            if (typeof user.email === "undefined") {
-                $scope.cuErrorMessages.push('Email is required');
-            }
+            // Save user
+            if(addUser) {
+                delete $scope.user.password2;
+                console.log(user);
+                $http.post('/api/save_user', user)
+                    .success(function (data) {
+                            if (typeof data.error !== 'undefined') {
+                                toastr.error(data.error.message);
+                            }
 
-            if (typeof user.password === "undefined") {
-                $scope.cuErrorMessages.push('Password is invalid. Make sure the password is at least 4 characters long.');
-            }
+                            if (typeof data.response !== 'undefined') {
+                                if (data.response.created == true) {
+                                    toastr.success('User has been added');
 
-            if (typeof user.password2 === "undefined") {
-                $scope.cuErrorMessages.push('Make sure the passwords match.');
-            }
-
-            if ($scope.cuErrorMessages.length === 0) {
-
-                if (user.password !== user.password2) {
-                    $scope.cuErrorMessages.push('Password doesn\'t match.');
-
-                } else if (user.password === user.password2) {
-                    delete user.password2;
-                    var addUser = true;
-
-                    // Save user
-                    if (addUser) {
-                        $http.post('/api/save_user', user)
-                            .success(function(data) {
-                                if (typeof data.error !== 'undefined') {
-                                    $scope.error.push(data.error.message);
-                                    toastr.error('Please try again later.', 'Something went wrong!');
+                                    //Load new user in table
+                                    $scope.rowCollection.push({
+                                        id: data.response._id, firstName: user.firstName, lastName: user.lastName, email: user.email,
+                                        role: 'N/A'
+                                    });
+                                    $scope.searchCollection = $scope.rowCollection;
                                 }
-
-                                if (typeof data.response !== 'undefined') {
-                                    if (data.response.created == true) {
-                                        toastr.success(user.firstName + ' ' + user.lastName + ' was successfully created.', 'User created!');
-                                        $state.go('^', {}, { reload: true });
-                                    }
-                                }
-                            })
-                            .error(function() {
-                                toastr.error('Please try again later.', 'Something went wrong!');
-                            });
-                    }
-
-                } else {
-                    $scope.cuErrorMessages.push('Unknown error.');
-                    toastr.error('Please try again later.', 'Something went wrong!');
-                }
+                            }
+                        }
+                    );
+            } else if (!addUser){
+                toastr.error('An user with this email address already exists');
+            } else {
+                toastr.error('Unknown error');
             }
-        }
+        };
     }
 })();

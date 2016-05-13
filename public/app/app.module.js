@@ -11,6 +11,7 @@
         'sideNavigation',
         'minimalizeSidebar',
         'iboxTools',
-        'iboxToolsFullScreen'
+        'iboxToolsFullScreen',
+        'compareTo'
     ]);
 })();
