@@ -11,7 +11,7 @@
                     <a ui-sref="mappings">Mappings</a>
                 </li>
                 <li class="active">
-                    <strong>Create</strong>
+                    <strong>Edit {{mapping.name}}</strong>
                 </li>
             </ol>
         </div>
@@ -45,13 +45,13 @@
             </div>
             <div class="col-lg-2 dnd">
                 <label>Fields</label>
-                <ul dnd-list="models.lists.fields" class="list-group">
+                <ul dnd-list="models.lists.fields" class="list-group clickable">
                     <li class="list-group-item" ng-repeat="(key,item) in models.lists.fields | unique:'field';" dnd-draggable="item" dnd-moved="models.lists.fields.splice($index, 1)" dnd-effect-allowed="move" ng-hide="item.field=='hashid'" ng-click="models.lists.fields.splice($index, 1); addField(item);" ng-class="{present: checkPresent(item)}">{{item.field}}</li>
                 </ul>
             </div>
             <div class="col-lg-2 dnd">
                 <label>Selected</label>
-                <ul dnd-list="models.lists.selectedFields" dnd-drop="selectField(event, index, item, type)" class="list-group">
+                <ul dnd-list="models.lists.selectedFields" dnd-drop="selectField(event, index, item, type)" class="list-group clickable">
                     <li class="list-group-item" ng-repeat="(key,item) in models.lists.selectedFields" dnd-draggable="item" dnd-moved="models.lists.selectedFields.splice($index, 1); reloadFields();" dnd-effect-allowed="move" ng-click="models.lists.selectedFields.splice($index, 1); reloadFields();">{{item.field}}</li>
                 </ul>
             </div>

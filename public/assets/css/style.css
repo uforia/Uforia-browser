@@ -27,3 +27,7 @@ div[size="xl"] .modal-dialog {
 #wrapper, #page-wrapper {
     overflow: hidden;
 }
+
+.clickable {
+    cursor: pointer;
+}

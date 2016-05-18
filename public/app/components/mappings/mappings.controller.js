@@ -21,5 +21,7 @@
         $scope.pauseFilling = function(type){
           socket.emit('pauseFilling', {type: type});
         }
+
+        console.log($rootScope);
     }
 })();
