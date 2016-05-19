@@ -2,9 +2,9 @@
 (function() {
     var mod = angular.module('profile', []);
 
-    mod.controller('profileController', UsersEditController);
+    mod.controller('profileController', profileController);
 
-    function UsersEditController($scope, $http, $state, $stateParams, loggedInUser) {
+    function profileController($scope, $http, $state, $stateParams, loggedInUser) {
         $scope.user = loggedInUser.response.hits.hits[0]._source;
         $scope.user.id = loggedInUser.response.hits.hits[0]._id;
 
