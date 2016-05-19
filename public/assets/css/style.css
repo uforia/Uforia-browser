@@ -31,3 +31,6 @@ div[size="xl"] .modal-dialog {
 .clickable {
     cursor: pointer;
 }
+.pointer_cursor {
+    cursor:pointer;
+}
