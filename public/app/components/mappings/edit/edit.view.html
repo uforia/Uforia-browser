@@ -17,12 +17,14 @@
     </div>
 </div>
 <div class="wrapper wrapper-content animated fadeIn">
-    <div class="back-btn">
-        <a ui-sref="^" class="btn btn-info btn-sm btn-rounded" type="submit"><i class="fa fa-arrow-left"></i> Back to overview</a>
-    </div>
     <div class="panel panel-default">
         <div class="panel-heading">
             Editing: {{mapping.name}}
+            <div class="pull-right">
+                <div class="btn-group">
+                    <a ui-sref="^" class="btn btn-primary btn-xs" type="submit"><i class="fa fa-arrow-left"></i> Back to overview</a>
+                </div>
+            </div>
         </div>
         <div class="panel-body">
             <div class="col-lg-2">
@@ -63,9 +65,9 @@
                         dnd-effect-allowed="move" ng-click="models.lists.selectedFields.splice($index, 1); reloadFields();">{{item.field}}</li>
                 </ul>
             </div>
-            <div class="col-lg-2">
-                <button type="button" ng-click="createMapping()" class="btn btn-primary">Create Mapping</button>
-            </div>
+        </div>
+        <div class="panel-footer">
+            <button type="button" ng-click="createMapping()" class="btn btn-sm btn-primary">Save</button>&nbsp;
         </div>
     </div>
 

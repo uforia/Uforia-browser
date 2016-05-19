@@ -17,12 +17,14 @@
         </div>
     </div>
     <div class="wrapper wrapper-content animated fadeIn">
-        <div class="back-btn">
-            <a ui-sref="^" class="btn btn-info btn-sm btn-rounded" type="submit"><i class="fa fa-arrow-left"></i> Back to overview</a>
-        </div>
         <div class="panel panel-default">
             <div class="panel-heading">
                 Editing {{mapping.name}}'s visualizations
+                <div class="pull-right">
+                    <div class="btn-group">
+                        <a ui-sref="^" class="btn btn-primary btn-xs" type="submit"><i class="fa fa-arrow-left"></i> Back to overview</a>
+                    </div>
+                </div>
             </div>
             <div class="panel-body">
                 <table class="table table-striped tabled-condensed">
@@ -78,7 +80,9 @@
                         </tr>
                     </tbody>
                 </table>
-                <button ng-click="save()" class="btn btn-sm btn-primary">Save</button>
+            </div>
+            <div class="panel-footer">
+                <button ng-click="save()" class="btn btn-sm btn-primary">Save</button>&nbsp;
             </div>
         </div>
     </div>
