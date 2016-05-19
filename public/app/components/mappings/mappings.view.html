@@ -41,7 +41,9 @@
                                 <button ng-if="mappings[type].progress" ng-click="pauseFilling(type)" class="btn btn-default">Pause</button>
                                 <button ui-sref="mappings.edit({type:type})" class="btn btn-default">Edit</button>
                                 <button ui-sref="mappings.visualizations({type:type})" class="btn btn-default">Visualizations</button>
-                                <button ng-click="deleteMapping(type, $index)" class="btn btn-danger">Delete</button>
+                                <!-- <button ng-click="deleteMapping(type, $index)" class="btn btn-danger">Delete</button> -->
+                                <!-- <button ng-click="deleteMapping(type)" class="btn btn-danger">Delete</button> -->
+                                <button class="btn btn-xs btn-danger" ng-click="deleteMapping(type)">Delete</button>
                             </td>
                         </tr>
                         </tbody>

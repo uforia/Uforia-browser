@@ -1,0 +1,19 @@
+<div class="modal-header">
+    <button ng-click="cancel()" type="button" aria-hidden="true" class="close">&times;</button>
+    <h2 class="h3 modal-title">Delete mapping</h2>
+
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form group">
+                    Are you sure you want the delete the mapping {{mapping.type}}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button class="btn btn-sm btn-danger" ng-click="confirm()">Yes</button>
+        <button type="button" class="btn btn-sm btn-default" ng-click="cancel()">No</button>
+    </div>
+</div>
