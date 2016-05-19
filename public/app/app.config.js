@@ -73,7 +73,8 @@
                 controllerAs: "profileCtrl",
                 data: { pageTitle: "profile" },
                 resolve: {
-                    loggedin: isAuthenticated
+                    loggedin: isAuthenticated,
+                    loggedInUser: getLoggedInUser,
                 }
             })
             .state('search', {
@@ -200,6 +201,16 @@ function isAuthenticated($q, $timeout, $http, $location, $rootScope, $state) {
 
             return deferred.promise;
         });
+}
+function getLoggedInUser($q, $http) {
+    var deferred = $q.defer();
+
+    $http.get('api/get_logged_in_user')
+        .success(function (loggedInUser) {
+            deferred.resolve(loggedInUser);
+        });
+
+    return deferred.promise;
 }
 function hasRoles(roles) {
     return function($q, $rootScope, ROLES) {

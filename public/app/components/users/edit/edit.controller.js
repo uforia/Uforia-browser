@@ -32,6 +32,7 @@
 
                         if (typeof data.response !== 'undefined' && typeof data.response._version !== 'undefined') {
                             toastr.success('Changes have been updated');
+                            $state.go('^');
                             delete user.password;
                         }
                     }

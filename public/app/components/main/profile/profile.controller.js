@@ -4,7 +4,9 @@
 
     mod.controller('profileController', UsersEditController);
 
-    function UsersEditController($scope, $http, $state, $stateParams) {
+    function UsersEditController($scope, $http, $state, $stateParams, loggedInUser) {
+        $scope.user = loggedInUser.response.hits.hits[0]._source;
+        $scope.user.id = loggedInUser.response.hits.hits[0]._id;
 
         $scope.clearFields = function (changePassword) {
             if (!changePassword){
@@ -38,28 +40,6 @@
                 );
         };
 
-        $scope.user = {};
-        $scope.user.id = $stateParams.userId;
-        $http({
-            method: 'GET',
-            url: '/api/get_user',
-            params: $scope.user
-        }).then(function successCallback(data) {
-            // Check if error
-            if (typeof data.data.error !== 'undefined') {
-                toastr.error(data.data.error.message);
-                $scope.isError = true;
-            } else if (data.data.response.hits.total === 1) {
-
-                var u = data.data.response.hits.hits[0]._source;
-                $scope.user.firstName=u.firstName, $scope.user.lastName=u.lastName, $scope.user.email=u.email;
-            }
-            else {
-                toastr.error('Something went wrong!');
-            }
-        }, function errorCallback(data) {
-            toastr.error('Please try again later.', 'Something went wrong!');
-        });
-    };
+    }
 
 })();
