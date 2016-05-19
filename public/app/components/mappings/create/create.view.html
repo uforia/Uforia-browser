@@ -30,7 +30,7 @@
                 <label>Mime-types</label>
                 <select ui-sortable="ui-sortable" ng-model="selectedMimetypes" ng-size="{{Utils.keys(mime_types).length+1}}" multiple="multiple" ng-change="updateModulesList()" ng-click="updateModulesList()" class="form-control selectFields">
                     <optgroup ng-repeat="(key, mime_types) in mimetypesList" label="{{key}}">
-                        <option ng-repeat="type in mime_types" value="{{type}}" ng-selected="selectedMimetypes.indexOf(type) != -1" ng-class="{available: checkMimetypeForFields(type)}">{{type.split('/')[1] || type}}</option>
+                        <option class="pointer_cursor" ng-repeat="type in mime_types" value="{{type}}" ng-selected="selectedMimetypes.indexOf(type) != -1" ng-class="{available: checkMimetypeForFields(type)}">{{type.split('/')[1] || type}}</option>
                     </optgroup>
                 </select>
             </div>
@@ -38,7 +38,7 @@
                 <label>Modules</label>
                 <select ui-sortable="ui-sortable" ng-model="selectedModules" ng-size="{{Utils.keys(modules).length+1}}" multiple="multiple" ng-change="checkSelected('selectedModules', 'modules')" ng-click="checkSelected('selectedModules', 'modules')" class="form-control">
                     <optgroup ng-repeat="(key, modules) in modulesList" label="{{key}}">
-                        <option ng-repeat="module in modules" value="{{module}}" ng-selected="selectedModules.indexOf(module) != -1" ng-class="{available: checkModuleForFields(module)}">{{module.split('_').pop() || module}}</option>
+                        <option class="pointer_cursor" ng-repeat="module in modules" value="{{module}}" ng-selected="selectedModules.indexOf(module) != -1" ng-class="{available: checkModuleForFields(module)}">{{module.split('_').pop() || module}}</option>
                     </optgroup>
                 </select>
             </div>

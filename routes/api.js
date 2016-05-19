@@ -985,8 +985,19 @@ router.get('/get_users', function(req, res){
  * url: /api/get_user
  */
 router.get('/get_user', function(req, res){
-  var userId = req.query.id;
+  getUser(req.query.id, function (error, response) {
+    res.send({error: error, response: response});
+  });
+});
 
+router.get('/get_logged_in_user', function(req, res){
+  getUser(req.user.id, function (error, response) {
+    res.send({error: error, response: response});
+  });
+});
+
+
+function getUser (userId, cb) {
   c.elasticsearch.search({
     index: INDEX,
     type: 'users',
@@ -998,10 +1009,8 @@ router.get('/get_user', function(req, res){
       }
     },
     _source: ["id", "firstName", "lastName", "email", "isDeleted", "role"],
-  }, function (error, response) {
-    res.send({error: error, response: response});
-  });
-});
+  }, cb);
+}
 
 /**
  * Edit an existing user

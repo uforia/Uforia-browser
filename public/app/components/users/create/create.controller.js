@@ -38,9 +38,9 @@
 
             // Save user
             if(addUser) {
-                delete $scope.user.password2;
-                console.log(user);
-                $http.post('/api/save_user', user)
+                var tempUser = angular.copy(user);
+                delete tempUser.password2;
+                $http.post('/api/save_user', tempUser)
                     .success(function (data) {
                             if (typeof data.error !== 'undefined') {
                                 toastr.error(data.error.message);
@@ -48,14 +48,8 @@
 
                             if (typeof data.response !== 'undefined') {
                                 if (data.response.created == true) {
-                                    toastr.success('User has been added');
-
-                                    //Load new user in table
-                                    $scope.rowCollection.push({
-                                        id: data.response._id, firstName: user.firstName, lastName: user.lastName, email: user.email,
-                                        role: 'N/A'
-                                    });
-                                    $scope.searchCollection = $scope.rowCollection;
+                                    toastr.success('User ' + tempUser.firstName + ' ' + tempUser.lastName +' has been added');
+                                    $state.go('^');
                                 }
                             }
                         }

@@ -73,8 +73,8 @@
                                     </div>
                                 </div>
                                 <div class="col-xs-12 col-md-2">
-                                    <button type="button" ng-click="add($index)" class="btn btn-sm btn-primary">Refine</button>
-                                    <button type="button" ng-click="remove($index)" ng-if="parameters.length > 1" class="btn btn-sm btn-danger">Remove</button>
+                                    <button type="button" ng-click="add($index)" class="btn btn-xs btn-primary">Refine</button>
+                                    <button type="button" ng-click="remove($index)" ng-if="parameters.length > 1" class="btn btn-xs btn-danger">Remove</button>
                                 </div>
                             </div>
                         </div>
@@ -96,8 +96,8 @@
                                     <p> <span ng-if="queryMatchesCount > maxResultCount">Too many results for this visualization. Please refine your search query</span></p>
                                 </div>
                                 <div class="col-lg-2">
-                                    <button ng-disabled="searchForm.$invalid || queryMatchesCount > maxResultCount" type="button" ng-click="search()" ng-class="{'btn-danger': queryMatchesCount > maxResultCount}"
-                                        class="btn btn-sm btn-primary">Visualize</button>
+                                    <button ng-disabled="searchForm.$invalid || queryMatchesCount > maxResultCount" type="button" ng-click="search()" ng-class="{'btn-xs btn-danger': queryMatchesCount > maxResultCount}"
+                                        class="btn btn-xs btn-primary">Visualize</button>
                                 </div>
                             </div>
                             <div ng-if="queryMatchesCount > maxResultCount" class="row col-lg-12"></div>

@@ -14,7 +14,7 @@
     </div>
     <div class="wrapper wrapper-content animated fadeIn ng-scope">
         <!-- Customers table -->
-        <div class="col-lg-6">
+        <div class="col-lg-10">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     Users
@@ -39,18 +39,18 @@
                             <tr ng-repeat="row in rowCollection">
                                 <td>{{row.firstName + ' ' + row.lastName}}</td>
                                 <td>{{row.email}}</td>
-                                <td>{{row.role}}</td>
+                                <td>{{row.role | capitalizeFirst}}</td>
                                 <td>
                                     <button ui-sref="users.edit({userId:row.id})" class="btn btn-xs btn-primary">
                                         <span class="glyphicon glyphicon-edit"></span> Edit user
                                     </button>
 
                                     <button ng-show="!row.isDeleted" class="btn btn-xs btn-danger" ng-click="archiveUser(row)">
-                                        <span class="glyphicon glyphicon-remove"></span> Archive user
+                                        <i class="fa fa-lock" aria-hidden="true"></i> Archive user
                                     </button>
 
                                     <button ng-show="row.isDeleted" class="btn btn-xs btn-danger" ng-click="unarchiveUser(row)">
-                                        <span class="glyphicon glyphicon-remove"></span> Unarchive user
+                                        <i class="fa fa-unlock" aria-hidden="true"></i> Unarchive user
                                     </button>
                                 </td>
                             </tr>
