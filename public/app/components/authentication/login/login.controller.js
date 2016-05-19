@@ -15,6 +15,8 @@
         $scope.login = function() {
             $http.post('/auth', { username: $scope.username, password: $scope.password })
                 .success(function(data) {
+                    $rootScope.user = [];
+                    $rootScope.user.role = data.role;
                     $rootScope.isLoggedIn = true;
                     $state.go('users');
                     toastr.success('Logged in successfully!');
