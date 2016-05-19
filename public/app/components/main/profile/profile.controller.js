@@ -16,8 +16,6 @@
         };
 
         $scope.save = function(user){
-            console.log(user);
-
             if ((typeof user.password === "undefined" || user.password =="") && (typeof user.password2 === "undefined" || user.password =="")){
                 delete user.password;
                 delete user.password2;
