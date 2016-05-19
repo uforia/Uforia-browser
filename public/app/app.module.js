@@ -3,6 +3,7 @@
         'ui.router', // Routing
         'oc.lazyLoad', // ocLazyLoad
         'ui.bootstrap', // Ui Bootstrap
+        'ngStorage',
         'main',
         'users',
         'profile',

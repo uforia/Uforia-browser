@@ -3,7 +3,7 @@
 
     mod.controller('AuthLoginController', AuthLoginController);
 
-    function AuthLoginController($http, $scope, $state, $rootScope) {
+    function AuthLoginController($http, $scope, $state, $rootScope, $sessionStorage) {
         $scope.username = "";
         $scope.password = "";
 
@@ -16,9 +16,10 @@
             $http.post('/auth', { username: $scope.username, password: $scope.password })
                 .success(function(data) {
                     $rootScope.user = [];
-                    $rootScope.user.role = data.role;
+                    $sessionStorage.user = data;
+                    $rootScope.user = data;
                     $rootScope.isLoggedIn = true;
-                    $state.go('users');
+                    $state.go('index');
                     toastr.success('Logged in successfully!');
                 }).error(function(data) {
                     toastr.error('E-mailaddress and password did not match!')
