@@ -49,7 +49,7 @@
                             if (typeof data.response !== 'undefined') {
                                 if (data.response.created == true) {
                                     toastr.success('User ' + tempUser.firstName + ' ' + tempUser.lastName +' has been added');
-                                    $state.go('^');
+                                    $state.go('users', {}, { reload: true });
                                 }
                             }
                         }
