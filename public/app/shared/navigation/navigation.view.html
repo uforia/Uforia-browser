@@ -46,7 +46,7 @@
                 <li ui-sref-active="active">
                     <a ui-sref="search"><i class="fa fa-search fa-fw"></i> Search</a>
                 </li>
-                <li ui-sref-active="active">
+                <li ui-sref-active="active" ng-hide="user.role == 'user'">
                     <a ui-sref="users"><i class="fa fa-users fa-fw"></i> Users</a>
                 </li>
                 <li ui-sref-active="active">
