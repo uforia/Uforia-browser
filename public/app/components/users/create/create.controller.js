@@ -40,7 +40,6 @@
             if(addUser) {
                 var tempUser = angular.copy(user);
                 delete tempUser.password2;
-                console.log(tempUser);
                 $http.post('/api/save_user', tempUser)
                     .success(function (data) {
                             if (typeof data.error !== 'undefined') {
