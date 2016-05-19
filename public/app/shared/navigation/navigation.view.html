@@ -41,16 +41,16 @@
             <ul class="nav" id="side-menu">
 
                 <li ui-sref-active="active">
-                    <a ui-sref="index"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
+                    <a ui-sref="index" ng-class="getClass('/index')"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
                 </li>
                 <li ui-sref-active="active">
-                    <a ui-sref="search"><i class="fa fa-search fa-fw"></i> Search</a>
+                    <a ui-sref="search" ng-class="getClass('/search')"><i class="fa fa-search fa-fw"></i> Search</a>
                 </li>
                 <li ui-sref-active="active" ng-hide="user.role == 'user'">
-                    <a ui-sref="users"><i class="fa fa-users fa-fw"></i> Users</a>
+                    <a ui-sref="users" ng-class="getClass('/users')"><i class="fa fa-users fa-fw"></i> Users</a>
                 </li>
                 <li ui-sref-active="active">
-                    <a ui-sref="mappings"><i class="fa fa-users fa-fw"></i> Mappings</a>
+                    <a ui-sref="mappings" ng-class="getClass('/mappings')"><i class="fa fa-users fa-fw"></i> Mappings</a>
                 </li>
 
 

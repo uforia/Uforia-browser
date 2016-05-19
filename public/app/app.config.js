@@ -3,7 +3,7 @@
     angular.module('uforia').config(config).run(run);
 
 
-    function run($rootScope, $http, $state, ROLES, $window) {
+    function run($rootScope, $http, $state, ROLES, $window, $location) {
         $rootScope.$state = $state;
 
         $rootScope.Utils = {
@@ -46,10 +46,15 @@
             }
 
         });
+
+        // For the menu and asigning active class to active menu items.
+        $rootScope.getClass = function (path) {
+            return ($location.path().substr(0, path.length) === path) ? 'active' : '';
+        }
     }
 
     function config($stateProvider, $urlRouterProvider, $ocLazyLoadProvider, $sceProvider, ROLES) {
-        $urlRouterProvider.otherwise("/");
+        $urlRouterProvider.otherwise("/index");
 
         // Disable Sce for ui-select plugin on mappings page
         $sceProvider.enabled(false);
@@ -61,7 +66,7 @@
 
         $stateProvider
             .state('index', {
-                url: "/",
+                url: "/index",
                 templateUrl: "app/components/main/main.view.html",
                 controller: "MainController",
                 controllerAs: "mainCtrl"
@@ -103,7 +108,7 @@
                 controller: "UsersCreateController",
                 controllerAs: 'ctrl',
                 data: { pageTitle: "Create user" },
-                resolve:{
+                resolve: {
                     loggedin: isAuthenticated,
                 }
             })
@@ -113,7 +118,7 @@
                 controller: "UsersEditController",
                 controllerAs: 'ctrl',
                 data: { pageTitle: "Edit user" },
-                resolve:{
+                resolve: {
                     loggedin: isAuthenticated
                 }
             })
@@ -213,7 +218,7 @@ function getLoggedInUser($q, $http) {
     return deferred.promise;
 }
 function hasRoles(roles) {
-    return function($q, $rootScope, ROLES) {
+    return function ($q, $rootScope, ROLES) {
         var deferred = $q.defer();
 
         for (var i = 0; i < roles.length; i++) {
@@ -221,7 +226,7 @@ function hasRoles(roles) {
             if (roles[i] === ROLES.admin && $rootScope.user.role == ROLES.admin || roles[i] === ROLES.manager && $rootScope.user.role == ROLES.manager
                 || roles[i] === ROLES.user && $rootScope.user.role == ROLES.user) {
                 return deferred.resolve();
-            }else{
+            } else {
                 // No match, do not resolve state
                 deferred.reject();
             }
