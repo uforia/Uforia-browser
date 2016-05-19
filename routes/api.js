@@ -877,13 +877,13 @@ router.post('/save_user', function(req, res){
       else {
         var bcrypt = require('bcrypt-nodejs');
 
-
         bcrypt.hash(user['password'], null, null, function(err, hash){
           user.password = hash;
 
           c.elasticsearch.create({
             index: INDEX,
             type: 'users',
+            refresh: true,
             body: user
           }, function (error, response) {
             res.send({error: error, response: response});
@@ -916,6 +916,7 @@ router.post('/edit_user', function(req, res){
       index: INDEX,
       type: 'users',
       id: id,
+      refresh: true,
       body: {
         "doc" : user
       }
@@ -934,6 +935,7 @@ router.post('/archive_user', function(req, res){
     index: INDEX,
     type: 'users',
     id: id,
+    refresh: true,
     body: {
       doc: {
         isDeleted: true
@@ -952,6 +954,7 @@ router.post('/unarchive_user', function(req, res){
     index: INDEX,
     type: 'users',
     id: id,
+    refresh: true,
     body: {
       doc: {
         isDeleted: 0
