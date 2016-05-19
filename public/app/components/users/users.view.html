@@ -14,52 +14,48 @@
     </div>
     <div class="wrapper wrapper-content animated fadeIn ng-scope">
         <!-- Customers table -->
-        <div class="col-lg-10">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    Users
-                    <div class="pull-right">
-                        <div class="btn-group">
-                            <a ui-sref="users.create" class="btn btn-primary btn-xs">Create new user</a>
-                        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Users
+                <div class="pull-right">
+                    <div class="btn-group">
+                        <a ui-sref="users.create" class="btn btn-primary btn-xs">Create new user</a>
                     </div>
                 </div>
-                <div class="panel-body">
-                    <table datatable="ng" class="table table-striped table-bordered table-hover dataTables-example">
-                        <thead>
+            </div>
+            <div class="panel-body">
+                <table datatable="ng" class="table table-striped table-bordered table-hover dataTables-example">
+                    <thead>
 
-                            <tr>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Role</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr ng-repeat="row in rowCollection">
-                                <td>{{row.firstName + ' ' + row.lastName}}</td>
-                                <td>{{row.email}}</td>
-                                <td>{{row.role | capitalizeFirst}}</td>
-                                <td>
-                                    <button ui-sref="users.edit({userId:row.id})" class="btn btn-xs btn-primary">
-                                        <span class="glyphicon glyphicon-edit"></span> Edit user
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="row in rowCollection">
+                            <td>{{row.firstName + ' ' + row.lastName}}</td>
+                            <td>{{row.email}}</td>
+                            <td>{{row.role | capitalizeFirst}}</td>
+                            <td>
+                                <button ui-sref="users.edit({userId:row.id})" class="btn btn-sm btn-primary" data-toggle="tooltip" title="Edit">
+                                        <span class="glyphicon glyphicon-edit"></span>
                                     </button>
 
-                                    <button ng-show="!row.isDeleted" class="btn btn-xs btn-danger" ng-click="archiveUser(row)">
-                                        <i class="fa fa-lock" aria-hidden="true"></i> Archive user
+                                <button ng-show="!row.isDeleted" class="btn btn-sm btn-danger" ng-click="archiveUser(row)" data-toggle="tooltip" title="Archive">
+                                        <i class="fa fa-lock" aria-hidden="true"></i>
                                     </button>
 
-                                    <button ng-show="row.isDeleted" class="btn btn-xs btn-danger" ng-click="unarchiveUser(row)">
-                                        <i class="fa fa-unlock" aria-hidden="true"></i> Unarchive user
+                                <button ng-show="row.isDeleted" class="btn btn-sm btn-warning" ng-click="unarchiveUser(row)" data-toggle="tooltip" title="Unarchive">
+                                        <i class="fa fa-unlock" aria-hidden="true"></i>
                                     </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
-        <!-- /.col-lg-12 -->
     </div>
-    <!-- /.row -->
 </div>

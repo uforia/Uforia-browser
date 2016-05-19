@@ -234,3 +234,11 @@ function hasRoles(roles) {
         return deferred.promise;
     }
 }
+
+
+// Activate jQuery tooltips.
+jQuery(function($) {
+    $(document).tooltip({
+        selector: '[data-toggle="tooltip"]'
+    });
+});
