@@ -39,7 +39,7 @@
                             <tr ng-repeat="row in rowCollection">
                                 <td>{{row.firstName + ' ' + row.lastName}}</td>
                                 <td>{{row.email}}</td>
-                                <td>{{row.role}}</td>
+                                <td>{{row.role | capitalizeFirst}}</td>
                                 <td>
                                     <button ui-sref="users.edit({userId:row.id})" class="btn btn-xs btn-primary">
                                         <span class="glyphicon glyphicon-edit"></span> Edit user

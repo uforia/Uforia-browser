@@ -89,7 +89,7 @@
                                 <label class="col-sm-4 control-label">Choose role</label>
                                 <div class="col-sm-8">
                                     <select ng-model="user.role" class="form-control">
-                                        <option ng-repeat="role in roles" value="{{role}}">{{role}}</option>
+                                        <option ng-repeat="role in roles" value="{{role}}">{{role | capitalizeFirst}}</option>
                                     </select>
                                 </div>
                             </div>

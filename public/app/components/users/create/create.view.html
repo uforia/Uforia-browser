@@ -88,7 +88,7 @@
                             <label class="col-sm-4 control-label">Choose role</label>
                             <div class="col-sm-8">
                                 <select title="role" name="role" ng-model="user.role" class="form-control" required>
-                                    <option ng-repeat="role in roles" value="{{role}}">{{role}}</option>
+                                    <option ng-repeat="role in roles" value="{{role}}">{{role | capitalizeFirst}}</option>
                                 </select>
                                 <small class="text-danger" ng-show="addUserForm.role.$error.required && addUserForm.$submitted">This field is required</small>
                             </div>
