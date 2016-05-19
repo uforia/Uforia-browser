@@ -75,7 +75,6 @@
                 resolve: {
                     loggedin: isAuthenticated,
                     loggedInUser: getLoggedInUser,
-                    isAllowed: hasRoles([ROLES.admin])
                 }
             })
             .state('search', {
@@ -95,7 +94,6 @@
                 controllerAs: 'ctrl',
                 data: { pageTitle: "User overview" },
                 resolve: {
-                    isAllowed: hasRoles([ROLES.admin]),
                     loggedin: isAuthenticated
                 }
             })
