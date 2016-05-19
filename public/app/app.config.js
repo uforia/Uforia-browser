@@ -3,8 +3,10 @@
     angular.module('uforia').config(config).run(run);
 
 
-    function run($rootScope, $http, $state, ROLES, $window, $location) {
+    function run($rootScope, $http, $state, ROLES, $window, $sessionStorage, $location) {
         $rootScope.$state = $state;
+
+        if(typeof $rootScope.user == 'undefined') $rootScope.user = $sessionStorage.user;
 
         $rootScope.Utils = {
             keys: Object.keys
@@ -99,7 +101,8 @@
                 controllerAs: 'ctrl',
                 data: { pageTitle: "User overview" },
                 resolve: {
-                    loggedin: isAuthenticated
+                    loggedin: isAuthenticated,
+                    isAllowed: hasRoles([ROLES.admin, ROLES.manager])
                 }
             })
             .state('users.create', {
@@ -110,6 +113,7 @@
                 data: { pageTitle: "Create user" },
                 resolve: {
                     loggedin: isAuthenticated,
+                    isAllowed: hasRoles([ROLES.admin, ROLES.manager])
                 }
             })
             .state('users.edit', {
@@ -118,8 +122,9 @@
                 controller: "UsersEditController",
                 controllerAs: 'ctrl',
                 data: { pageTitle: "Edit user" },
-                resolve: {
-                    loggedin: isAuthenticated
+                resolve:{
+                    loggedin: isAuthenticated,
+                    isAllowed: hasRoles([ROLES.admin, ROLES.manager])
                 }
             })
             .state('auth', {
