@@ -47,13 +47,13 @@
                     <a ui-sref="search" ng-class="getClass('/search')"><i class="fa fa-search fa-fw"></i> Search</a>
                 </li>
                 <li ui-sref-active="active" ng-hide="user.role == 'user' || user.role == 'admin'">
-                    <a ui-sref="cases" ng-class="getClass('/cases')"><i class="fa fa-search fa-fw"></i> Cases</a>
+                    <a ui-sref="cases" ng-class="getClass('/cases')"><i class="fa fa-folder-open fa-fw"></i> Cases</a>
                 </li>
                 <li ui-sref-active="active" ng-hide="user.role == 'user'">
                     <a ui-sref="users" ng-class="getClass('/users')"><i class="fa fa-users fa-fw"></i> Users</a>
                 </li>
                 <li ui-sref-active="active">
-                    <a ui-sref="mappings" ng-class="getClass('/mappings')"><i class="fa fa-users fa-fw"></i> Mappings</a>
+                    <a ui-sref="mappings" ng-class="getClass('/mappings')"><i class="fa fa-random fa-fw"></i> Mappings</a>
                 </li>
 
 
