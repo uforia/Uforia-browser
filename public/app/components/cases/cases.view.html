@@ -13,7 +13,6 @@
         </div>
     </div>
     <div class="wrapper wrapper-content animated fadeIn ng-scope">
-        <!-- Customers table -->
         <div class="panel panel-default">
             <div class="panel-heading">
                 Cases
@@ -25,36 +24,7 @@
             </div>
             <div class="panel-body">
                 <div class="table-responsive">
-                    <table datatable="ng" class="table table-striped table-bordered table-hover dataTables-example">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <!-- <th>Email</th> -->
-                                <!-- <th>Role</th> -->
-                                <!-- <th>Actions</th> -->
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr ng-repeat="row in rowCollection">
-                                <td>{{row.name}}</td>
-                                <!-- <td>{{row.email}}</td>
-                                <td>{{row.role | capitalizeFirst}}</td>
-                                <td>
-                                    <button ui-sref="users.edit({userId:row.id})" class="btn btn-sm btn-primary" data-toggle="tooltip" title="Edit">
-                                            <span class="glyphicon glyphicon-edit"></span>
-                                        </button>
-
-                                    <button ng-show="!row.isDeleted" class="btn btn-sm btn-danger" ng-click="archiveUser(row)" data-toggle="tooltip" title="Archive">
-                                            <i class="fa fa-lock" aria-hidden="true"></i>
-                                        </button>
-
-                                    <button ng-show="row.isDeleted" class="btn btn-sm btn-warning" ng-click="unarchiveUser(row)" data-toggle="tooltip" title="Unarchive">
-                                            <i class="fa fa-unlock" aria-hidden="true"></i>
-                                        </button>
-                                </td> -->
-                            </tr>
-                        </tbody>
-                    </table>
+                    
                 </div>
             </div>
         </div>
