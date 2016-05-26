@@ -19,6 +19,7 @@
         'iboxToolsFullScreen',
         'dndLists',
         'ui',
-        'ui.select'
+        'ui.select',
+        'datatables'
     ]);
 })();
