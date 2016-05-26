@@ -15,19 +15,19 @@ var express   = require('express'),
 var INDEX = c.config.elasticsearch.index;
 
 /* Query elasticsearch
- * url: /api/search
- * takes params:
- * type
- * parameters
- *   must(objects with field and a query)
- *   must_not(objects with field and a query)
- * filters
- *   must(objects with a field, stard_date and end_date)
- *   must_not(objects with a field, stard_date and end_date)
- * view
- * visualization
- *
- */
+* url: /api/search
+* takes params:
+* type
+* parameters
+*   must(objects with field and a query)
+*   must_not(objects with field and a query)
+* filters
+*   must(objects with a field, stard_date and end_date)
+*   must_not(objects with a field, stard_date and end_date)
+* view
+* visualization
+*
+*/
 router.post("/search", function(req, res) {
   var data = req.body;
   var search_request = {};
@@ -62,32 +62,32 @@ router.post("/search", function(req, res) {
 
 //Search and return the result
 var search = function(search_request, res, type, view, parameters){
-  c.elasticsearch.search(search_request).then(function(resp){
-    var vis = require('../lib/visualizations/' + view.toLowerCase());
+    c.elasticsearch.search(search_request).then(function(resp){
+      var vis = require('../lib/visualizations/' + view.toLowerCase());
 
-    c.elasticsearch.search({
-      index: INDEX,
-      type: type + '_visualizations',
-      body: { query: { match: {type: view} } }
-    }).then(function(vismapping){
-      // if(resp[INDEX].mappings[req.body.type])
-      //   res.send({fields: Object.keys(resp[INDEX].mappings[req.body.type].properties)});
-      // else
-      //   res.send({});
+      c.elasticsearch.search({
+        index: INDEX,
+        type: type + '_visualizations',
+        body: { query: { match: {type: view} } }
+      }).then(function(vismapping){
+        // if(resp[INDEX].mappings[req.body.type])
+        //   res.send({fields: Object.keys(resp[INDEX].mappings[req.body.type].properties)});
+        // else
+        //   res.send({});
 
-      // console.log(vismapping);
+        // console.log(vismapping);
 
-      vismapping = vismapping.hits.hits[0]._source;
+        vismapping = vismapping.hits.hits[0]._source;
 
-      parameters.field1 = vismapping.field1;
-      parameters.field2 = vismapping.field2;
+        parameters.field1 = vismapping.field1;
+        parameters.field2 = vismapping.field2;
 
-      worker = workerFarm(config.workers, require.resolve('../lib/visualizations/' + view.toLowerCase()), ['generateJSON']);
+        worker = workerFarm(config.workers, require.resolve('../lib/visualizations/' + view.toLowerCase()), ['generateJSON']);
 
-      worker.generateJSON(resp.hits.hits, parameters, function(data){
-        res.send(data);
+        worker.generateJSON(resp.hits.hits, parameters, function(data){
+          res.send(data);
+        });
       });
-    });
   }, function(err){
     res.send();
     console.trace(err.message);
@@ -95,19 +95,19 @@ var search = function(search_request, res, type, view, parameters){
 };
 
 /* Returns the number or results a query will return
- * url: /api/count
- * takes params:
- * q
- * type
- * parameters
- *   must(objects with field and a query)
- *   must_not(objects with field and a query)
- * filters
- *   must(objects with a field, stard_date and end_date)
- *   must_not(objects with a field, stard_date and end_date)
- * view
- *
- */
+* url: /api/count
+* takes params:
+* q
+* type
+* parameters
+*   must(objects with field and a query)
+*   must_not(objects with field and a query)
+* filters
+*   must(objects with a field, stard_date and end_date)
+*   must_not(objects with a field, stard_date and end_date)
+* view
+*
+*/
 router.post("/count", function(req, res){
   var data = req.body;
   var search_request = {};
@@ -142,36 +142,37 @@ router.post("/count", function(req, res){
 });
 
 /*Returns the availabe types and their pretty names
- * url: /api/get_types
- * takes params:
- * none
- */
+* url: /api/get_types
+* takes params:
+* none
+*/
 router.post("/get_types", function(req, res){
   c.elasticsearch.indices.getMapping({
     index: INDEX
   }).then(function(resp){
 
     var mappings = [];
+    var visualization_types = [];
     if(resp[INDEX]){
       async.each(Object.keys(resp[INDEX].mappings), function(mapping, cb){
         var last = mapping.split('_');
         last = last[last.length-1];
 
-        var suffixesToExclude = ['fields', 'visualizations'];
-        var typesToExclude = ['users'];
+        var exclude = ['fields', 'visualizations'];
 
-        if (mappings.indexOf(mapping) == -1 && suffixesToExclude.indexOf(last) == -1 && typesToExclude.indexOf(mapping) == -1) {
+        if(mappings.indexOf(mapping) == -1 && exclude.indexOf(last) == -1){
           mappings.push(mapping);
         }
         // If there are empty mappings, show the mapping in the UI anyways
-        else if (suffixesToExclude.indexOf(last) != -1) {
-          var mappingName = mapping.slice(0, mapping.indexOf('_' + last));
-
-          if (mappings.indexOf(mappingName) == -1 && typesToExclude.indexOf(mappingName) == -1) {
-            mappings.push(mappingName);
-          }
+        else if(exclude.indexOf(last) != -1 && mappings.indexOf(mapping.slice(0, mapping.indexOf('_' + last))) == -1){
+          mappings.push(mapping.slice(0, mapping.indexOf('_' + last)));
         }
 
+        var mapping = exclude.indexOf(last) != -1 ? mapping.slice(0, mapping.indexOf('_' + last)) : mapping;
+
+        if(visualization_types.indexOf(mapping + '_visualizations') == -1){
+          visualization_types.push(mapping + '_visualizations');
+        }
         cb();
       }, function(err){
 
@@ -186,11 +187,11 @@ router.post("/get_types", function(req, res){
 });
 
 /*Return the fields each item in a mapping has
- * url: /api/mapping_info
- * takes params:
- * type
- *
- */
+* url: /api/mapping_info
+* takes params:
+* type
+*
+*/
 router.post("/mapping_info", function(req, res){
   var type = req.body.type;
   // console.log(type);
@@ -205,7 +206,7 @@ router.post("/mapping_info", function(req, res){
       if(resp[INDEX].mappings[type]){
         var data = resp[INDEX].mappings[type].properties;
         if(data['_table']);
-        delete data['_table'];
+          delete data['_table'];
 
         res.send(data);
       }
@@ -222,11 +223,11 @@ router.post("/mapping_info", function(req, res){
 });
 
 /* Return the available view for a type
- * url: /api/view_info
- * takes params:
- * type
- *
- */
+* url: /api/view_info
+* takes params:
+* type
+*
+*/
 router.post("/view_info", function(req, res){
   type = req.param('type') || DEFAULT_TYPE;
 
@@ -249,12 +250,12 @@ router.post("/view_info", function(req, res){
 });
 
 /* Queries database and return the full path of a file
- * url: /api/get_file_details
- * takes params:
- * type
- * tablenames
- * hashids
- */
+* url: /api/get_file_details
+* takes params:
+* type
+* tablenames
+* hashids
+*/
 router.post("/get_file_details", function(req, res){
   var type = req.body.type;
   var hashids = req.body.hashids || [];
@@ -274,51 +275,51 @@ router.post("/get_file_details", function(req, res){
         if(_.findIndex(fields, {'Field': labelFields[i]}) != -1){
           var test = c.mysql_db.query('SELECT COUNT(*) AS count, hashid FROM ?? WHERE hashid IN (?) GROUP BY hashid; \
           SELECT ??.?? AS label, ??.hashid, ??.fullpath FROM ?? LEFT JOIN ?? ON ??.hashid = ??.hashid WHERE ??.hashid IN (?)',
-              [table, _.uniq(hashids),
-                table, labelFields[i], filesTable, filesTable, table, filesTable, table, filesTable, table, _.uniq(hashids)], function(err, results){
-                if(err) throw err;
+          [table, _.uniq(hashids),
+          table, labelFields[i], filesTable, filesTable, table, filesTable, table, filesTable, table, _.uniq(hashids)], function(err, results){
+            if(err) throw err;
 
-                var oneToMany = false;
-                _.each(results[0], function(record){
-                  if(record.count > 1){
-                    oneToMany = true;
-                    return false;
-                  }
-                });
+            var oneToMany = false;
+            _.each(results[0], function(record){
+              if(record.count > 1){
+                oneToMany = true;
+                return false;
+              }
+            });
 
-                if(oneToMany){
-                  data.push({hashid: results[1][0].hashid, label: 'Multiple records from one file', fullpath: results[1][0].fullpath});
-                } else {
-                  data = data.concat(results[1]);
-                }
+            if(oneToMany){
+              data.push({hashid: results[1][0].hashid, label: 'Multiple records from one file', fullpath: results[1][0].fullpath});
+            } else {
+              data = data.concat(results[1]);
+            }
 
-                callback();
-              });
+            callback();
+          });
           break;
         }
         if(i == labelFields-1){
           c.mysql_db.query('SELECT COUNT(*) AS count, hashid FROM ?? WHERE hashid IN (?) GROUP BY hashid; \
           SELECT ??.name AS label, ??.hashid, ??.fullpath FROM ?? LEFT JOIN ?? ON ??.hashid = ??.hashid WHERE ??.hashid IN (?)',
-              [table, _.uniq(hashids),
-                filesTable, 'name', filesTable, filesTable, table, filesTable, table, filesTable, table, _.uniq(hashids)], function(err, results){
-                if(err) throw err;
+          [table, _.uniq(hashids),
+          filesTable, 'name', filesTable, filesTable, table, filesTable, table, filesTable, table, _.uniq(hashids)], function(err, results){
+            if(err) throw err;
 
-                var oneToMany = false;
-                _.each(results[0], function(record){
-                  if(record.count > 1){
-                    oneToMany = true;
-                    return false;
-                  }
-                });
+            var oneToMany = false;
+            _.each(results[0], function(record){
+              if(record.count > 1){
+                oneToMany = true;
+                return false;
+              }
+            });
 
-                if(oneToMany){
-                  data.push({hashid: results[1][0].hashid, label: 'Multiple records from one file', fullpath: results[1][0].fullpath});
-                } else {
-                  data = data.concat(results[1]);
-                }
+            if(oneToMany){
+              data.push({hashid: results[1][0].hashid, label: 'Multiple records from one file', fullpath: results[1][0].fullpath});
+            } else {
+              data = data.concat(results[1]);
+            }
 
-                callback();
-              });
+            callback();
+          });
           break;
         }
       }
@@ -329,10 +330,10 @@ router.post("/get_file_details", function(req, res){
 });
 
 /* Return the content from a evidence file
- * url: /api/file/:hashid
- * takes params:
- * hashid: hashid of the file
- */
+* url: /api/file/:hashid
+* takes params:
+* hashid: hashid of the file
+*/
 router.get('/file/:hashid', function(req, res){
   c.mysql_db.query('SELECT fullpath, name FROM files WHERE hashid=?', [req.params.hashid], function(err, result){
     if(err) throw err;
@@ -344,19 +345,19 @@ router.get('/file/:hashid', function(req, res){
       if (!exists) {
         var totalContent = "";
         c.mysql_db.query('SELECT supported_mimetypes.modules FROM supported_mimetypes INNER JOIN files ON supported_mimetypes.mime_type = files.mtype WHERE files.hashid=?', [req.params.hashid], function(err, result) {
-          if (err) throw err;
-          var hashednames = JSON.parse(result[0].modules);
-          var tables = Object.keys(hashednames);
-          async.each(tables, function(table, callback) {
-            c.mysql_db.query('SELECT Content FROM ?? WHERE hashid=?', [hashednames[table],req.params.hashid], function(err, result) {
-              if (err) throw err;
-              totalContent += result[0].Content;
-              callback();
+            if (err) throw err;
+            var hashednames = JSON.parse(result[0].modules);
+            var tables = Object.keys(hashednames);
+            async.each(tables, function(table, callback) {
+                c.mysql_db.query('SELECT Content FROM ?? WHERE hashid=?', [hashednames[table],req.params.hashid], function(err, result) {
+                    if (err) throw err;
+                    totalContent += result[0].Content;
+                    callback();
+                });
+            }, function(err) {
+                if (totalContent) res.send(totalContent)
+                else res.send('No content available, because no module has processed or stored it, and the file is not or no longer available on the filesystem.');
             });
-          }, function(err) {
-            if (totalContent) res.send(totalContent)
-            else res.send('No content available, because no module has processed or stored it, and the file is not or no longer available on the filesystem.');
-          });
         });
       } else {
         res.download(fullpath, result.filename);
@@ -366,10 +367,10 @@ router.get('/file/:hashid', function(req, res){
 });
 
 /* Return the content from a evidence file
- * url: /api/get_file_content
- * takes params:
- *
- */
+* url: /api/get_file_content
+* takes params:
+*
+*/
 router.get('/file/:hashid/validate', function(req, res){
   c.mysql_db.query('SELECT fullpath, md5, sha1, sha256 FROM files WHERE hashid=?', [req.params.hashid], function(err, result){
     if(err) throw err;
@@ -452,10 +453,10 @@ router.get('/files', function(req, res){
 });
 
 /* Return the indexed mappings for a type
- * url: /api/get_modules
- * takes params:
- *
- */
+* url: /api/get_modules
+* takes params:
+*
+*/
 router.post("/get_modules", function(req, res){
   c.mysql_db.query('SELECT * FROM supported_mimetypes', function(err, results){
     if(err) throw err;
@@ -514,23 +515,23 @@ router.post("/get_modules", function(req, res){
     });
 
 
-    // if(mime.extension(result.mime_type)){
-    //   modules.push({
-    //     name: mime.extension(result.mime_type),
-    //     tables: table_names
-    //   })
-    // }
+      // if(mime.extension(result.mime_type)){
+      //   modules.push({
+      //     name: mime.extension(result.mime_type),
+      //     tables: table_names
+      //   })
+      // }
 
-    // mime_types[mime.extension(result.mime_type)] = mime_types[mime.extension(result.mime_type)] || [];
-    // mime_types[mime.extension(result.mime_type)] = result.modules;
+      // mime_types[mime.extension(result.mime_type)] = mime_types[mime.extension(result.mime_type)] || [];
+      // mime_types[mime.extension(result.mime_type)] = result.modules;
   });
 });
 
 /* Return the indexed mapping
- * url: /api/get_mapping
- * takes params:
- * type - string
- */
+* url: /api/get_mapping
+* takes params:
+* type - string
+*/
 router.post("/get_mapping", function(req, res){
   c.elasticsearch.search({
     index: INDEX,
@@ -547,13 +548,13 @@ router.post("/get_mapping", function(req, res){
 });
 
 /*
- * Writes a costom mapping format to a file and starts the mapping script
- * url: /api/create_mapping
- * takes params:
- * name
- * modules - object
- * fields - array
- */
+* Writes a costom mapping format to a file and starts the mapping script
+* url: /api/create_mapping
+* takes params:
+* name
+* modules - object
+* fields - array
+*/
 router.post("/create_mapping", function(req, res){
   var mapping = req.body;
   var num = 4;
@@ -717,7 +718,7 @@ router.post("/create_mapping", function(req, res){
 
   function setFieldInfo(callback){
     for(var table in mapping.tables){
-      c.elasticsearch.create({
+        c.elasticsearch.create({
         index: INDEX,
         type: mapping.name + '_fields',
         body: {table: table, fields: mapping.tables[table].fields, mime_types: mapping.tables[table].mime_types, modules: mapping.tables[table].modules}
@@ -790,11 +791,11 @@ router.post("/create_mapping", function(req, res){
 });
 
 /*
- * Delete's a mapping from elasticsearch
- * url: /api/delete_mapping
- * takes params:
- * type - string
- */
+* Delete's a mapping from elasticsearch
+* url: /api/delete_mapping
+* takes params:
+* type - string
+*/
 router.post('/delete_mapping', function(req, res){
   c.elasticsearch.indices.deleteMapping({
     index: INDEX,
@@ -805,12 +806,12 @@ router.post('/delete_mapping', function(req, res){
 });
 
 /*
- * Save visualizations for a mapping
- * url: /api/visualizations/save
- * takes body params:
- * type - string
- * visualizations - object containing visualizations
- */
+* Save visualizations for a mapping
+* url: /api/visualizations/save
+* takes body params:
+* type - string
+* visualizations - object containing visualizations
+*/
 router.post('/visualizations/save', function(req, res){
   var type = req.body.type;
   var visualizations = req.body.visualizations;
@@ -843,6 +844,7 @@ router.post('/visualizations/save', function(req, res){
  */
 router.post('/save_user', function(req, res){
   var user = req.body;
+  var username = user.email;
 
   function isDef(v) {
     return v !== undefined && v !== null;
@@ -858,7 +860,7 @@ router.post('/save_user', function(req, res){
           filtered: {
             filter: {
               term: {
-                email: user.email
+                email: username
               }
             }
           }
@@ -875,13 +877,13 @@ router.post('/save_user', function(req, res){
       else {
         var bcrypt = require('bcrypt-nodejs');
 
-
         bcrypt.hash(user['password'], null, null, function(err, hash){
           user.password = hash;
 
           c.elasticsearch.create({
             index: INDEX,
             type: 'users',
+            refresh: true,
             body: user
           }, function (error, response) {
             res.send({error: error, response: response});
@@ -897,9 +899,139 @@ router.post('/save_user', function(req, res){
       }
     });
   }
+});
+
+router.post('/edit_user', function(req, res){
+  var bcrypt = require('bcrypt-nodejs');
+  var user = req.body;
+  var id = user.id;
+  delete user.id;
+
+  bcrypt.hash(user['password'], null, null, function(err, hash){
+    if (user.password != null){
+      user.password = hash;
+    }
+
+    c.elasticsearch.update({
+      index: INDEX,
+      type: 'users',
+      id: id,
+      refresh: true,
+      body: {
+        "doc" : user
+      }
+    }, function (error, response) {
+      res.send({error: error, response: response});
+    });
+  })
+});
+
+
+router.post('/archive_user', function(req, res){
+  var user = req.body;
+  var id = user.id;
+
+  c.elasticsearch.update({
+    index: INDEX,
+    type: 'users',
+    id: id,
+    refresh: true,
+    body: {
+      doc: {
+        isDeleted: true
+      }
+    }
+  }, function (error, response) {
+    res.send({error: error, response: response});
+  });
+});
+
+router.post('/unarchive_user', function(req, res){
+  var user = req.body;
+  var id = user.id;
+
+  c.elasticsearch.update({
+    index: INDEX,
+    type: 'users',
+    id: id,
+    refresh: true,
+    body: {
+      doc: {
+        isDeleted: 0
+      }
+    }
+  }, function (error, response) {
+    res.send({error: error, response: response});
+  });
 
 });
 
+/**
+ * Get all users
+ * url: /api/get_users
+ */
+router.get('/get_users', function(req, res){
+
+  c.elasticsearch.search({
+    index: INDEX,
+    type: 'users',
+    body: { query: { match_all: {}}},
+    _source: ["id", "firstName", "lastName", "email", "isDeleted", "role"],
+    size: 999 // all
+  }, function (error, response) {
+    res.send({error: error, response: response});
+  });
+});
+
+router.get('/get_filtered_users', function(req, res){
+  var filter = req.body.filter;
+  c.elasticsearch.search({
+    index: INDEX,
+    type: 'users',
+    body: { query: { match: {'role': 'user'},}},
+    _source: ["id", "firstName", "lastName", "email", "isDeleted", "role"],
+    size: 999 // all
+  }, function (error, response) {
+    res.send({error: error, response: response});
+  });
+});
+
+/**
+ * Get one user
+ * url: /api/get_user
+ */
+router.get('/get_user', function(req, res){
+  getUser(req.query.id, function (error, response) {
+    res.send({error: error, response: response});
+  });
+});
+
+router.get('/get_logged_in_user', function(req, res){
+  getUser(req.user.id, function (error, response) {
+    res.send({error: error, response: response});
+  });
+});
+
+
+function getUser (userId, cb) {
+  c.elasticsearch.search({
+    index: INDEX,
+    type: 'users',
+    body: {
+      query: {
+        "ids" : {
+          "values" : [userId]
+        }
+      }
+    },
+    _source: ["id", "firstName", "lastName", "email", "isDeleted", "role"],
+  }, cb);
+}
+
+/**
+ * Edit an existing user
+ * url: /api/edit_user
+ */
 router.post('/edit_user', function(req, res){
   var bcrypt = require('bcrypt-nodejs');
   var user = req.body;
@@ -924,59 +1056,62 @@ router.post('/edit_user', function(req, res){
   })
 });
 
-
-router.post('/archive_user', function(req, res){
-  var user = req.body;
-  var id = user.id;
-
-  c.elasticsearch.update({
-    index: INDEX,
-    type: 'users',
-    id: id,
-    body: {
-      doc: {
-        isDeleted: true
-      }
-    }
-  }, function (error, response) {
-    res.send({error: error, response: response});
-  });
-});
-
-router.post('/unarchive_user', function(req, res){
-  var user = req.body;
-  var id = user.id;
-
-  c.elasticsearch.update({
-    index: INDEX,
-    type: 'users',
-    id: id,
-    body: {
-      doc: {
-        isDeleted: false
-      }
-    }
-  }, function (error, response) {
-    res.send({error: error, response: response});
-  });
-
-});
-
 /**
- * Get all users
- * url: /api/get_users
+ * Save case
+ * url: /api/save_case
+ * Takes user object with name, caseStarted, caseClosed, leadInvestigator, investigators
  */
-router.post('/get_users', function(req, res){
+router.post('/save_case', function(req, res){
+  var cases = req.body;
+  var name = cases.name;
 
-  c.elasticsearch.search({
-    index: INDEX,
-    type: 'users',
-    body: { query: { match_all: {}}},
-    _source: ["id", "firstName", "lastName", "email", "isDeleted", "role"],
-    size: 999 // all
-  }, function (error, response) {
-    res.send({error: error, response: response});
-  });
+  function isDef(v) {
+    return v !== undefined && v !== null;
+  }
+
+  if(isDef(name)){
+    c.elasticsearch.search({
+      index: c.config.elasticsearch.index,
+      type: 'cases',
+      size: 1,
+      body: {
+        query: {
+          filtered: {
+            filter: {
+              term: {
+                name: name
+              }
+            }
+          }
+        }
+      }
+    }).then(function(response) {
+      if (response.hits.total != 0) {
+        res.send({
+          error: {
+            message: 'Case already exists'
+          }
+        });
+      }
+      else {
+        c.elasticsearch.create({
+          index: INDEX,
+          type: 'cases',
+          refresh: true,
+          body: cases
+        }, function (error, response) {
+          res.send({error: error, response: response});
+        });
+      }
+    });
+  }
+  else {
+    res.send({
+      error: {
+        message: 'Variable is undefined'
+      }
+    });
+  }
 });
 
 

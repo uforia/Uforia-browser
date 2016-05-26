@@ -19,10 +19,6 @@ var api         = require('./routes/api'),
 
 var app = express();
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
-
 app.use(favicon(__dirname + '/public/favicon.ico'));
 app.use(logger('dev'));
 app.use(bodyParser.json());
@@ -74,7 +70,8 @@ passport.use(new LocalStrategy(
     }).then(function(response) {
       if (response.hits.total == 1) {
         var user = response.hits.hits[0]._source;
-        if (user['email'] === username && !user['isDeleted'] && bcrypt.compareSync(password, user['password'])) {
+        user.id = response.hits.hits[0]._id;
+        if (user['email'] === username && bcrypt.compareSync(password, user['password'])) {
           done(null, user);
           return;
         }

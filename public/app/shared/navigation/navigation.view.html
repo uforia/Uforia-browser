@@ -1,0 +1,65 @@
+<!-- Navigation -->
+<nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" ui-sref="index">Uforia</a>
+    </div>
+    <!-- /.navbar-header -->
+
+    <ul class="nav navbar-top-links navbar-right">
+        <li>
+            <a ng-show="!isLoggedIn" href="" ui-sref="auth.login"><i class="fa fa-sign-in fa-fw"></i> Login</a>
+        </li>
+        <!-- /.dropdown -->
+        <li class="dropdown" ng-show="isLoggedIn">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="">
+                <i class="fa fa-user fa-fw"></i> <i class="fa fa-caret-down"></i>
+            </a>
+            <ul class="dropdown-menu dropdown-user">
+                <li><a href="#/profile"><i class="fa fa-user fa-fw"></i> User Profile</a>
+                </li>
+                <li><a href="#"><i class="fa fa-gear fa-fw"></i> Settings</a>
+                </li>
+                <li class="divider"></li>
+                <li>
+                    <a href="" ng-click="logout()"><i class="fa fa-sign-out fa-fw"></i> Log out</a>
+                </li>
+            </ul>
+            <!-- /.dropdown-user -->
+        </li>
+        <!-- /.dropdown -->
+    </ul>
+    <!-- /.navbar-top-links -->
+
+    <div class="navbar-default sidebar" role="navigation" ng-hide="!isLoggedIn">
+        <div class="sidebar-nav navbar-collapse">
+            <ul class="nav" id="side-menu">
+
+                <li ui-sref-active="active">
+                    <a ui-sref="index" ng-class="getClass('/index')"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
+                </li>
+                <li ui-sref-active="active">
+                    <a ui-sref="search" ng-class="getClass('/search')"><i class="fa fa-search fa-fw"></i> Search</a>
+                </li>
+                <li ui-sref-active="active" ng-hide="user.role == 'user' || user.role == 'admin'">
+                    <a ui-sref="cases" ng-class="getClass('/cases')"><i class="fa fa-folder-open fa-fw"></i> Cases</a>
+                </li>
+                <li ui-sref-active="active" ng-hide="user.role == 'user'">
+                    <a ui-sref="users" ng-class="getClass('/users')"><i class="fa fa-users fa-fw"></i> Users</a>
+                </li>
+                <li ui-sref-active="active">
+                    <a ui-sref="mappings" ng-class="getClass('/mappings')"><i class="fa fa-random fa-fw"></i> Mappings</a>
+                </li>
+
+
+            </ul>
+        </div>
+        <!-- /.sidebar-collapse -->
+    </div>
+    <!-- /.navbar-static-side -->
+</nav>

@@ -1,0 +1,66 @@
+<div class="modal-header">
+  <button ng-click="modalInstance.dismiss()" type="button" aria-hidden="true" class="close">&times;</button>
+  <h3 class="modal-title">Details for: {{addresses.join(' - ')}}</h3>
+</div>
+<div class="modal-body">
+  <div class="row">
+    <div class="col-lg-3">
+      <div class="row">
+        <div class="btn-group col-lg-12"><a href="{{filesLink}}" class="btn btn-default btn-sm col-lg-6">Download all</a>
+          <button type="button" ng-click="copyFilesLink()" class="btn btn-default btn-sm col-lg-6">Copy link to files</button>
+        </div>
+      </div>
+      <select data-ng-attr-size="{{files.length}}" ng-model="selectedFile" required="required" class="form-control">
+        <option ng-hide="true" value="?"></option>
+        <option ng-repeat="item in files" value="{{item}}" ng-selected="showFile.hashid == item.hashid">{{item.label}}</option>
+      </select>
+    </div>
+    <div class="col-lg-9">
+      <div ng-show="!showFile">Select a file from the list.</div>
+      <div ng-show="showFile">
+        <div class="panel panel-default">
+          <div class="panel-heading">{{showFile.label}}<span class="pull-right">
+              <div class="btn-group"><a href="/api/file/{{showFile.hashid}}" class="btn btn-sm btn-default">Download</a>
+                <button type="button" ng-click="copyLink(showFile)" class="btn btn-sm btn-default">Copy link</button>
+              </div>
+            </span>
+          </div>
+          <div class="panel-body">
+            <div class="col-lg-7">
+              <h3 class="h5">File details</h3>
+              <table class="col-lg-12">
+                <tbody>
+                  <tr>
+                    <td>Original path:</td>
+                    <td>"{{showFile.fullpath}}"</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="col-lg-5">
+              <h3 class="h5">Change verification</h3>
+              <p class="small">Checks to validate if the file has changed since indexing.</p>
+              <table class="col-lg-12">
+                <tbody>
+                  <tr ng-repeat="(hash, validated) in showFile.verification">
+                    <td ng-bind="hash + ' validated:'"></td>
+                    <td><i ng-class="{'glyphicon-ok': validated, 'text-success': validated, 'glyphicon-remove': !validated, 'text-danger': !validated}" label="{{hash + ' ' + (validated ? 'validated' : ' not validated')}}" class="glyphicon"></i></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="panel panel-default">
+          <div class="panel-heading">Contents</div>
+          <div class="panel-body">
+            <div ng-bind="showFile.content" class="file_content"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-footer">
+  <button ng-click="modalInstance.dismiss()()" class="btn btn-sm btn-default">Close</button>
+</div>

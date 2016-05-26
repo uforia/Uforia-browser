@@ -1,0 +1,55 @@
+<div ui-view class="ng-scope">
+    <div class="row">
+        <div class="col-xs-12">
+            <h1 class="page-header">Mappings</h1>
+            <ol class="breadcrumb">
+                <li>
+                    <a ui-sref="index">Home</a>
+                </li>
+                <li class="active">
+                    <strong>Mappings</strong>
+                </li>
+            </ol>
+        </div>
+    </div>
+    <div class="wrapper wrapper-content animated fadeIn ng-scope">
+        <!-- Customers table -->
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Mappings
+                <div class="pull-right">
+                    <div class="btn-group">
+                        <a ui-sref="mappings.create" class="btn btn-success btn-xs">Create new mapping</a>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="table-responsive">
+                    <table datatable="ng" class="table table-striped table-hover dataTables-example">
+                        <thead>
+                            <tr>
+                                <th>Mapping</th>
+                                <th>Status</th>
+                                <th>Options</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="type in types">
+                                <td ng-bind="type"></td>
+                                <td ng-bind="(mappings[type].progress != null) ? (mappings[type].progress | percentage:2) : 'Ready'"></td>
+                                <td>
+                                    <button ng-if="mappings[type].progress" ng-click="pauseFilling(type)" class="btn btn-sm btn-default" data-toggle="tooltip" title="Pause"><i class="fa fa-pause"></i></button>
+                                    <button ui-sref="mappings.visualizations({type:type})" class="btn btn-sm btn-default" data-toggle="tooltip" title="Visualizations"><i class="fa fa-line-chart"></i></button>
+                                    <button ui-sref="mappings.edit({type:type})" class="btn btn-sm btn-primary" data-toggle="tooltip" title="Edit"><i class="fa fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" ng-click="deleteMapping(type)" data-toggle="tooltip" title="Delete"><i class="fa fa-remove"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /.col-lg-12 -->
+</div>

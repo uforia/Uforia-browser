@@ -1,59 +1,175 @@
-<!DOCTYPE html>
-<html xmlns:ng="http://angularjs.org" ng-app="uforia" ng-controller="appCtrl as app">
-  <head>
-    <title>Uforia ElasticSearch Front-End</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="./components/bootstrap/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="./components/angular-ui/build/angular-ui.css">
-    <link rel="stylesheet" href="./components/angular-ui-select/dist/select.css">
-    <link rel="stylesheet" href="./stylesheets/style.css">
-    <link rel="stylesheet" href="./components/toastr/toastr.min.css">
-  </head>
-  <body>
-    <navigation></navigation>
-    <div class="container-fluid margin-top">
-      <header>
-        <p class="logo"><b>U</b>niversal <b>For</b>ensic <b>I</b>ndexer and <b>A</b>nalyzer - Visualize Anything!</p>
-        <p style="font-size: 10pt;">
-          <ul>
-            <li><b>Disclaimer 1: </b>sorry, we can't guarantee this website always works (correctly)! Please <a href="mailto:uforia@dhcp.net?Subject=Uforia Bug Report">report bugs </a>and/or <a href="https://github.com/uforia">submit a pull request </a>!</li>
-            <li><b>Usage tip 1: </b>Unless you are using the Bar Chart visualization, try to visualize up to +/- 200 items: more can make your browser slow!<br /><b>Usage tip 2: </b>Try clicking on the various parts of the visualizations (nodes, lines, edges, etc.) to get a detailed view of the documents.<br /><b>Usage tip 3: </b>For the cellphone log example, try searching for SiteName words such as 'Heineken', 'Bijlmer' or 'Sloterdijk' (set contains dummy data).</li>
-            <li><b>Common issues: </b>Visualizing too many results can make your browser slow or not show anything at all (empty canvas), the timeline horizontal axis breaks sometimes.</li>
-          </ul>
-        </p>
-      </header>
-      <div ui-view class="container-fluid"></div>
-    </div>
+﻿﻿<!DOCTYPE html>
+<html ng-app="uforia">
 
-    <script src="./components/jquery/dist/jquery.min.js"></script>
-    <script src="./components/jquery-ui/jquery-ui.js"></script>
-    <script src="./components/jquery-ui/ui/sortable.js"></script>
-    <script src="./components/bootstrap/dist/js/bootstrap.js"></script>
-    <script src="./components/angular/angular.js"></script>
-    <script src="./components/angular-ui/common/module.js"></script>
-    <script src="./components/angular-ui/modules/directives/sortable/sortable.js"></script>
-    <script src="./components/angular-ui/modules/filters/unique/unique.js"></script>
-    <script src="./components/angular-ui-router/release/angular-ui-router.js"></script>
-    <script src="./components/angular-ui-bootstrap/src/transition/transition.js"></script>
-    <script src="./components/angular-ui-bootstrap/src/modal/modal.js"></script>
-    <script src="./components/angular-ui-bootstrap/src/dateparser/dateparser.js"></script>
-    <script src="./components/angular-ui-bootstrap/src/position/position.js"></script>
-    <script src="./components/angular-ui-bootstrap/src/datepicker/datepicker.js"></script>
-    <script src="./components/angular-ui-select/dist/select.js"></script>
-    <script src="./components/angular-drag-and-drop-lists/angular-drag-and-drop-lists.js"></script>
-    <script src="./components/angular-smart-table/dist/smart-table.min.js"></script>
-    <script src="./components/d3/d3.js"></script>
-    <script src="./components/ngstorage/ngStorage.js"></script>
-    <script src="./components/d3-tip/index.js"></script>
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Bootstrap Core CSS -->
+    <link href="assets/bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- MetisMenu CSS -->
+    <link href="assets/bower_components/metisMenu/dist/metisMenu.min.css" rel="stylesheet">
+
+    <!-- Animate -->
+    <link href="assets/bower_components/animate.css/animate.min.css" rel="stylesheet">
+
+    <!-- Toastr -->
+    <link href="assets/bower_components/toastr/toastr.min.css" rel="stylesheet" />
+
+    <!-- Timeline CSS -->
+    <link href="assets/css/timeline.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="assets/css/sb-admin-2.css" rel="stylesheet">
+
+    <!-- DataTables CSS -->
+    <link href="assets/bower_components/angular-datatables/jquery.dataTables.min.css" rel="stylesheet">
+
+    <!-- Morris Charts CSS -->
+    <link href="assets/bower_components/morrisjs/morris.css" rel="stylesheet">
+
+    <!-- Angular UI-select CSS-->
+    <link href="assets/js/angular-ui-select/dist/select.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="assets/bower_components/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- Page title set in pageTitle directive -->
+    <title page-title></title>
+
+    <link href="assets/css/style.css" rel="stylesheet" />
+</head>
+
+<body ng-attr-class="{{($state.includes('auth.login')) ? 'login-page' : ''}}">
+
+    <!-- Main view  -->
+    <!-- Wrapper-->
+    <div id="wrapper">
+
+        <!-- Navigation -->
+        <div ng-include="'app/shared/navigation/navigation.view.html'" ng-hide="$state.includes('auth.login')"></div>
+
+        <!-- Page wraper -->
+        <!-- ng-class with current state name give you the ability to extended customization your view -->
+        <div id="{{($state.includes('auth.login')) ? '' : 'page-wrapper' }}">
+
+            <!-- Main view  -->
+            <div ui-view></div>
+        </div>
+        <!-- End page wrapper-->
+
+    </div>
+    <!-- End wrapper-->
+
+    <!-- jQuery -->
+    <script src="assets/bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="assets/bower_components/angular-datatables/dist/jquery.dataTables.min.js"></script>
+
+    <!-- JQuery UI-->
+    <script src="assets/js/jquery-ui/jquery-ui.min.js"></script>
+    <script src="assets/js/jquery-ui/ui/sortable.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="assets/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+
+    <!-- Metis Menu Plugin JavaScript -->
+    <script src="assets/bower_components/metisMenu/dist/metisMenu.min.js"></script>
+
+    <!-- Morris Charts JavaScript -->
+    <script src="assets/bower_components/raphael/raphael-min.js"></script>
+    <script src="assets/bower_components/morrisjs/morris.min.js"></script>
+
     <script src="https://cdn.socket.io/socket.io-1.3.3.js"></script>
-    <script src="./components/toastr/toastr.min.js"></script>
-    <script src="./javascripts/app.js"></script>
-    <script src="./javascripts/controllers.js"></script>
-    <script src="./javascripts/models.js"></script>
-    <script src="./javascripts/directives.js"></script>
-    <script src="./javascripts/filters.js"></script>
-    <script src="./javascripts/scrolltotop.js"></script>
-    <script src="./javascripts/analytics.js"></script>
-    <script src="./javascripts/constants.js"></script>
-  </body>
+
+    <!-- Toastr -->
+    <script src="assets/bower_components/toastr/toastr.min.js"></script>
+
+    <script src="assets/bower_components/d3/d3.js"></script>
+    <script src="assets/bower_components/d3-tip/index.js"></script>
+
+    <!-- Custom Theme JavaScript -->
+    <script src="assets/js/sb-admin-2.js"></script>
+
+    <!-- Main Angular scripts-->
+    <!--<script src="assets/js/angular/angular.min.js"></script>-->
+    <script src="assets/bower_components/angular/angular.min.js"></script>
+
+    <!-- ngStorage JavaScript -->
+    <script src="assets/bower_components/ngstorage/ngStorage.min.js"></script>
+
+    <!-- Angular-Datatables JavaScript -->
+    <script src="assets/bower_components/angular-datatables/dist/angular-datatables.min.js"></script>
+
+    <!-- Angular UI modules-->
+    <script src="assets/js/angular-ui/common/module.js"></script>
+    <script src="assets/js/angular-ui/modules/filters/unique/unique.js"></script>
+    <script src="assets/js/angular-ui/modules/filters/highlight/highlight.js"></script>
+    <script src="assets/js/angular-ui-select/dist/select.js"></script>
+
+
+    <!-- Angular Drag and Drop Lists (dndList) -->
+    <script src="assets/js/angular-drag-and-drop-lists/angular-drag-and-drop-lists.js"></script>
+
+    <script src="assets/bower_components/oclazyload/dist/ocLazyLoad.min.js"></script>
+    <script src="assets/js/ui-router/angular-ui-router.min.js"></script>
+    <script src="assets/js/bootstrap/ui-bootstrap-tpls-0.12.0.min.js"></script>
+
+    <!-- Anglar App Script -->
+    <script language="javascript" src="app/app.module.js"></script>
+    <script language="javascript" src="app/app.config.js"></script>
+    <script language="javascript" src="app/app.constants.js"></script>
+    <script language="javascript" src="app/app.directive.js"></script>
+
+    <!-- Angular directives -->
+    <script language="javascript" src="app/shared/compare-passwords/compare-passwords.directive.js"></script>
+    <script language="javascript" src="app/shared/page-title/page-title.directive.js"></script>
+    <script language="javascript" src="app/shared/side-navigation/side-navigation.directive.js"></script>
+    <script language="javascript" src="app/shared/minimalize-sidebar/minimalize-sidebar.directive.js"></script>
+    <script language="javascript" src="app/shared/ibox-tools/regular/ibox-tools.directive.js"></script>
+    <script language="javascript" src="app/shared/ibox-tools/fullscreen/ibox-tools-fullscreen.directive.js"></script>
+
+    <!-- Component models -->
+    <script language="javascript" src="app/components/search/search.models.js"></script>
+    <script language="javascript" src="app/components/mappings/mappings.models.js"></script>
+
+    <!-- Angular controllers -->
+    <script language="javascript" src="app/components/main/main.controller.js"></script>
+    <script language="javascript" src="app/components/authentication/authentication.controller.js"></script>
+    <script language="javascript" src="app/components/authentication/login/login.controller.js"></script>
+    <script language="javascript" src="app/components/users/users.controller.js"></script>
+    <script language="javascript" src="app/components/users/create/create.controller.js"></script>
+    <script language="javascript" src="app/components/users/edit/edit.controller.js"></script>
+    <script language="javascript" src="app/components/users/modals/archiveUserModal.controller.js"></script>
+    <script language="javascript" src="app/components/users/modals/unarchiveUserModal.controller.js"></script>
+    <script language="javascript" src="app/components/main/profile/profile.controller.js"></script>
+    <script language="javascript" src="app/components/mappings/mappings.controller.js"></script>
+    <script language="javascript" src="app/components/mappings/modals/deleteMappingModal.controller.js"></script>
+    <script language="javascript" src="app/components/mappings/create/create.controller.js"></script>
+    <script language="javascript" src="app/components/mappings/edit/edit.controller.js"></script>
+    <script language="javascript" src="app/components/mappings/visualizations/visualizations.controller.js"></script>
+    <script language="javascript" src="app/components/search/search.controller.js"></script>
+    <script language="javascript" src="app/components/search/details/details.controller.js"></script>
+    <script language="javascript" src="app/components/cases/cases.controller.js"></script>
+    <script language="javascript" src="app/components/cases/create/create.controller.js"></script>
+
+    <script language="javascript" src="app/shared/ibox-tools/fullscreen/ibox-tools-fullscreen.controller.js"></script>
+    <script language="javascript" src="app/shared/ibox-tools/regular/ibox-tools.controller.js"></script>
+    <script language="javascript" src="app/shared/minimalize-sidebar/minimalize-sidebar.controller.js"></script>
+
+    <!-- Component filters -->
+    <script language="javascript" src="app/app.filter.js"></script>
+</body>
+
 </html>
