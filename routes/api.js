@@ -1057,6 +1057,24 @@ router.post('/edit_user', function(req, res){
 });
 
 /**
+ * Get case
+ * url: /api/get_case
+ * Repsonds: name, caseClosed, caseStarted, leadInvestigator, investigators
+ */
+router.get('/get_cases', function(req, res){
+
+  c.elasticsearch.search({
+    index: INDEX,
+    type: 'cases',
+    body: { query: { match_all: {}}},
+    _source: ["id", "name", "caseClosed", "caseStarted", "leadInvestigator", "investigators"],
+    size: 999 // all
+  }, function (error, response) {
+    res.send({error: error, response: response});
+  });
+});
+
+/**
  * Save case
  * url: /api/save_case
  * Takes user object with name, caseStarted, caseClosed, leadInvestigator, investigators

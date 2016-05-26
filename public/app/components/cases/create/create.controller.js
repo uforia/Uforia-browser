@@ -33,6 +33,9 @@
             // Save case
             if(addCase) {
                 var tempCase = angular.copy(cases);
+                var d = new Date();
+                tempCase.caseStarted = d;
+                console.log(tempCase)
                 $http.post('/api/save_case', tempCase)
                     .success(function (data) {
                             if (typeof data.error !== 'undefined') {
