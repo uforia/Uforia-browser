@@ -187,18 +187,40 @@
                     mapping: mappings.getMapping,
                     mime_types: mappings.getAvailableModules
                 }
+            })
+            .state('cases', {
+                url: "/cases",
+                templateUrl: "app/components/cases/cases.view.html",
+                controller: 'CasesController',
+                controllerAs: 'ctrl',
+                data: { pageTitle: "Case overview" },
+                resolve: {
+                    loggedin: isAuthenticated,
+                    isAllowed: hasRoles([ROLES.manager])
+                }
+            })
+            .state('cases.create', {
+                url: "/create",
+                templateUrl: "app/components/cases/create/create.view.html",
+                controller: "CasesCreateController",
+                controllerAs: 'ctrl',
+                data: { pageTitle: "Create case" },
+                resolve: {
+                    loggedin: isAuthenticated,
+                    isAllowed: hasRoles([ROLES.manager])
+                }
             });
     }
 })();
 
 
 function isAuthenticated($q, $timeout, $http, $location, $rootScope, $state) {
-    // Initialize a new promise 
+    // Initialize a new promise
     var deferred = $q.defer();
 
     $http.get('/logged-in')
         .success(function (user) {
-            // Authenticated 
+            // Authenticated
             if (user == 1) {
                 $rootScope.isLoggedIn = true;
                 deferred.resolve();

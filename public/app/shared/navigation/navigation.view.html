@@ -46,6 +46,9 @@
                 <li ui-sref-active="active">
                     <a ui-sref="search" ng-class="getClass('/search')"><i class="fa fa-search fa-fw"></i> Search</a>
                 </li>
+                <li ui-sref-active="active" ng-hide="user.role == 'user' || user.role == 'admin'">
+                    <a ui-sref="cases" ng-class="getClass('/cases')"><i class="fa fa-search fa-fw"></i> Cases</a>
+                </li>
                 <li ui-sref-active="active" ng-hide="user.role == 'user'">
                     <a ui-sref="users" ng-class="getClass('/users')"><i class="fa fa-users fa-fw"></i> Users</a>
                 </li>

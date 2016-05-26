@@ -7,6 +7,7 @@
         'main',
         'users',
         'profile',
+        'cases',
         'mappings',
         'authentication',
         'search',
