@@ -983,6 +983,19 @@ router.get('/get_users', function(req, res){
   });
 });
 
+router.get('/get_filtered_users', function(req, res){
+  var filter = req.body.filter;
+  c.elasticsearch.search({
+    index: INDEX,
+    type: 'users',
+    body: { query: { match: {'role': 'user'},}},
+    _source: ["id", "firstName", "lastName", "email", "isDeleted", "role"],
+    size: 999 // all
+  }, function (error, response) {
+    res.send({error: error, response: response});
+  });
+});
+
 /**
  * Get one user
  * url: /api/get_user
@@ -1042,5 +1055,64 @@ router.post('/edit_user', function(req, res){
     });
   })
 });
+
+/**
+ * Save case
+ * url: /api/save_case
+ * Takes user object with name, caseStarted, caseClosed, leadInvestigator, investigators
+ */
+router.post('/save_case', function(req, res){
+  var cases = req.body;
+  var name = cases.name;
+
+  function isDef(v) {
+    return v !== undefined && v !== null;
+  }
+
+  if(isDef(name)){
+    c.elasticsearch.search({
+      index: c.config.elasticsearch.index,
+      type: 'cases',
+      size: 1,
+      body: {
+        query: {
+          filtered: {
+            filter: {
+              term: {
+                name: name
+              }
+            }
+          }
+        }
+      }
+    }).then(function(response) {
+      if (response.hits.total != 0) {
+        res.send({
+          error: {
+            message: 'Case already exists'
+          }
+        });
+      }
+      else {
+        c.elasticsearch.create({
+          index: INDEX,
+          type: 'cases',
+          refresh: true,
+          body: cases
+        }, function (error, response) {
+          res.send({error: error, response: response});
+        });
+      }
+    });
+  }
+  else {
+    res.send({
+      error: {
+        message: 'Variable is undefined'
+      }
+    });
+  }
+});
+
 
 module.exports = router;
