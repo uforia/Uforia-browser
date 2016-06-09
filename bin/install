@@ -47,20 +47,56 @@ common.elasticsearch.indices.putMapping({
 	}
 })
 .then(function(resp) {
-	var hash = bcrypt.hashSync(PASSWORD);
-
-	return common.elasticsearch.create({
+	return common.elasticsearch.search({
 		index: common.config.elasticsearch.index,
 		type: 'users',
+		size: 1,
 		body: {
-			firstName: 'John',
-			lastName: 'Doe',
-			email: EMAIL_ADDRESS,
-			password: hash,
-			role: 'admin',
-			isDeleted: false,
+			query: {
+				filtered: {
+					filter: {
+						term: {
+							email: EMAIL_ADDRESS
+						}
+					}
+				}
+			}
 		}
 	});
+})
+.then(function(resp) {
+	var hash = bcrypt.hashSync(PASSWORD);
+
+	if (resp.hits.total == 0) {
+		// create new user
+		return common.elasticsearch.create({
+			index: common.config.elasticsearch.index,
+			type: 'users',
+			body: {
+				firstName: 'John',
+				lastName: 'Doe',
+				email: EMAIL_ADDRESS,
+				password: hash,
+				role: 'admin',
+				isDeleted: false,
+			}
+		});
+	}
+	else {
+		// edit existing user
+		return common.elasticsearch.update({
+			index: common.config.elasticsearch.index,
+			type: 'users',
+			id: resp.hits.hits[0]._id,
+			body: {
+				doc: {
+					password: hash,
+					role: 'admin',
+					isDeleted: false,
+				}
+			},
+		});
+	}
 })
 .then(function(resp) {
 	console.log('The setup has been completed successfully.');
