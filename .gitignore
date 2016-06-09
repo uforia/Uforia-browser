@@ -4,3 +4,5 @@ npm-debug.log
 Uforia-browser.iml
 .DS_Store
 .vscode
+/public/assets/bower_components/angular-datatables/bower.json
+/public/assets/bower_components/angular-datatables/.bower.json

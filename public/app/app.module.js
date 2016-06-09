@@ -21,6 +21,7 @@
         'dndLists',
         'ui',
         'ui.select',
-        'datatables'
+        'datatables',
+        'datatables.bootstrap'
     ]);
 })();
