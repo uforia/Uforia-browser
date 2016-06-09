@@ -6,7 +6,7 @@
     function run($rootScope, $http, $state, ROLES, $window, $sessionStorage, $location) {
         $rootScope.$state = $state;
 
-        if(typeof $rootScope.user == 'undefined') $rootScope.user = $sessionStorage.user;
+        if (typeof $rootScope.user == 'undefined') $rootScope.user = $sessionStorage.user;
 
         $rootScope.Utils = {
             keys: Object.keys
@@ -52,6 +52,12 @@
         // For the menu and asigning active class to active menu items.
         $rootScope.getClass = function (path) {
             return ($location.path().substr(0, path.length) === path) ? 'active' : '';
+        }
+
+
+        // Put refreshUser function in the rootscope.
+        $rootScope.refreshUser = function () {
+            refreshUser($http, $sessionStorage, $rootScope);
         }
     }
 
@@ -122,7 +128,7 @@
                 controller: "UsersEditController",
                 controllerAs: 'ctrl',
                 data: { pageTitle: "Edit user" },
-                resolve:{
+                resolve: {
                     loggedin: isAuthenticated,
                     isAllowed: hasRoles([ROLES.admin, ROLES.manager])
                 }
@@ -214,6 +220,18 @@
 })();
 
 
+/**
+ * Refreshes the user object in the rootscope.
+ */
+function refreshUser($http, $sessionStorage, $rootScope) {
+    $http.get('/api/get_user', { "id": $rootScope.user.id })
+        .success(function (data) {
+            $rootScope.user = data;
+            $sessionStorage.user = data;
+        });
+}
+
+
 function isAuthenticated($q, $timeout, $http, $location, $rootScope, $state) {
     // Initialize a new promise
     var deferred = $q.defer();
@@ -264,7 +282,7 @@ function hasRoles(roles) {
 
 
 // Activate jQuery tooltips.
-jQuery(function($) {
+jQuery(function ($) {
     $(document).tooltip({
         selector: '[data-toggle="tooltip"]'
     });

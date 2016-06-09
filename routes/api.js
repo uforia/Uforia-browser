@@ -845,6 +845,14 @@ router.post('/visualizations/save', function(req, res){
  */
 router.post('/save_user', function(req, res){
   var user = req.body;
+
+  // Add requered preferences field.
+  user.preferences = {
+      cases: {
+        activeCase: ""
+      }
+  };
+
   var username = user.email;
 
   function isDef(v) {
@@ -967,6 +975,31 @@ router.post('/unarchive_user', function(req, res){
 
 });
 
+router.post('/edit_user_preferences', function(req, res){
+  var userId = req.body.userId;
+  var caseId = req.body.caseId;
+
+  console.log("user id:" + userId + " case id:" + caseId);  
+
+  c.elasticsearch.update({
+    index: INDEX,
+    type: 'users',
+    id: userId,
+    refresh: true,
+    body: {
+      doc: {
+        preferences:{
+          cases:{
+            activeCase: caseId
+          }
+        }
+      }
+    }
+  }, function (error, response) {
+    res.send({error: error, response: response});
+  });
+});
+
 /**
  * Get all users
  * url: /api/get_users
@@ -1002,6 +1035,7 @@ router.get('/get_filtered_users', function(req, res){
  * url: /api/get_user
  */
 router.get('/get_user', function(req, res){
+  console.log(req);
   getUser(req.query.id, function (error, response) {
     res.send({error: error, response: response});
   });

@@ -9,8 +9,8 @@
         $scope.searchCollection = [];
 
         // Set active case, but leave empty if no case is defined.
-        $scope.activeRow = ($scope.user.preferences.cases.activeCase != 'undefined')? $scope.user.preferences.cases.activeCase : 0;
-
+        $scope.activeRow = ($scope.user.preferences.cases.activeCase != 'undefined') ? $scope.user.preferences.cases.activeCase : 0;
+        
         $scope.message = [];
         $scope.error = [];
         var cases;
@@ -62,14 +62,17 @@
          * Sets object.active of the row to true and the old object to false.
          */
         $scope.setActiveRow = function (id) {
+            var data = { userId: $scope.user.id, caseId: id };
+
             // Update user preferences to the active case.
-            $http({
-                method: 'POST',
-                url: 'api/edit_user_preferences',
-                data: {userId: $scope.user.id, caseId: id}
-            }).then(function(data){
-                console.log("Active case saved.");
-            });
+            $http.post('/api/edit_user_preferences', data)
+                .success(function (data) {
+                    $scope.activeRow = id;
+                    console.log("Active case saved.");
+                });
+
+            // Refresh user to see the changes after refresh.
+            $scope.refreshUser();
         }
 
         if ($scope.isLoggedIn) {
