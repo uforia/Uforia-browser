@@ -27,6 +27,7 @@
                     <table datatable="ng" class="table dataTables-example">
                         <thead>
                             <tr>
+                                <th>Active</th>
                                 <th>Name</th>
                                 <th>Case Started</th>
                                 <th>Lead Investigator</th>
@@ -35,8 +36,10 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr ng-repeat="row in rowCollection">
-                                <td>{{row.name}}</td>
+                            <tr ng-repeat="(key, row) in rowCollection" ng-class="(row.id === activeRow) ? 'success' : '' ">
+                                
+                                <td><input type="radio" name="row.active" ng-click="setActiveRow(row.id)" ng-checked="(row.id === activeRow)"/></td>    
+                                <td>({{row.active}}) {{row.name}}</td>
                                 <td>{{row.caseStarted | date:'M/d/yyyy'}}</td>
                                 <td>{{row.leadInvestigator}}</td>
                                 <td>{{row.investigators}}</td>

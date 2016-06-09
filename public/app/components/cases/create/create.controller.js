@@ -7,6 +7,8 @@
     function CasesCreateController($scope, $http, $state) {
         $scope.cases = {};
         $scope.cases.isDeleted = false;
+        $scope.cases.active = false;
+
         var cases = {};
 
         $scope.formData = {};

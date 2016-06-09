@@ -349,6 +349,7 @@ router.get('/file/:hashid', function(req, res){
             var hashednames = JSON.parse(result[0].modules);
             var tables = Object.keys(hashednames);
             async.each(tables, function(table, callback) {
+              console.log(hashednames, table, req.params.hashid);
                 c.mysql_db.query('SELECT Content FROM ?? WHERE hashid=?', [hashednames[table],req.params.hashid], function(err, result) {
                     if (err) throw err;
                     totalContent += result[0].Content;
@@ -1067,7 +1068,7 @@ router.get('/get_cases', function(req, res){
     index: INDEX,
     type: 'cases',
     body: { query: { match_all: {}}},
-    _source: ["id", "name", "caseClosed", "caseStarted", "leadInvestigator", "investigators"],
+    _source: ["id", "name", "caseClosed", "caseStarted", "leadInvestigator", "investigators", "active"],
     size: 999 // all
   }, function (error, response) {
     res.send({error: error, response: response});
