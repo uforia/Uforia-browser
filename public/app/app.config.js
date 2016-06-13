@@ -209,6 +209,17 @@
                     loggedin: isAuthenticated,
                     isAllowed: hasRoles([ROLES.manager])
                 }
+            })
+            .state('cases.edit', {
+                url: "/edit/:caseId",
+                templateUrl: "app/components/cases/edit/edit.view.html",
+                controller: "CasesEditController",
+                controllerAs: 'ctrl',
+                data: { pageTitle: "Edit case" },
+                resolve: {
+                    loggedin: isAuthenticated,
+                    isAllowed: hasRoles([ROLES.manager])
+                }
             });
     }
 })();
