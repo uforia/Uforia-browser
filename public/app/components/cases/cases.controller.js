@@ -8,9 +8,10 @@
         $scope.showNumberOfPages = 7;
         $scope.searchCollection = [];
 
-        // Set active case, but leave empty if no case is defined.
-        $scope.activeRow = ($scope.user.preferences.cases.activeCase != 'undefined') ? $scope.user.preferences.cases.activeCase : 0;
-        
+        // Set active case.
+        $scope.activeRow = "";
+        getActiveCase($scope, $http);
+
         $scope.message = [];
         $scope.error = [];
         var cases;
@@ -48,8 +49,6 @@
 
                     });
 
-                    console.log($scope.rowCollection);
-
                     $scope.searchCollection = $scope.rowCollection;
                     cases = data.data.response.hits.hits;
                 }
@@ -70,9 +69,6 @@
                     $scope.activeRow = id;
                     console.log("Active case saved.");
                 });
-
-            // Refresh user to see the changes after refresh.
-            $scope.refreshUser();
         }
 
         if ($scope.isLoggedIn) {
@@ -81,3 +77,13 @@
 
     }
 })();
+
+/**
+ * Gets the id of the current case in the user object and sets the active row.
+ */
+function getActiveCase($scope, $http) {
+    $http.get('api/get_active_case?userId=' + $scope.user.id)
+        .success(function (caseId) {
+            $scope.activeRow = caseId.response;
+        });
+}

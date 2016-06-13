@@ -53,12 +53,6 @@
         $rootScope.getClass = function (path) {
             return ($location.path().substr(0, path.length) === path) ? 'active' : '';
         }
-
-
-        // Put refreshUser function in the rootscope.
-        $rootScope.refreshUser = function () {
-            refreshUser($http, $sessionStorage, $rootScope);
-        }
     }
 
     function config($stateProvider, $urlRouterProvider, $ocLazyLoadProvider, $sceProvider, ROLES) {
@@ -218,19 +212,6 @@
             });
     }
 })();
-
-
-/**
- * Refreshes the user object in the rootscope.
- */
-function refreshUser($http, $sessionStorage, $rootScope) {
-    $http.get('/api/get_user', { "id": $rootScope.user.id })
-        .success(function (data) {
-            $rootScope.user = data;
-            $sessionStorage.user = data;
-        });
-}
-
 
 function isAuthenticated($q, $timeout, $http, $location, $rootScope, $state) {
     // Initialize a new promise
