@@ -1,5 +1,5 @@
 
-(function () {
+(function() {
     var mod = angular.module('cases.create', []);
 
     mod.controller('CasesCreateController', CasesCreateController);
@@ -7,8 +7,6 @@
     function CasesCreateController($scope, $http, $state) {
         $scope.cases = {};
         $scope.cases.isDeleted = false;
-        $scope.user.activeCase = false;
-
         var cases = {};
 
         $scope.formData = {};
@@ -30,40 +28,26 @@
         });
 
 
-        $scope.save = function (cases) {
+        $scope.save = function(cases){
             var addCase = true;
             // Save case
-            if (addCase) {
+            if(addCase) {
                 var tempCase = angular.copy(cases);
-                var d = new Date();
-                tempCase.caseStarted = d;
-                console.log(tempCase)
                 $http.post('/api/save_case', tempCase)
                     .success(function (data) {
-                        if (typeof data.error !== 'undefined') {
-                            toastr.error(data.error.message);
-                        }
+                            if (typeof data.error !== 'undefined') {
+                                toastr.error(data.error.message);
+                            }
 
-                        if (typeof data.response !== 'undefined') {
-                            if (data.response.created == true) {
-                                toastr.success('Case ' + tempCase.name + ' has been added');
-
-                                // If case is active, change active case on user object.
-                                if ($scope.user.activeCase) {
-                                    $scope.user.preferences.cases.activeCase = data.response._id;
-                                    $http.post('api/edit_user', $scope.user)
-                                        .success(function (data) {
-                                            $state.go('cases', {}, { reload: true });
-                                        })
-                                        .error(function (data) {
-                                            toast.error("Something went wrong!", "Please try again later.")
-                                        });
+                            if (typeof data.response !== 'undefined') {
+                                if (data.response.created == true) {
+                                    toastr.success('Case ' + tempCase.name +' has been added');
+                                    $state.go('cases', {}, { reload: true });
                                 }
                             }
                         }
-                    }
                     );
-            } else if (!addCase) {
+            } else if (!addCase){
                 toastr.error('An user with this email address already exists');
             } else {
                 toastr.error('Unknown error');
