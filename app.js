@@ -12,9 +12,9 @@ var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var bcrypt = require('bcrypt-nodejs');
 
-var routes      = require('./routes/index');
-var api         = require('./routes/api'),
-    m           = require('./lib/middleware.js');
+var routes = require('./routes/index');
+var api = require('./routes/api'),
+  m = require('./lib/middleware.js');
 
 
 var app = express();
@@ -30,28 +30,28 @@ app.use(session({ secret: 'keyboard cat' }));
 app.use(passport.initialize());
 app.use(passport.session());
 
-var auth = function(req, res, next) {
-	if (!req.isAuthenticated()) {
-		res.send(401);
-	}
-	else {
-		next();
-	}
+var auth = function (req, res, next) {
+  if (!req.isAuthenticated()) {
+    res.send(401);
+  }
+  else {
+    next();
+  }
 }
 
 app.use('/', m.init, routes);
 app.use('/api', auth, api);
 
-passport.serializeUser(function(user, done) {
+passport.serializeUser(function (user, done) {
   done(null, user);
 });
 
-passport.deserializeUser(function(user, done) {
+passport.deserializeUser(function (user, done) {
   done(null, user);
 });
 
 passport.use(new LocalStrategy(
-  function(username, password, done) {
+  function (username, password, done) {
     c.elasticsearch.search({
       index: c.config.elasticsearch.index,
       type: 'users',
@@ -67,25 +67,26 @@ passport.use(new LocalStrategy(
           }
         }
       }
-    }).then(function(response) {
+    }).then(function (response) {
       if (response.hits.total == 1) {
         var user = response.hits.hits[0]._source;
         user.id = response.hits.hits[0]._id;
         if (user['email'] === username && bcrypt.compareSync(password, user['password'])) {
+          delete user.password;
           done(null, user);
           return;
         }
       }
-      done(null, false, {error: 'Incorrect password.'});
+      done(null, false, { error: 'Incorrect password.' });
     });
   }
 ));
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
-    var err = new Error('Not Found');
-    err.status = 404;
-    next(err);
+app.use(function (req, res, next) {
+  var err = new Error('Not Found');
+  err.status = 404;
+  next(err);
 });
 
 // error handlers
