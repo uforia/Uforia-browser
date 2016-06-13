@@ -24,7 +24,33 @@
             </div>
             <div class="panel-body">
                 <div class="table-responsive">
-                    
+                    <table datatable="ng" class="table dataTables-example">
+                        <thead>
+                            <tr>
+                                <th>Active</th>
+                                <th>Name</th>
+                                <th>Case Started</th>
+                                <th>Lead Investigator</th>
+                                <th>Investigator</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="(key, row) in rowCollection" ng-class="(row.id === activeRow) ? 'success' : '' ">
+
+                                <td><input type="radio" name="row.active" ng-click="setActiveRow(row.id)" ng-checked="(row.id === activeRow)"/></td>
+                                <td>{{row.name}}</td>
+                                <td>{{row.caseStarted | date:'M/d/yyyy'}}</td>
+                                <td>{{row.leadInvestigator}}</td>
+                                <td>{{row.investigators.join(", ")}}</td>
+                                <td>
+                                    <button ng-disabled="row.isDeleted" ui-sref="cases.edit({caseId:row.id})" class="btn btn-sm btn-primary" data-toggle="tooltip" title="Edit">
+                                      <span class="glyphicon glyphicon-edit"></span>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>

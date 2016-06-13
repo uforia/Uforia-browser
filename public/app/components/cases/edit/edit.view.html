@@ -11,7 +11,7 @@
                     <a ui-sref="cases">Cases</a>
                 </li>
                 <li class="active">
-                    <strong>Create</strong>
+                    <strong>Edit</strong>
                 </li>
             </ol>
         </div>
@@ -19,46 +19,40 @@
     <div class="wrapper wrapper-content animated fadeIn">
         <div class="col-lg-6">
             <div class="panel panel-default">
-                <div class="panel-heading">Create a new case
+                <div class="panel-heading">Edit a case
                     <div class="pull-right">
                         <div class="btn-group">
                             <a ui-sref="^" class="btn btn-primary btn-xs" type="submit"><i class="fa fa-arrow-left"></i> Back to overview</a>
                         </div>
                     </div>
                 </div>
-                <form class="form-horizontal" novalidate ng-submit="addCaseForm.$valid && save(cases)" name="addCaseForm">
+                <form class="form-horizontal" novalidate ng-submit="editCaseForm.$valid && save(cases)" name="editCaseForm">
                     <div class="panel-body">
                         <div class="form-group">
                             <label class="col-sm-4 control-label">Case name</label>
                             <div class="col-sm-8">
                                 <input title="name" type="text" name="name" ng-model="cases.name" class="form-control" required/>
-                                <div ng-show="addCaseForm.name.$invalid && addCaseForm.name.$dirty || addCaseForm.$submitted">
-                                    <small class="text-danger" ng-show="addCaseForm.name.$error.required">Please enter the name</small>
+                                <div ng-show="editCaseForm.name.$invalid && editCaseForm.name.$dirty || editCaseForm.$submitted">
+                                    <small class="text-danger" ng-show="editCaseForm.name.$error.required">Please enter the name</small>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-sm-4 control-label">Active</label>
-                            <div class="col-sm-8">
-                                <input title="active" type="checkbox" name="active" ng-model="user.activeCase" class="checkbox"/>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="col-sm-4 control-label">Lead investigator</label>
                             <div class="col-sm-8">
-                                <select title="leadInvestigator" name="leadInvestigator" ng-model="cases.leadInvestigator" class="form-control" required>
-                                    <option ng-repeat="user in formData.users" value="{{user._id}}">{{user._source.lastName}}, {{user._source.firstName}}</option>
+                                <select title="leadInvestigator" name="leadInvestigator" ng-model="cases.leadInvestigator" class="form-control chosen-select" required>
+                                    <option ng-selected="(cases.leadInvestigator == user._id)" ng-repeat="user in formData.users" value="{{user._id}}">{{user._source.lastName}}, {{user._source.firstName}}</option>
                                 </select>
-                                <small class="text-danger" ng-show="addCaseForm.leadInvestigator.$error.required && addCaseForm.$submitted">Please enter the lead investigator</small>
+                                <small class="text-danger" ng-show="editCaseForm.leadInvestigator.$error.required && editCaseForm.$submitted">Please enter the lead investigator</small>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="col-sm-4 control-label">Investigator</label>
                             <div class="col-sm-8">
-                                <select title="Investigators" name="Investigators" ng-model="cases.investigators" class="form-control" multiple>
-                                    <option ng-repeat="user in formData.users" value="{{user._id}}">{{user._source.lastName}}, {{user._source.firstName}}</option>
+                                <select title="Investigators" name="Investigators" ng-model="cases.investigators" class="form-control chosen-select" multiple>
+                                    <option ng-selected="(cases.investigators == user._id)" ng-repeat="user in formData.users" value="{{user._id}}">{{user._source.lastName}}, {{user._source.firstName}}</option>
                                 </select>
-                                <small class="text-danger" ng-show="addCaseForm.Investigators.$error.required && addCaseForm.$submitted">Please enter the investigator</small>
+                                <small class="text-danger" ng-show="editCaseForm.Investigators.$error.required && editCaseForm.$submitted">Please enter the investigator</small>
                             </div>
                         </div>
                     </div>

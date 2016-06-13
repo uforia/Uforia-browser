@@ -6,7 +6,7 @@
     function run($rootScope, $http, $state, ROLES, $window, $sessionStorage, $location) {
         $rootScope.$state = $state;
 
-        if(typeof $rootScope.user == 'undefined') $rootScope.user = $sessionStorage.user;
+        if (typeof $rootScope.user == 'undefined') $rootScope.user = $sessionStorage.user;
 
         $rootScope.Utils = {
             keys: Object.keys
@@ -122,7 +122,7 @@
                 controller: "UsersEditController",
                 controllerAs: 'ctrl',
                 data: { pageTitle: "Edit user" },
-                resolve:{
+                resolve: {
                     loggedin: isAuthenticated,
                     isAllowed: hasRoles([ROLES.admin, ROLES.manager])
                 }
@@ -209,10 +209,20 @@
                     loggedin: isAuthenticated,
                     isAllowed: hasRoles([ROLES.manager])
                 }
+            })
+            .state('cases.edit', {
+                url: "/edit/:caseId",
+                templateUrl: "app/components/cases/edit/edit.view.html",
+                controller: "CasesEditController",
+                controllerAs: 'ctrl',
+                data: { pageTitle: "Edit case" },
+                resolve: {
+                    loggedin: isAuthenticated,
+                    isAllowed: hasRoles([ROLES.manager])
+                }
             });
     }
 })();
-
 
 function isAuthenticated($q, $timeout, $http, $location, $rootScope, $state) {
     // Initialize a new promise
@@ -264,7 +274,7 @@ function hasRoles(roles) {
 
 
 // Activate jQuery tooltips.
-jQuery(function($) {
+jQuery(function ($) {
     $(document).tooltip({
         selector: '[data-toggle="tooltip"]'
     });
