@@ -979,7 +979,7 @@ router.post('/edit_user_preferences', function(req, res){
   var userId = req.body.userId;
   var caseId = req.body.caseId;
 
-  console.log("user id:" + userId + " case id:" + caseId);  
+  console.log("user id:" + userId + " case id:" + caseId);
 
   c.elasticsearch.update({
     index: INDEX,
@@ -1096,76 +1096,152 @@ router.post('/edit_user', function(req, res){
  * url: /api/get_case
  * Repsonds: name, caseClosed, caseStarted, leadInvestigator, investigators
  */
-router.get('/get_cases', function(req, res){
+ router.get('/get_cases', function(req, res){
 
-  c.elasticsearch.search({
-    index: INDEX,
-    type: 'cases',
-    body: { query: { match_all: {}}},
-    _source: ["id", "name", "caseClosed", "caseStarted", "leadInvestigator", "investigators", "active"],
-    size: 999 // all
-  }, function (error, response) {
-    res.send({error: error, response: response});
-  });
-});
+   var userIds = [];
+   var users = {};
 
-/**
- * Save case
- * url: /api/save_case
- * Takes user object with name, caseStarted, caseClosed, leadInvestigator, investigators
- */
-router.post('/save_case', function(req, res){
-  var cases = req.body;
-  var name = cases.name;
+   c.elasticsearch.search({
+     index: INDEX,
+     type: 'cases',
+     body: { query: { match_all: {}}},
+     _source: ["id", "name", "caseClosed", "caseStarted", "leadInvestigator", "investigators", "active"],
+     size: 999 // all
+   }, function (error, response) {
+     response.hits.hits.forEach(function(value, index) {
+       userIds.push(value._source.leadInvestigator);
+       value._source.investigators.forEach(function(userId) {
+         userIds.push(userId);
+       });
 
-  function isDef(v) {
-    return v !== undefined && v !== null;
-  }
+     });
+     var cases = response.hits.hits;
+     c.elasticsearch.search({
+       index: INDEX,
+       type: 'users',
+       body: {
+         query: {
+           "ids" : {
+             "values" : [userIds]
+           }
+         }
+       },
+       _source: ["firstName", "lastName"]
+     }, function(error, response) {
+       response.hits.hits.forEach(function(user, index) {
+         users[user._id] = user._source;
+       });
 
-  if(isDef(name)){
-    c.elasticsearch.search({
-      index: c.config.elasticsearch.index,
-      type: 'cases',
-      size: 1,
-      body: {
-        query: {
-          filtered: {
-            filter: {
-              term: {
-                name: name
-              }
-            }
-          }
-        }
-      }
-    }).then(function(response) {
-      if (response.hits.total != 0) {
-        res.send({
-          error: {
-            message: 'Case already exists'
-          }
-        });
-      }
-      else {
-        c.elasticsearch.create({
-          index: INDEX,
-          type: 'cases',
-          refresh: true,
-          body: cases
-        }, function (error, response) {
-          res.send({error: error, response: response});
-        });
-      }
-    });
-  }
-  else {
-    res.send({
-      error: {
-        message: 'Variable is undefined'
-      }
-    });
-  }
-});
+       cases.forEach(function(value, index) {
+         console.log(value);
+         cases[index].leadInvestigator = users[value._source.leadInvestigator].firstName + ' ' + users[value._source.leadInvestigator].lastName;
+         cases[index].investigators = [];
+
+         value._source.investigators.forEach(function(investigatorId) {
+           cases[index].investigators.push(users[investigatorId].firstName + ' ' + users[investigatorId].lastName);
+         });
+       });
+       res.send({error: error, response: cases});
+     });
+   });
+
+ });
+ router.get('/get_case', function(req, res){
+   getCase(req.query.id, function (error, response) {
+     res.send({error: error, response: response});
+   });
+ });
+
+ function getCase (caseId, cb) {
+   c.elasticsearch.search({
+     index: INDEX,
+     type: 'cases',
+     body: {
+       query: {
+         "ids" : {
+           "values" : [caseId]
+         }
+       }
+     },
+     _source: ["id", "name", "caseClosed", "caseStarted", "leadInvestigator", "investigators"],
+   }, cb);
+ }
+
+ router.post('/edit_case', function(req, res){
+   var bcrypt = require('bcrypt-nodejs');
+   var cases = req.body;
+   var id = cases.id;
+
+   c.elasticsearch.update({
+     index: INDEX,
+     type: 'cases',
+     id: id,
+     refresh: true,
+     body: {
+       "doc" : cases
+     }
+   }, function (error, response) {
+     res.send({error: error, response: response});
+   });
+
+ });
+ /**
+  * Save case
+  * url: /api/save_case
+  * Takes user object with name, caseStarted, caseClosed, leadInvestigator, investigators
+  */
+ router.post('/save_case', function(req, res){
+   var cases = req.body;
+   var name = cases.name;
+
+   function isDef(v) {
+     return v !== undefined && v !== null;
+   }
+
+   if(isDef(name)){
+     c.elasticsearch.search({
+       index: c.config.elasticsearch.index,
+       type: 'cases',
+       size: 1,
+       body: {
+         query: {
+           filtered: {
+             filter: {
+               term: {
+                 name: name
+               }
+             }
+           }
+         }
+       }
+     }).then(function(response) {
+       if (response.hits.total != 0) {
+         res.send({
+           error: {
+             message: 'Case already exists'
+           }
+         });
+       }
+       else {
+         c.elasticsearch.create({
+           index: INDEX,
+           type: 'cases',
+           refresh: true,
+           body: cases
+         }, function (error, response) {
+           res.send({error: error, response: response});
+         });
+       }
+     });
+   }
+   else {
+     res.send({
+       error: {
+         message: 'Variable is undefined'
+       }
+     });
+   }
+ });
 
 
 module.exports = router;

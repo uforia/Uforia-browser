@@ -1,5 +1,5 @@
 (function () {
-    var mod = angular.module('cases', ['cases.create']);
+    var mod = angular.module('cases', ['cases.create', 'cases.edit']);
 
     mod.controller('CasesController', CasesController);
 
@@ -9,8 +9,8 @@
         $scope.searchCollection = [];
 
         // Set active case, but leave empty if no case is defined.
-        $scope.activeRow = ($scope.user.preferences.cases.activeCase != 'undefined') ? $scope.user.preferences.cases.activeCase : 0;
-        
+        // $scope.activeRow = ($scope.user.preferences.cases.activeCase != 'undefined') ? $scope.user.preferences.cases.activeCase : 0;
+
         $scope.message = [];
         $scope.error = [];
         var cases;
@@ -29,29 +29,38 @@
                 if (typeof data.data.error !== 'undefined') {
                     $scope.error.push(data.data.error.message);
                     $scope.isError = true;
-                } else if (data.data.response.hits.total > 0) {
+                } else {
                     $scope.rowCollection = {};
-
-                    // Load cases in table.
-                    angular.forEach(data.data.response.hits.hits, function (value, key) {
-                        var cases = value._source;
-
-                        // Create collection of cases.
+                    angular.forEach(data.data.response, function(value, key) {
                         $scope.rowCollection[value._id] = {
-                            id: value._id,
-                            name: cases.name,
-                            caseStarted: cases.caseStarted,
-                            caseClosed: cases.caseClosed,
-                            leadInvestigator: cases.leadInvestigator,
-                            investigators: cases.investigators
+                          id: value._id,
+                          name: value._source.name,
+                          caseStarted: value._source.caseStarted,
+                          // caseClosed: cases.caseClosed,
+                          leadInvestigator: value.leadInvestigator,
+                          investigators: value.investigators
                         };
-
-                    });
+                      });
+                    // Load cases in table.
+                    // angular.forEach(data.data.response.hits.hits, function (value, key) {
+                    //     var cases = value._source;
+                    //
+                    //     // Create collection of cases.
+                    //     $scope.rowCollection[value._id] = {
+                    //         id: value._id,
+                    //         name: cases.name,
+                    //         caseStarted: cases.caseStarted,
+                    //         caseClosed: cases.caseClosed,
+                    //         leadInvestigator: cases.leadInvestigator,
+                    //         investigators: cases.investigators
+                    //     };
+                    //
+                    // });
 
                     console.log($scope.rowCollection);
 
                     $scope.searchCollection = $scope.rowCollection;
-                    cases = data.data.response.hits.hits;
+                    // cases = data.data.response.hits.hits;
                 }
             }, function errorCallback(data) {
                 toastr.error('Please try again later.', 'Something went wrong!');
