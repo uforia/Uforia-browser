@@ -158,7 +158,7 @@ router.post("/get_types", function(req, res){
         last = last[last.length-1];
 
         var suffixesToExclude = ['fields', 'visualizations'];
-        var typesToExclude = ['users','cases'];
+        var typesToExclude = ['users','cases','tagged_evidence'];
 
         if (mappings.indexOf(mapping) == -1 && suffixesToExclude.indexOf(last) == -1 && typesToExclude.indexOf(mapping) == -1) {
           mappings.push(mapping);
