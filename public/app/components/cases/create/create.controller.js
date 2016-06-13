@@ -50,14 +50,15 @@
 
                                 // If case is active, change active case on user object.
                                 if ($scope.user.activeCase) {
+                                    delete $scope.user.activeCase;
                                     $scope.user.preferences.cases.activeCase = data.response._id;
                                     $http.post('api/edit_user', $scope.user)
                                         .success(function (data) {
-                                            $state.go('cases', {}, { reload: true });
                                         })
                                         .error(function (data) {
                                             toast.error("Something went wrong!", "Please try again later.")
                                         });
+                                    $state.go('cases', {}, { reload: true });
                                 }
                             }
                         }
