@@ -15,7 +15,7 @@ angular.module('users')
                         toastr.error(data.error.message);
                     }
                     else if (typeof data.response !== 'undefined' && typeof data.response._version !== 'undefined') {
-                        toastr.success('User has been archived');
+                        toastr.success('User has been unarchived');
                     }
 
                     $modalInstance.close();
