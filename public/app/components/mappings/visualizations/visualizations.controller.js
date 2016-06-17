@@ -12,6 +12,7 @@
             .success(function(data) {
                 fields = data;
                 $scope.fields = Object.keys(fields);
+                $scope.fields.push('Count');
             });
 
         $scope.mapping = {name: type};
@@ -33,7 +34,6 @@
 
             });
 
-        $scope.fields.push('Count');
 
         $scope.groupFind = function(item){
             return Object.keys(fields).indexOf(item) > -1 ? "Fields" : "Metadata";
