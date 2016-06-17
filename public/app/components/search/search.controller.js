@@ -180,7 +180,7 @@
 
             //Get all the search parameters and add them to the query object.
             $scope.parameters.forEach(function (parameter) {
-                if (parameter.memeType && parameter.memeType.toLowerCase() == 'date' && !isNaN(parameter.startDate.getTime()) && !isNaN(parameter.endDate.getTime())) {
+                if (parameter.memeType && $scope.memeTypes[parameter.memeType].type == 'date' && !isNaN(parameter.startDate.getTime()) && !isNaN(parameter.endDate.getTime())) {
                     if (api_params.query.length > 0)
                         api_params.query += ' ' + parameter.andOr + ' ';
 
