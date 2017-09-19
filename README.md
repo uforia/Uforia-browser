@@ -1,9 +1,13 @@
 Uforia-browser
 ==============
 
+Requirements
+------------
+Please note that the Uforia-browser currently supports only up to ElasticSearch 2.4.x. ElasticSearch 5.x or higher will NOT work!
+
 Installation
 ------------
-In order to install the application you must run `npm install`. This will download all Node.js dependencies that are required by Uforia-browser. Subsequently you must run Uforia-browser's installation script by running `./bin/install`. This script will create a user with the administrator role. The credentials that you need in order to log in will be displayed if you run the script.
+In order to install the application you must run `npm install`. This will download all Node.js dependencies that are required by Uforia-browser. After the `npm install`, run `curl -X PUT localhost:9200/uforia` to create the Uforia default indedx. Subsequently you must run Uforia-browser's installation script by running `./bin/install`. This script will create a user with the administrator role. The credentials that you need in order to log in will be displayed if you run the script.
 
 Recreate admin account
 ----------------------
